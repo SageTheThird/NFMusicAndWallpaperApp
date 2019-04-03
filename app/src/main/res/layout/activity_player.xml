@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/backgr"
+
+    tools:context=".PlayerActivity">
+
+
+       <!-- <com.mikhaellopez.circularimageview.CircularImageView
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:src="@drawable/hqdefault"
+            android:layout_gravity="center"
+            android:layout_marginTop="90dp"/>-->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Song Name"
+            android:textAlignment="center"
+            android:textSize="15sp"
+            android:layout_marginTop="63dp"
+            android:singleLine="true"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:ellipsize="marquee"
+            android:scrollHorizontally="true"
+            android:textColor="#FFF"
+            android:id="@+id/songtextView"
+
+            />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="NF"
+        android:textAlignment="center"
+        android:textSize="11sp"
+        android:layout_marginTop="82dp"
+        android:singleLine="true"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:ellipsize="marquee"
+        android:scrollHorizontally="true"
+        android:textColor="#FFF"
+        android:id="@+id/songtextView2"
+
+        />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="296dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="518dp"
+
+        android:layout_marginBottom="80dp"
+        android:background="@drawable/queue_icon"
+        />
+
+    <Button
+        android:id="@+id/pause"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="18dp"
+        android:background="@drawable/play_button"
+
+
+        />
+
+    <Button
+        android:id="@+id/next"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="76dp"
+
+
+        android:layout_marginBottom="22dp"
+        android:background="@drawable/next_button"
+
+        />
+
+    <Button
+        android:id="@+id/previous"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="22dp"
+
+
+
+        android:layout_marginLeft="70dp"
+        android:background="@drawable/prev_button" />
+
+    <Button
+        android:layout_width="23dp"
+        android:layout_height="23dp"
+        android:id="@+id/shuffle"
+        android:background="@drawable/shuffle"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="45dp"
+        android:layout_marginLeft="20dp"
+        />
+    <Button
+        android:layout_width="23dp"
+        android:layout_height="23dp"
+        android:id="@+id/repeat"
+        android:background="@drawable/repeat"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="45dp"
+        android:layout_marginRight="20dp"
+        android:layout_alignParentRight="true"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/running_time"
+        android:textColor="#FFF"
+
+        android:text=" "
+        android:layout_marginBottom="105dp"
+        android:layout_marginLeft="3dp"
+        android:layout_alignParentBottom="true"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/total_time"
+        android:textColor="#FFF"
+
+        android:text=" "
+        android:layout_marginBottom="105dp"
+        android:layout_marginRight="3dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        />
+
+    <Button
+        android:id="@+id/back_button"
+        android:layout_width="25dp"
+        android:layout_height="10dp"
+        android:layout_alignParentLeft="true"
+
+        android:layout_marginLeft="18dp"
+        android:layout_marginTop="26dp"
+        android:background="@drawable/back_arrow" />
+
+    <Button
+        android:id="@+id/queue_button"
+        android:layout_width="28dp"
+        android:layout_height="14dp"
+        android:layout_alignParentRight="true"
+
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="12dp"
+        android:background="@drawable/queue_icon" />
+
+    <TextView
+        android:id="@+id/editText"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_marginTop="100dp"
+        android:backgroundTintMode="multiply"
+        android:clickable="false"
+        android:editable="false"
+
+        android:ems="10"
+        android:gravity="center"
+        android:padding="40dp"
+
+        android:includeFontPadding="true"
+        android:text="That nurse came in to my room and
+         said i m sick in the head
+i m in hip hop
+hospital bed with a pad a
+pen and a brace round my neck
+they told me that i m never leaving
+WHY?
+
+coz i m as ill as it gets
+
+any rapper that said i m
+running the game i ll
+come in the session and cut off their legs
+
+you ve never been on my level
+i got a problem
+with it why coz u looking like
+you read my pages
+i wreck these stages
+real talk better give me spaces
+i m chasin
+something they told me that i wont make it yeah i
+"       android:textColor="@color/common_google_signin_btn_text_dark_pressed"
+        android:textSize="15dp"
+        android:textStyle="bold"
+        />
+
+
+</RelativeLayout>
+
+
+
+
