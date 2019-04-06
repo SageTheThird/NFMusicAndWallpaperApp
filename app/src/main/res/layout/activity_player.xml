@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000"
+    android:background="@drawable/backgroundnew"
     tools:context="com.homie.nf.PlayerActivity">
 
 
@@ -14,24 +14,24 @@
             android:src="@drawable/hqdefault"
             android:layout_gravity="center"
             android:layout_marginTop="90dp"/>-->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:text="NF-Remember This"
-            android:textAlignment="center"
-            android:textSize="25sp"
-            android:textStyle="bold"
-            android:layout_marginTop="10dp"
-            android:singleLine="true"
-            android:marqueeRepeatLimit="marquee_forever"
-            android:ellipsize="marquee"
-            android:scrollHorizontally="true"
-            android:textColor="#FFF"
-            android:id="@+id/songtextView"
-            android:layout_below="@+id/cover"
-            android:gravity="center"
+    <TextView
+        android:id="@+id/songtextView"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:ellipsize="marquee"
+        android:gravity="center"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:text="NF-Remember This"
+        android:textAlignment="center"
+        android:textColor="#FFF"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:layout_below="@id/cover"
 
-            />
+        />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="30dp"
@@ -53,23 +53,21 @@
 
     <com.akaita.android.circularseekbar.CircularSeekBar
         android:id="@+id/seekBar"
-        style="?android:progressBarStyleHorizontal"
-        android:layout_width="1295px"
-        android:layout_height="1098px"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="80dp"
+        app:innerCircleColor="@color/colorAccent"
 
-        android:layout_marginTop="70dp"
-        android:progress="60"
-        android:rotation="-90"
-         />
-
+        app:ringColor="@color/colorPrimary"
+        app:ringWidth=".05" />
     <Button
         android:id="@+id/pause"
-        android:layout_width="143dp"
-        android:layout_height="141dp"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="31dp"
+        android:layout_marginBottom="20dp"
         android:background="@drawable/play_button"
 
 

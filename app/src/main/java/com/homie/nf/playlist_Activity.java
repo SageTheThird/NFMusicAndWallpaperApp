@@ -79,7 +79,7 @@ public class playlist_Activity extends AppCompatActivity {
 
         statues = getResources().getStringArray(R.array.statues);
 
-        
+
 
         for (int i = 0; i < member_names.length; i++) {
             RowItem item = new RowItem(member_names[i],

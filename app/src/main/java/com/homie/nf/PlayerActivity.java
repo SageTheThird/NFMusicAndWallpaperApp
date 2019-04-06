@@ -16,6 +16,8 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.akaita.android.circularseekbar.CircularSeekBar;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -24,7 +26,7 @@ public class PlayerActivity extends AppCompatActivity {
     static MediaPlayer mediaPlayer;
 
     TextView songnameView;
-    SeekBar songseekBar;
+    CircularSeekBar songseekBar;
     int positionSong;
     ArrayList<File> mySongs;
 
@@ -49,7 +51,7 @@ public class PlayerActivity extends AppCompatActivity {
         btn_previous = (Button) findViewById(R.id.previous);
         btn_next = (Button) findViewById(R.id.next);
         songnameView = (TextView) findViewById(R.id.songtextView);
-        songseekBar = (SeekBar) findViewById(R.id.seekBar);
+        songseekBar = (CircularSeekBar) findViewById(R.id.seekBar);
         back_arrow=(Button) findViewById(R.id.back_button);
         startDur=findViewById(R.id.running_time);
         //totalDur=findViewById(R.id.total_time);
@@ -70,6 +72,7 @@ public class PlayerActivity extends AppCompatActivity {
                     try{
                         sleep(500);
                         currentPosition=mediaPlayer.getCurrentPosition();
+                        songseekBar.setEnabled(true);
                         songseekBar.setProgress(currentPosition);
 
 
@@ -160,15 +163,32 @@ public class PlayerActivity extends AppCompatActivity {
 
         updateseekBar.start();
          //to change color of the seekBar //following 2 lines
-        songseekBar.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttn), PorterDuff.Mode.MULTIPLY);
-        songseekBar.getThumb().setColorFilter(getResources().getColor(R.color.buttn),PorterDuff.Mode.SRC_IN);
+       // songseekBar.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttn), PorterDuff.Mode.MULTIPLY);
+       // songseekBar.getThumb().setColorFilter(getResources().getColor(R.color.buttn),PorterDuff.Mode.SRC_IN);
 
-        songseekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        songseekBar.setOnCircularSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(CircularSeekBar seekBar, float progress, boolean fromUser) {
+                //startDur.setText(currentPosition);
+            }
+
+            @Override
+            public void onStartTrackingTouch(CircularSeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(CircularSeekBar seekBar) {
+
+                mediaPlayer.seekTo((int) seekBar.getProgress());
+            }
+        });
+  /*      {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
 
-                //startDur.setText(currentPosition);
+
 
             }
 
@@ -180,10 +200,10 @@ public class PlayerActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
 
-                mediaPlayer.seekTo(seekBar.getProgress());
+
 
             }
-        });
+        });*/
 
        btn_pause.setOnClickListener(new View.OnClickListener() {
            @Override
