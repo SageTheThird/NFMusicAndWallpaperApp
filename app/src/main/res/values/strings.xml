@@ -3,5 +3,71 @@
     <string name="open">Open</string>
     <string name="close">Close</string>
 
+    <!-- Names -->
+    <string-array name="Member_names">
+        <item>10 Feet Down.mp3</item>
+        <item>3 A_M_.mp3</item>
+        <item>Destiny.mp3</item>
+        <item>Dreams.mp3</item>
+        <item>Green Lights.mp3</item>
+        <item>If You Want Love.mp3</item>
+
+        <item>10 Feet Down.mp3</item>
+        <item>Intro III.mp3</item>
+        <item>Let You Down.mp3</item>
+        <item>Lie.mp3</item>
+        <item>My Life.mp3</item>
+        <item>One Hundred.mp3</item>
+
+        <item>Outcast.mp3</item>
+        <item>Remember This.mp3</item>
+        <item>You're Special.mp3</item>
+
+    </string-array>
+
+    <!-- Pictures -->
+    <array name="profile_pics">
+        <item>@drawable/play_button</item>
+        <item>@drawable/play_button</item>
+        <item>@drawable/play_button</item>
+        <item>@drawable/play_button</item>
+        <item>@drawable/play_button</item>
+        <item>@drawable/play_button</item>
+
+        <item>@drawable/play_button</item>
+        <item>@drawable/play_button</item>
+        <item>@drawable/play_button</item>
+        <item>@drawable/play_button</item>
+        <item>@drawable/play_button</item>
+        <item>@drawable/play_button</item>
+
+        <item>@drawable/play_button</item>
+        <item>@drawable/play_button</item>
+        <item>@drawable/play_button</item>
+
+    </array>
+
+    <!-- Status -->
+    <string-array name="statues">
+        <item>NF</item>
+        <item>NF</item>
+        <item>NF</item>
+        <item>NF</item>
+        <item>NF</item>
+        <item>NF</item>
+
+        <item>NF</item>
+        <item>NF</item>
+        <item>NF</item>
+        <item>NF</item>
+        <item>NF</item>
+        <item>NF</item>
+
+        <item>NF</item>
+        <item>NF</item>
+        <item>NF</item>
+
+    </string-array>
+
 
 </resources>

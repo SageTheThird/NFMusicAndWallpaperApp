@@ -6,7 +6,7 @@
     android:orientation="horizontal"
     android:background="#FFF"
     android:padding="16dp"
-    
+
     >
 
     <com.mikhaellopez.circularimageview.CircularImageView

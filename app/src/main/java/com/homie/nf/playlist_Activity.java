@@ -3,7 +3,7 @@ package com.homie.nf;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayer;
+import android.content.res.TypedArray;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -24,90 +25,97 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.util.ArrayList;
-
-import static android.os.Environment.DIRECTORY_DOCUMENTS;
-import static android.os.Environment.DIRECTORY_DOWNLOADS;
+import java.util.List;
 
 public class playlist_Activity extends AppCompatActivity {
 
+    //private MediaPlayer mMediaplayer;
+    static ListView listView_songs;
     ListView songslistView;
     String[] items;
     FirebaseStorage firebaseStorage;
     StorageReference storageReference;
     StorageReference ref;
-    //private MediaPlayer mMediaplayer;
-   static ListView listView_songs;
     String filePath;
 
     ArrayList<String> songsArray = new ArrayList<>();
 
+    String[] member_names;
+    TypedArray profile_pics;
+    String[] statues;
+    String[] contactType;
+
+    List<RowItem> rowItems;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+       getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_playlist_);
-        String path=Environment.getExternalStorageDirectory().getPath()+"Documents";
-
-        //Working directory
-        //Environment.getExternalStorageDirectory().getAbsolutePath()+"/Android/data/"+this.getPackageName()+"/files/Documents"
+        String path = Environment.getExternalStorageDirectory().getPath() + "Documents";
 
 
-       /*  String name="nf1.mp3";
-       if(new File(DIRECTORY_DOWNLOADS+"/public/"+name).exists()){
-            Toast.makeText(this, "File Exists public folder", Toast.LENGTH_SHORT).show();
 
-        }
-        else {
-            Toast.makeText(this, "File Doesnt Exist", Toast.LENGTH_SHORT).show();
-        }*/
-
-
-        //filePath = Environment.getExternalStorageDirectory().getPath() + "/NF";
-                //"/Android/data/com.homie.nf/files/storage/emulated/0/NF";
-
-        File direct = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/Android/data/"+this.getPackageName()+"/files/Documents");
+        File direct = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/" + this.getPackageName() + "/files/Documents");
 
         if (!direct.exists()) {
-            File myDirectory = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/Android/data/"+this.getPackageName()+"/files/Documents");
+            File myDirectory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/" + this.getPackageName() + "/files/Documents");
             myDirectory.mkdir();
         }
 
 
         listView_songs = findViewById(R.id.listView_songs);
+/*
 
         songsArray.add("introthree.mp3");
         songsArray.add("greenlights.mp3");
+*/
+
+        rowItems = new ArrayList<RowItem>();
+
+        member_names = getResources().getStringArray(R.array.Member_names);
+
+        profile_pics = getResources().obtainTypedArray(R.array.profile_pics);
+
+        statues = getResources().getStringArray(R.array.statues);
+
+        
+
+        for (int i = 0; i < member_names.length; i++) {
+            RowItem item = new RowItem(member_names[i],
+                    profile_pics.getResourceId(i, -1), statues[i]);
+            rowItems.add(item);
+        }
+
+        CustomAdapter adapter = new CustomAdapter(this, rowItems);
+        listView_songs.setAdapter(adapter);
 
 
-        ArrayAdapter<String> myadapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, songsArray);
+      /*  ArrayAdapter<String> myadapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, songsArray);
         listView_songs.setAdapter(myadapter);
-
+*/
         listView_songs.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String fileName = listView_songs.getItemAtPosition(position).toString();
+                String fileName = rowItems.get(position).getMember_name();
 
-                String nextFileName = listView_songs.getItemAtPosition(position+1).toString();
-                Log.i("Next File Name: ",nextFileName);
-
-
+                String nextFileName = listView_songs.getItemAtPosition(position + 1).toString();
+                Log.i("Next File Name: ", nextFileName);
 
 
-
-
-               // String pathsong = Environment.getExternalStorageDirectory().getPath() +"/NF/"+fileName+".mp3";
-                        //"/Android/data/com.homie.nf/files/storage/emulated/0/NF/" + fileName + ".mp3";
-               // Toast.makeText(playlist_Activity.this, fileName, Toast.LENGTH_LONG).show();
+                // String pathsong = Environment.getExternalStorageDirectory().getPath() +"/NF/"+fileName+".mp3";
+                //"/Android/data/com.homie.nf/files/storage/emulated/0/NF/" + fileName + ".mp3";
+                // Toast.makeText(playlist_Activity.this, fileName, Toast.LENGTH_LONG).show();
 
                 //File file = new File(pathsong);
-                  // String path102="/storage/emulated/0/Android/data/com.homie.nf/files/Documents/";
-                  String path101=Environment.getExternalStorageDirectory().getAbsolutePath()+"/Android/data/"+getApplicationContext().getPackageName()+"/files/Documents/"+fileName;
-                if(new File(path101).exists()){
-                        //"/storage/emulated/0/Android/data/com.homie.nf/files/Documents/"+fileName).exists()) {
+                // String path102="/storage/emulated/0/Android/data/com.homie.nf/files/Documents/";
+                String path101 = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/" + fileName;
+                if (new File(path101).exists()) {
+                    //"/storage/emulated/0/Android/data/com.homie.nf/files/Documents/"+fileName).exists()) {
                     //Do something
                     Toast.makeText(playlist_Activity.this, "File Exists", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(playlist_Activity.this,PlayerActivity.class)
-                    .putExtra("songname",fileName).putExtra("nextsong",nextFileName));
+                    startActivity(new Intent(playlist_Activity.this, PlayerActivity.class)
+                            .putExtra("songname", fileName).putExtra("nextsong", nextFileName));
 
                   /*  MediaPlayer mplayer = new MediaPlayer();
                     try {
@@ -128,15 +136,13 @@ public class playlist_Activity extends AppCompatActivity {
                 } else {
 
 
-                        download(fileName);
-                        Toast.makeText(playlist_Activity.this, "Downloading", Toast.LENGTH_SHORT).show();
-                        //if file exists just play
-                        /*if (file.exists()) {*/
-                        //  String pathElse = Environment.getExternalStorageDirectory().getPath() + "/Android/data/com.homie.nf/files/storage/emulated/0/NF/" + fileName + ".mp3";
-                    }
-                    }
-
-
+                    download(fileName);
+                    Toast.makeText(playlist_Activity.this, "Downloading", Toast.LENGTH_SHORT).show();
+                    //if file exists just play
+                    /*if (file.exists()) {*/
+                    //  String pathElse = Environment.getExternalStorageDirectory().getPath() + "/Android/data/com.homie.nf/files/storage/emulated/0/NF/" + fileName + ".mp3";
+                }
+            }
 
 
         });
@@ -153,7 +159,7 @@ public class playlist_Activity extends AppCompatActivity {
                 //after download url from file is fetched it will download file
 
                 String url = uri.toString();
-                downloadFiles(playlist_Activity.this, fileNameInto, "",Environment.DIRECTORY_DOCUMENTS,  url);
+                downloadFiles(playlist_Activity.this, fileNameInto, "", Environment.DIRECTORY_DOCUMENTS, url);
 
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -176,7 +182,7 @@ public class playlist_Activity extends AppCompatActivity {
         request.setDestinationInExternalFilesDir(context, destinationDirectory, fileName + fileExtension);
 
         downloadManager.enqueue(request);
-       // Toast.makeText(playlist_Activity.this, "File Stored For offline Use", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(playlist_Activity.this, "File Stored For offline Use", Toast.LENGTH_SHORT).show();
 
 
     }

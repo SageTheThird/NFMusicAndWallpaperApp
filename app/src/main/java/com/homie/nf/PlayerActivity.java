@@ -10,6 +10,7 @@ import android.os.Bundle;
 
 import android.util.Log;
 import android.view.View;
+
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -51,7 +52,7 @@ public class PlayerActivity extends AppCompatActivity {
         songseekBar = (SeekBar) findViewById(R.id.seekBar);
         back_arrow=(Button) findViewById(R.id.back_button);
         startDur=findViewById(R.id.running_time);
-        totalDur=findViewById(R.id.total_time);
+        //totalDur=findViewById(R.id.total_time);
 
         //to edit the actionBar
         //getSupportActionBar().setTitle("Now Playing");
