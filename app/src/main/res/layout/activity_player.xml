@@ -51,16 +51,14 @@
 
         />
 
-    <com.akaita.android.circularseekbar.CircularSeekBar
+    <SeekBar
         android:id="@+id/seekBar"
         android:layout_width="250dp"
-        android:layout_height="250dp"
+        android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="80dp"
-        app:innerCircleColor="@color/colorAccent"
-
-        app:ringColor="@color/colorPrimary"
-        app:ringWidth=".05" />
+        android:layout_marginTop="25dp"
+        android:layout_below="@id/songtextView2"
+         />
     <Button
         android:id="@+id/pause"
         android:layout_width="160dp"

@@ -26,7 +26,7 @@ public class PlayerActivity extends AppCompatActivity {
     static MediaPlayer mediaPlayer;
 
     TextView songnameView;
-    CircularSeekBar songseekBar;
+    SeekBar songseekBar;
     int positionSong;
     ArrayList<File> mySongs;
 
@@ -51,7 +51,7 @@ public class PlayerActivity extends AppCompatActivity {
         btn_previous = (Button) findViewById(R.id.previous);
         btn_next = (Button) findViewById(R.id.next);
         songnameView = (TextView) findViewById(R.id.songtextView);
-        songseekBar = (CircularSeekBar) findViewById(R.id.seekBar);
+        songseekBar = (SeekBar) findViewById(R.id.seekBar);
         back_arrow=(Button) findViewById(R.id.back_button);
         startDur=findViewById(R.id.running_time);
         //totalDur=findViewById(R.id.total_time);
@@ -72,7 +72,7 @@ public class PlayerActivity extends AppCompatActivity {
                     try{
                         sleep(500);
                         currentPosition=mediaPlayer.getCurrentPosition();
-                        songseekBar.setEnabled(true);
+                        //songseekBar.setEnabled(true);
                         songseekBar.setProgress(currentPosition);
 
 
@@ -91,30 +91,7 @@ public class PlayerActivity extends AppCompatActivity {
             mediaPlayer.release();
         }
 
-      /*  Intent i=getIntent();
 
-        Bundle bundle=i.getExtras();
-
-        //getting songs as a bundle and putting it in a arraylist
-
-
-
-
-        mySongs=(ArrayList) bundle.getParcelableArrayList("songs");
-
-        sname= mySongs.get(positionSong).getName().toString();//tostring
-
-        String songName=i.getStringExtra("songname");
-
-        songnameView.setText(songName);
-        songnameView.setSelected(true);
-
-        positionSong=bundle.getInt("pos",0);
-
-        //getting position of song clicked from mainactivity and getting its info and putting it into
-        //the uri*/
-
-       // Uri u=Uri.parse(mySongs.get(positionSong).toString());
        Intent intent=getIntent();
 
         String fileName101=intent.getStringExtra("songname");
@@ -130,9 +107,9 @@ public class PlayerActivity extends AppCompatActivity {
 
        // MediaPlayer mediaPlayer = new MediaPlayer();
         try {
-           Uri u=Uri.parse(songPath);
+            final Uri[] u = {Uri.parse(songPath)};
 
-         mediaPlayer=MediaPlayer.create(PlayerActivity.this,u);
+         mediaPlayer=MediaPlayer.create(PlayerActivity.this, u[0]);
           //  mediaPlayer.setDataSource(songPath);
             mediaPlayer.prepare();
 
@@ -141,8 +118,8 @@ public class PlayerActivity extends AppCompatActivity {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    Uri nexturi=Uri.parse(nextSongPath);
-                    mp=MediaPlayer.create(PlayerActivity.this,nexturi);
+                    u[0] =Uri.parse(nextSongPath);
+                    mp=MediaPlayer.create(PlayerActivity.this, u[0]);
                     mp.start();
 
 
@@ -163,32 +140,12 @@ public class PlayerActivity extends AppCompatActivity {
 
         updateseekBar.start();
          //to change color of the seekBar //following 2 lines
-       // songseekBar.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttn), PorterDuff.Mode.MULTIPLY);
-       // songseekBar.getThumb().setColorFilter(getResources().getColor(R.color.buttn),PorterDuff.Mode.SRC_IN);
+       songseekBar.getProgressDrawable().setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.MULTIPLY);
+       songseekBar.getThumb().setColorFilter(getResources().getColor(R.color.colorAccent),PorterDuff.Mode.SRC_IN);
 
-        songseekBar.setOnCircularSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(CircularSeekBar seekBar, float progress, boolean fromUser) {
-                //startDur.setText(currentPosition);
-            }
-
-            @Override
-            public void onStartTrackingTouch(CircularSeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(CircularSeekBar seekBar) {
-
-                mediaPlayer.seekTo((int) seekBar.getProgress());
-            }
-        });
-  /*      {
+        songseekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-
-
 
             }
 
@@ -200,10 +157,10 @@ public class PlayerActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
 
-
-
+                mediaPlayer.seekTo((int) seekBar.getProgress());
             }
-        });*/
+        });
+
 
        btn_pause.setOnClickListener(new View.OnClickListener() {
            @Override
