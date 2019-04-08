@@ -41,6 +41,8 @@ public class MainActivity extends AppCompatActivity  {
                switch(menuItem.getItemId()){
 
                    case R.id.menu_playlist:
+
+
                        startActivity(new Intent(MainActivity.this,playlist_Activity.class));
 
 

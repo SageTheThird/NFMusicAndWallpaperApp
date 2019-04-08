@@ -4,6 +4,8 @@ import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -100,9 +102,13 @@ public class playlist_Activity extends AppCompatActivity {
 
                 } else {
 
+                    if (checkConnectivity()) {
+                        download(fileName);
+                        Toast.makeText(playlist_Activity.this, "Downloading", Toast.LENGTH_SHORT).show();
+                        //do something
 
-                    download(fileName);
-                    Toast.makeText(playlist_Activity.this, "Downloading", Toast.LENGTH_SHORT).show();
+                    }
+
 
                 }
             }
@@ -149,6 +155,22 @@ public class playlist_Activity extends AppCompatActivity {
 
 
     }
+
+    private boolean checkConnectivity() {
+        boolean enabled = true;
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+
+        if ((info == null || !info.isConnected() || !info.isAvailable())) {
+            Toast.makeText(getApplicationContext(), "No Internet Connection..", Toast.LENGTH_SHORT).show();
+            return false;
+        } else {
+            return true;
+        }
+
+    }
+
 }
 
 

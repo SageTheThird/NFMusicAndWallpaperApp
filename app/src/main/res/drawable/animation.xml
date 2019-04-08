@@ -36,9 +36,7 @@
     <item
         android:drawable="@drawable/signal_9"
         android:duration="400"/>
-    <item
-        android:drawable="@drawable/signal_10"
-        android:duration="400"/>
+
 
 
 </animation-list>

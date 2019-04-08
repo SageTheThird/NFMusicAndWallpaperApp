@@ -27,7 +27,7 @@
         android:text="NF-Remember This"
         android:textAlignment="center"
         android:textColor="#FFF"
-        android:textSize="25sp"
+        android:textSize="23sp"
         android:textStyle="bold"
         android:layout_below="@id/cover"
 
@@ -37,7 +37,7 @@
         android:layout_height="30dp"
         android:text="NF"
         android:textAlignment="center"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:layout_marginTop="0dp"
         android:singleLine="true"
         android:marqueeRepeatLimit="marquee_forever"
@@ -59,17 +59,19 @@
         android:layout_marginTop="25dp"
         android:layout_below="@id/songtextView2"
          />
+
     <Button
         android:id="@+id/pause"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
+        android:layout_width="116dp"
+        android:layout_height="114dp"
+
         android:layout_alignParentBottom="true"
+
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
-        android:background="@drawable/play_button"
 
 
-        />
+        android:layout_marginBottom="56dp"
+        android:background="@drawable/play_button" />
 
     <Button
         android:id="@+id/next"
@@ -78,7 +80,7 @@
 
 
 android:layout_alignParentRight="true"
-        android:layout_marginRight="81dp"
+        android:layout_marginRight="86dp"
         android:layout_marginBottom="80dp"
 
         android:layout_alignParentBottom="true"
@@ -93,11 +95,12 @@ android:layout_alignParentRight="true"
 android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
 
+
         android:layout_marginBottom="80dp"
 
 
 
-        android:layout_marginLeft="89dp"
+        android:layout_marginLeft="97dp"
         android:background="@drawable/prev_button" />
 
     <Button
@@ -133,28 +136,28 @@ android:layout_alignParentLeft="true"
 
     <Button
         android:id="@+id/back_button"
-        android:layout_width="25dp"
-        android:layout_height="10dp"
+        android:layout_width="22dp"
+        android:layout_height="8dp"
         android:layout_alignParentLeft="true"
 
         android:layout_marginLeft="18dp"
         android:layout_marginTop="22dp"
         android:background="@drawable/back_arrow" />
-<ImageView
-    android:layout_width="1095px"
-    android:layout_height="1095px"
-    android:background="@drawable/cover"
-    android:layout_centerHorizontal="true"
-    android:layout_marginTop="70dp"
-    android:id="@+id/cover"
+
+    <ImageView
+        android:id="@+id/cover"
+        android:layout_width="252dp"
+        android:layout_height="261dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="70dp"
+        android:background="@drawable/cover"
 
 
-
-    />
+        />
     <Button
         android:id="@+id/queue_button"
-        android:layout_width="28dp"
-        android:layout_height="14dp"
+        android:layout_width="24dp"
+        android:layout_height="10dp"
         android:layout_alignParentRight="true"
 
         android:layout_marginTop="20dp"
@@ -163,7 +166,7 @@ android:layout_alignParentLeft="true"
 
     <ImageView
         android:id="@+id/back_view"
-        android:layout_width="230dp"
+        android:layout_width="200dp"
         android:layout_height="45dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
