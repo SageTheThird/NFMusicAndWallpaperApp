@@ -4,4 +4,7 @@
     <color name="colorPrimaryDark">#000a12</color>
     <color name="colorAccent">#D81B60</color>
     <color name="buttn">#769AB7</color>
+
+    <color name="black">#000000</color>
+    <color name="blacktransparent">#BF000000</color>
 </resources>

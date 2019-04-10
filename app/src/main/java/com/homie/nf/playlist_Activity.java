@@ -24,10 +24,16 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
+
 public class playlist_Activity extends AppCompatActivity {
+
 
 
     static ListView listView_songs;
@@ -44,6 +50,10 @@ public class playlist_Activity extends AppCompatActivity {
 
 
     List<RowItem> rowItems;
+    String lyrics_fileName;
+    InputStream inputStream;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +97,31 @@ public class playlist_Activity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String fileName = rowItems.get(position).getMember_name();
 
+                String lyrics_fileName=fileName.replace(".mp3",".txt");
+                Toast.makeText(playlist_Activity.this, lyrics_fileName, Toast.LENGTH_LONG).show();
+
+
+
+             /*   try{
+
+                    InputStream inputStream=getAssets().open(lyrics_fileName.);
+                    int size=inputStream.available();
+                    byte[]  buffer=new byte[size];
+
+                    inputStream.read(buffer);
+                    inputStream.close();
+                    text=new String(buffer);
+
+
+
+                }catch (IOException ex){
+
+                    ex.printStackTrace();
+                }
+                lyrics_textView.setText(text);
+*/
+
+
                 String nextFileName = listView_songs.getItemAtPosition(position + 1).toString();
                 Log.i("Next File Name: ", nextFileName);
 
@@ -97,17 +132,10 @@ public class playlist_Activity extends AppCompatActivity {
                     //Do something
                     Toast.makeText(playlist_Activity.this, "File Exists", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(playlist_Activity.this, PlayerActivity.class)
-                            .putExtra("songname", fileName).putExtra("nextsong", nextFileName));
+                            .putExtra("songname", fileName).putExtra("nextsong", nextFileName).putExtra("LYRICSFILE",lyrics_fileName));
 
 
                 } else {
-
-                    if (checkConnectivity()) {
-                        download(fileName);
-                        Toast.makeText(playlist_Activity.this, "Downloading", Toast.LENGTH_SHORT).show();
-                        //do something
-
-                    }
 
 
                 }
@@ -115,8 +143,32 @@ public class playlist_Activity extends AppCompatActivity {
 
 
         });
-    }
 
+    }
+    /*  public void loadLyrics(String fileName){
+          try{
+
+                    inputStream=getAssets().open("10 Feet Down.txt");
+                    int size=inputStream.available();
+                    byte[]  buffer=new byte[size];
+
+                    inputStream.read(buffer);
+                    inputStream.close();
+                    text=new String(buffer);
+
+
+
+                }catch (IOException ex){
+
+                    ex.printStackTrace();
+                }
+                PlayerActivity.lyrics_textView.setText(text);
+
+
+
+
+
+      }*/
 
     public void download(final String fileNameInto) {
 

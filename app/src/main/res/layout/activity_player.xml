@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -18,47 +18,65 @@
         android:id="@+id/songtextView"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:layout_marginTop="10dp"
+
+        android:layout_below="@id/cover"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:ellipsize="marquee"
         android:gravity="center"
         android:marqueeRepeatLimit="marquee_forever"
         android:scrollHorizontally="true"
         android:singleLine="true"
+
         android:text="NF-Remember This"
         android:textAlignment="center"
         android:textColor="#FFF"
         android:textSize="23sp"
         android:textStyle="bold"
-        android:layout_below="@id/cover"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.547"
+        tools:layout_editor_absoluteX="0dp" />
 
-        />
+
+
     <TextView
+        android:id="@+id/songtextView2"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="24dp"
+        android:layout_below="@+id/songtextView"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="8dp"
+        android:ellipsize="marquee"
+        android:gravity="center"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
         android:text="NF"
         android:textAlignment="center"
-        android:textSize="18sp"
-        android:layout_marginTop="0dp"
-        android:singleLine="true"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:ellipsize="marquee"
-        android:scrollHorizontally="true"
+
+
         android:textColor="#FFF"
-        android:id="@+id/songtextView2"
-        android:layout_below="@+id/songtextView"
-        android:gravity="center"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/songtextView"
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="0dp" />
 
-
-        />
 
     <SeekBar
         android:id="@+id/seekBar"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="25dp"
         android:layout_below="@id/songtextView2"
-         />
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/songtextView2" />
+
 
     <Button
         android:id="@+id/pause"
@@ -70,8 +88,16 @@
         android:layout_centerHorizontal="true"
 
 
-        android:layout_marginBottom="56dp"
-        android:background="@drawable/play_button" />
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/pause_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/back_view"
+        app:layout_constraintStart_toStartOf="@+id/back_view"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.864"
+        tools:ignore="MissingConstraints" />
+
 
     <Button
         android:id="@+id/next"
@@ -79,60 +105,76 @@
         android:layout_height="34dp"
 
 
-android:layout_alignParentRight="true"
-        android:layout_marginRight="86dp"
-        android:layout_marginBottom="80dp"
+        android:layout_alignParentRight="true"
 
         android:layout_alignParentBottom="true"
-        android:background="@drawable/next_button"
 
-        />
+        android:layout_marginStart="124dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/next_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/pause"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.822"
+        tools:ignore="MissingConstraints" />
+
 
     <Button
         android:id="@+id/previous"
         android:layout_width="34dp"
         android:layout_height="34dp"
-android:layout_alignParentLeft="true"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
 
 
-        android:layout_marginBottom="80dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/prev_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/pause"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.822"
+        tools:ignore="MissingConstraints" />
 
-
-
-        android:layout_marginLeft="97dp"
-        android:background="@drawable/prev_button" />
 
     <Button
+        android:id="@+id/shuffle"
         android:layout_width="23dp"
         android:layout_height="23dp"
-        android:id="@+id/shuffle"
-        android:background="@drawable/shuffle"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="90dp"
-        android:layout_marginLeft="20dp"
-        />
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/shuffle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/back_view"
+        app:layout_constraintHorizontal_bias="0.585"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.806"
+        tools:ignore="MissingConstraints" />
+
+
     <Button
+        android:id="@+id/repeat"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:id="@+id/repeat"
-        android:background="@drawable/repeat"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="90dp"
-        android:layout_marginRight="20dp"
         android:layout_alignParentRight="true"
-        />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/running_time"
-        android:textColor="#FFF"
-
-        android:text=" "
-        android:layout_marginBottom="105dp"
-        android:layout_marginLeft="3dp"
         android:layout_alignParentBottom="true"
-        />
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/repeat"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.425"
+        app:layout_constraintStart_toEndOf="@+id/back_view"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.808"
+        tools:ignore="MissingConstraints" />
 
     <Button
         android:id="@+id/back_button"
@@ -140,29 +182,47 @@ android:layout_alignParentLeft="true"
         android:layout_height="8dp"
         android:layout_alignParentLeft="true"
 
-        android:layout_marginLeft="18dp"
-        android:layout_marginTop="22dp"
-        android:background="@drawable/back_arrow" />
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/back_arrow"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.003" />
+
 
     <ImageView
         android:id="@+id/cover"
-        android:layout_width="252dp"
-        android:layout_height="261dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="70dp"
-        android:background="@drawable/cover"
+        android:layout_width="240dp"
+        android:layout_height="250dp"
 
 
-        />
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.2" />
+
+
     <Button
         android:id="@+id/queue_button"
         android:layout_width="24dp"
         android:layout_height="10dp"
         android:layout_alignParentRight="true"
 
-        android:layout_marginTop="20dp"
-        android:layout_marginRight="12dp"
-        android:background="@drawable/queue_icon" />
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/queue_icon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.003" />
+
 
     <ImageView
         android:id="@+id/back_view"
@@ -170,11 +230,92 @@ android:layout_alignParentLeft="true"
         android:layout_height="45dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="80dp"
-        android:background="@drawable/button_backview" />
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/button_backview"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.818"
+        tools:ignore="MissingConstraints" />
 
 
-</RelativeLayout>
+    <Button
+        android:id="@+id/lyrics_button"
+        android:layout_width="80dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/lyrics_button"
+        android:text="lyrics"
+        android:textAllCaps="false"
+        android:textColor="#FFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shuffle"
+        tools:ignore="MissingConstraints" />
+
+
+    <Button
+        android:id="@+id/geniusbutton"
+        android:layout_width="80dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/genius_button"
+        android:text="genius"
+        android:textAllCaps="false"
+        android:textColor="#FFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.851"
+        app:layout_constraintStart_toEndOf="@+id/lyrics_button"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.937"
+        tools:ignore="MissingConstraints" />
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="472dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="16dp"
+        android:background="@color/blacktransparent"
+        android:id="@+id/nestScrollView"
+
+       >
+
+        <TextView
+
+            android:id="@+id/lyricstextView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="50dp"
+
+            android:gravity="center"
+            android:text="ANYTHING"
+            android:textColor="#fff"
+            android:textSize="17dp"
+            />
+
+
+    </android.support.v4.widget.NestedScrollView>
+    <WebView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/geniusWebView"></WebView>
+
+
+</android.support.constraint.ConstraintLayout>
 
 
 

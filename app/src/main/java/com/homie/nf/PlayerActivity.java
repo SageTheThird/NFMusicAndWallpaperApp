@@ -5,6 +5,7 @@ import android.graphics.PorterDuff;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -12,13 +13,17 @@ import android.util.Log;
 import android.view.View;
 
 import android.view.WindowManager;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.akaita.android.circularseekbar.CircularSeekBar;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 public class PlayerActivity extends AppCompatActivity {
@@ -34,8 +39,14 @@ public class PlayerActivity extends AppCompatActivity {
     String sname;
     TextView startDur,totalDur;
     int currentPosition=0;
-
-
+    static TextView lyrics_textView;
+    NestedScrollView nestedScrollView;
+    boolean tester=true;
+    String text="";
+    String lyrics_file;
+    Intent intent;
+    WebView geniusWebView;
+    Button genius_btn;
 
 
     @Override
@@ -43,6 +54,8 @@ public class PlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_player);
+        nestedScrollView=findViewById(R.id.nestScrollView);
+        intent=getIntent();
 
 
 
@@ -53,13 +66,92 @@ public class PlayerActivity extends AppCompatActivity {
         songnameView = (TextView) findViewById(R.id.songtextView);
         songseekBar = (SeekBar) findViewById(R.id.seekBar);
         back_arrow=(Button) findViewById(R.id.back_button);
-        startDur=findViewById(R.id.running_time);
+        final Button shuffle_btn=findViewById(R.id.shuffle);
+        final Button repeat_btn=findViewById(R.id.repeat);
+        geniusWebView=findViewById(R.id.geniusWebView);
+        //startDur=findViewById(R.id.running_time);
         //totalDur=findViewById(R.id.total_time);
+        genius_btn=findViewById(R.id.geniusbutton);
+
+
+         lyrics_file=intent.getStringExtra("LYRICSFILE");
+        Toast.makeText(this, "LYRICNAME"+lyrics_file, Toast.LENGTH_SHORT).show();
+
 
         //to edit the actionBar
         //getSupportActionBar().setTitle("Now Playing");
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Button lyrics_button=findViewById(R.id.lyrics_button);
+        lyrics_textView=findViewById(R.id.lyricstextView);
+
+        lyrics_textView.setVisibility(View.INVISIBLE);
+        nestedScrollView.setVisibility(View.INVISIBLE);
+
+
+
+        lyrics_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                if(tester==true){
+
+                lyrics_textView.setVisibility(View.VISIBLE);
+                nestedScrollView.setVisibility(View.VISIBLE);
+
+                btn_pause.setVisibility(View.INVISIBLE);
+                btn_next.setVisibility(View.INVISIBLE);
+                btn_previous.setVisibility(View.INVISIBLE);
+                shuffle_btn.setVisibility(View.INVISIBLE);
+                repeat_btn.setVisibility(View.INVISIBLE);
+
+
+
+
+
+               try{
+
+                    InputStream inputStream=getAssets().open(lyrics_file);
+                    int size=inputStream.available();
+                    byte[]  buffer=new byte[size];
+
+                    inputStream.read(buffer);
+                    inputStream.close();
+                    text=new String(buffer);
+
+
+
+                }catch (IOException ex){
+
+                    ex.printStackTrace();
+                }
+                lyrics_textView.setText(text);
+
+                tester=false;
+
+                }
+                else if(tester==false)
+                {
+
+                    lyrics_textView.setVisibility(View.INVISIBLE);
+                    nestedScrollView.setVisibility(View.INVISIBLE);
+
+                    btn_pause.setVisibility(View.VISIBLE);
+                    btn_next.setVisibility(View.VISIBLE);
+                    btn_previous.setVisibility(View.VISIBLE);
+                    shuffle_btn.setVisibility(View.VISIBLE);
+                    repeat_btn.setVisibility(View.VISIBLE);
+                    tester=true;
+
+
+                }
+
+            }
+        });
+
+
+
 
         updateseekBar=new Thread(){
             @Override
@@ -92,7 +184,7 @@ public class PlayerActivity extends AppCompatActivity {
         }
 
 
-       Intent intent=getIntent();
+
 
         String fileName101=intent.getStringExtra("songname");
         String nextSongname=intent.getStringExtra("nextsong");
@@ -157,7 +249,7 @@ public class PlayerActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
 
-                mediaPlayer.seekTo((int) seekBar.getProgress());
+                mediaPlayer.seekTo(seekBar.getProgress());
             }
         });
 
