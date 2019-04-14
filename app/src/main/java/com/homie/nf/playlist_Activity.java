@@ -98,44 +98,33 @@ public class playlist_Activity extends AppCompatActivity {
                 String fileName = rowItems.get(position).getMember_name();
 
                 String lyrics_fileName=fileName.replace(".mp3",".txt");
-                Toast.makeText(playlist_Activity.this, lyrics_fileName, Toast.LENGTH_LONG).show();
 
-
-
-             /*   try{
-
-                    InputStream inputStream=getAssets().open(lyrics_fileName.);
-                    int size=inputStream.available();
-                    byte[]  buffer=new byte[size];
-
-                    inputStream.read(buffer);
-                    inputStream.close();
-                    text=new String(buffer);
-
-
-
-                }catch (IOException ex){
-
-                    ex.printStackTrace();
-                }
-                lyrics_textView.setText(text);
-*/
+                String genius_fileName=fileName.replace(".mp3","");
 
 
                 String nextFileName = listView_songs.getItemAtPosition(position + 1).toString();
-                Log.i("Next File Name: ", nextFileName);
 
 
-                String path101 = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/" + fileName;
+
+                String path101 = Environment.getExternalStorageDirectory().getAbsolutePath()
+                        + "/Android/data/" + getApplicationContext().getPackageName()
+                        + "/files/Documents/" + fileName;
+
                 if (new File(path101).exists()) {
 
                     //Do something
                     Toast.makeText(playlist_Activity.this, "File Exists", Toast.LENGTH_SHORT).show();
+
                     startActivity(new Intent(playlist_Activity.this, PlayerActivity.class)
-                            .putExtra("songname", fileName).putExtra("nextsong", nextFileName).putExtra("LYRICSFILE",lyrics_fileName));
+                            .putExtra("songname", fileName)
+                            .putExtra("nextsong", nextFileName)
+                            .putExtra("LYRICSFILE",lyrics_fileName)
+                             .putExtra("GENIUSFILENAME",genius_fileName));
 
 
                 } else {
+                    download(fileName);
+                    Toast.makeText(playlist_Activity.this, "Downloading File..", Toast.LENGTH_SHORT).show();
 
 
                 }
@@ -145,30 +134,7 @@ public class playlist_Activity extends AppCompatActivity {
         });
 
     }
-    /*  public void loadLyrics(String fileName){
-          try{
 
-                    inputStream=getAssets().open("10 Feet Down.txt");
-                    int size=inputStream.available();
-                    byte[]  buffer=new byte[size];
-
-                    inputStream.read(buffer);
-                    inputStream.close();
-                    text=new String(buffer);
-
-
-
-                }catch (IOException ex){
-
-                    ex.printStackTrace();
-                }
-                PlayerActivity.lyrics_textView.setText(text);
-
-
-
-
-
-      }*/
 
     public void download(final String fileNameInto) {
 
@@ -203,7 +169,7 @@ public class playlist_Activity extends AppCompatActivity {
         request.setDestinationInExternalFilesDir(context, destinationDirectory, fileName + fileExtension);
 
         downloadManager.enqueue(request);
-        // Toast.makeText(playlist_Activity.this, "File Stored For offline Use", Toast.LENGTH_SHORT).show();
+
 
 
     }

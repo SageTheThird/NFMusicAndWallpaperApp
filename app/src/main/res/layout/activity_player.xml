@@ -290,6 +290,7 @@
         tools:layout_editor_absoluteX="16dp"
         android:background="@color/blacktransparent"
         android:id="@+id/nestScrollView"
+        android:visibility="invisible"
 
        >
 
@@ -309,10 +310,33 @@
 
 
     </android.support.v4.widget.NestedScrollView>
-    <WebView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/geniusWebView"></WebView>
+        android:orientation="vertical"
+        android:visibility="invisible"
+        android:id="@+id/linearLayout">
+
+        <Button
+            android:layout_width="43dp"
+            android:layout_height="50dp"
+            android:id="@+id/genius_back"
+            android:background="@drawable/genius_back_arrow"
+            android:layout_weight="2"
+            />
+
+        <WebView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/geniusWebView"
+            android:layout_weight="8"
+             >
+
+        </WebView>
+
+    </LinearLayout>
+
+
 
 
 </android.support.constraint.ConstraintLayout>
