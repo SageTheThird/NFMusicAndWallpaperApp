@@ -45,6 +45,9 @@ public class MainActivity extends AppCompatActivity  {
 
                        startActivity(new Intent(MainActivity.this,playlist_Activity.class));
 
+                       break;
+
+
 
 
 

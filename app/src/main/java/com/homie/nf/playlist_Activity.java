@@ -7,6 +7,8 @@ import android.content.res.TypedArray;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -41,7 +43,7 @@ public class playlist_Activity extends AppCompatActivity {
 
     FirebaseStorage firebaseStorage;
     StorageReference storageReference;
-    StorageReference ref;
+
 
 
     String[] member_names;
@@ -123,7 +125,9 @@ public class playlist_Activity extends AppCompatActivity {
 
 
                 } else {
+
                     download(fileName);
+
                     Toast.makeText(playlist_Activity.this, "Downloading File..", Toast.LENGTH_SHORT).show();
 
 
@@ -139,14 +143,18 @@ public class playlist_Activity extends AppCompatActivity {
     public void download(final String fileNameInto) {
 
         storageReference = firebaseStorage.getInstance().getReference();
-        ref = storageReference.child(fileNameInto);
-        ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+        storageReference = storageReference.child(fileNameInto);
+        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
             public void onSuccess(Uri uri) {
                 //after download url from file is fetched it will download file
 
                 String url = uri.toString();
-                downloadFiles(playlist_Activity.this, fileNameInto, "", Environment.DIRECTORY_DOCUMENTS, url);
+               // downloadFiles(playlist_Activity.this, fileNameInto, "", Environment.DIRECTORY_DOCUMENTS, url);
+
+                DownloadFiles downloadFiles=new DownloadFiles(playlist_Activity.this,"",Environment.DIRECTORY_DOCUMENTS,url);
+                downloadFiles.execute(fileNameInto);
+
 
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -159,17 +167,28 @@ public class playlist_Activity extends AppCompatActivity {
 
     }
 
-    public void downloadFiles(Context context, String fileName, String fileExtension, String destinationDirectory, String url) {
+  /*  public void downloadFiles(Context context, String fileName, String fileExtension, String destinationDirectory, String url) {
 
-        DownloadManager downloadManager = (DownloadManager) context
-                .getSystemService(Context.DOWNLOAD_SERVICE);
+        DownloadManager downloadManager = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
+            downloadManager = (DownloadManager) context
+                    .getSystemService(Context.DOWNLOAD_SERVICE);
+        }
         Uri uri = Uri.parse(url);
-        DownloadManager.Request request = new DownloadManager.Request(uri);
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        request.setDestinationInExternalFilesDir(context, destinationDirectory, fileName + fileExtension);
+        DownloadManager.Request request = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
+            request = new DownloadManager.Request(uri);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            request.setDestinationInExternalFilesDir(context, destinationDirectory, fileName + fileExtension);
+        }
 
-        downloadManager.enqueue(request);
-
+        if(downloadManager!=null) {
+            downloadManager.enqueue(request);
+        }
 
 
     }
@@ -180,7 +199,7 @@ public class playlist_Activity extends AppCompatActivity {
         ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
 
-        if ((info == null || !info.isConnected() || !info.isAvailable())) {
+        if ((info == null || !info.isConnected() )) {
             Toast.makeText(getApplicationContext(), "No Internet Connection..", Toast.LENGTH_SHORT).show();
             return false;
         } else {
@@ -188,8 +207,62 @@ public class playlist_Activity extends AppCompatActivity {
         }
 
     }
-
+*/
 }
+
+     class DownloadFiles extends AsyncTask<String,Void,Void>{
+
+         Context context;
+         String fileExtension;
+         String destinationDirectory;
+         String url;
+
+         public DownloadFiles(Context context, String fileExtension, String destinationDirectory,String url) {
+             this.context = context;
+             this.fileExtension = fileExtension;
+             this.destinationDirectory = destinationDirectory;
+             this.url=url;
+         }
+
+         @Override
+         protected Void doInBackground(String... url) {
+
+
+             DownloadManager downloadManager = null;
+             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
+                 downloadManager = (DownloadManager) context
+                         .getSystemService(Context.DOWNLOAD_SERVICE);
+             }
+             Uri uri = Uri.parse(url[0]);
+             DownloadManager.Request request = null;
+             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
+                 request = new DownloadManager.Request(uri);
+             }
+             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+             }
+             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+                 request.setDestinationInExternalFilesDir(context, destinationDirectory, url[0] + fileExtension);
+             }
+
+             if(downloadManager!=null) {
+                 downloadManager.enqueue(request);
+             }
+
+
+
+
+
+
+             return null;
+         }
+
+         @Override
+         protected void onPostExecute(Void aVoid) {
+             super.onPostExecute(aVoid);
+             Toast.makeText(context, "File Downloaded:", Toast.LENGTH_LONG).show();
+         }
+     }
 
 
 

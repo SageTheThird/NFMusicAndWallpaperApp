@@ -8,10 +8,16 @@
         android:icon="@drawable/ic_home"
         android:title="home"
         />
+
     <item
         android:id="@+id/menu_playlist"
         android:icon="@drawable/ic_playlist"
         android:title="playlist" />
+    <item
+        android:id="@+id/menu_wallpapers"
+        android:icon="@drawable/ic_home"
+        android:title="wallpapers"
+        />
     <item
         android:id="@+id/menu_about"
         android:icon="@drawable/ic_about"

@@ -1,9 +1,11 @@
 package com.homie.nf;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -31,24 +33,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import static com.homie.nf.PlayerActivity.currentPosition;
+import static com.homie.nf.PlayerActivity.geniusWebView;
+import static com.homie.nf.PlayerActivity.mediaPlayer;
+import static com.homie.nf.PlayerActivity.songseekBar;
+import static java.lang.Thread.sleep;
+
 public class PlayerActivity extends AppCompatActivity {
     static MediaPlayer mediaPlayer;
     static TextView lyrics_textView;
     Button btn_pause, btn_previous, btn_next, back_arrow, genius_btn, lyrics_button, shuffle_btn, repeat_btn,genius_back_btn,queue_btn;
     TextView songnameView;
-    SeekBar songseekBar;
+    static SeekBar songseekBar;
     int positionSong;
     ArrayList<File> mySongs;
     Thread updateseekBar;
     String sname;
     TextView startDur, totalDur;
-    int currentPosition = 0;
+    static  int currentPosition = 0;
     NestedScrollView nestedScrollView;
     boolean tester = true;
     String text = "";
     String lyrics_file;
     Intent intent;
-    WebView geniusWebView;
+    static WebView geniusWebView;
 
     String genius_file;
     FirebaseDatabase firebaseDatabase;
@@ -91,13 +99,14 @@ public class PlayerActivity extends AppCompatActivity {
         Toast.makeText(this, "Genius: " + genius_file, Toast.LENGTH_SHORT).show();
 
         firebaseDatabase = FirebaseDatabase.getInstance();
-        mRef = firebaseDatabase.getReference();
+        mRef = firebaseDatabase.getReference("genius");
 
         mRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                showData(dataSnapshot);
+                GeniusFetch geniusFetch=new GeniusFetch(genius_file,PlayerActivity.this);
+                geniusFetch.execute(dataSnapshot);
             }
 
             @Override
@@ -162,7 +171,7 @@ public class PlayerActivity extends AppCompatActivity {
             public void onClick(View v) {
 
 
-                if (tester == true) {
+                if (tester) {
 
                     lyrics_textView.setVisibility(View.VISIBLE);
                     nestedScrollView.setVisibility(View.VISIBLE);
@@ -193,7 +202,7 @@ public class PlayerActivity extends AppCompatActivity {
 
                     tester = false;
 
-                } else if (tester == false) {
+                } else if (!tester) {
 
                     lyrics_textView.setVisibility(View.INVISIBLE);
                     nestedScrollView.setVisibility(View.INVISIBLE);
@@ -212,7 +221,7 @@ public class PlayerActivity extends AppCompatActivity {
         });
 
 
-        updateseekBar = new Thread() {
+       updateseekBar = new Thread() {
             @Override
             public void run() {
 
@@ -263,7 +272,7 @@ public class PlayerActivity extends AppCompatActivity {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    u[0] = Uri.parse(nextSongPath);
+                    u[1] = Uri.parse(nextSongPath);
                     mp = MediaPlayer.create(PlayerActivity.this, u[0]);
                     mp.start();
 
@@ -364,20 +373,49 @@ public class PlayerActivity extends AppCompatActivity {
 
     }
 
-    private void showData(DataSnapshot dataSnapshot) {
-        for (DataSnapshot ds : dataSnapshot.getChildren()) {
-            String url = (String) ds.child(genius_file).getValue();
 
-            Log.i("Song Url: ", url);
-
-            geniusWebView.getSettings().setJavaScriptEnabled(true);
-            geniusWebView.setWebViewClient(new WebViewClient());
-            geniusWebView.loadUrl(url);
-        }
-
-    }
 
 
 }
+
+ class GeniusFetch extends AsyncTask<DataSnapshot, Void, String> {
+
+    String genius_fileUrl;
+    Context context;
+
+     public GeniusFetch(String genius_fileUrl, Context context) {
+         this.genius_fileUrl = genius_fileUrl;
+         this.context = context;
+     }
+
+     @Override
+     protected void onPreExecute() {
+         super.onPreExecute();
+
+     }
+
+     @Override
+     protected String doInBackground(DataSnapshot... dataSnapshots) {
+
+
+         String url = null;
+         for (DataSnapshot ds : dataSnapshots[0].getChildren()) {
+             url = (String) ds.child(genius_fileUrl).getValue();
+
+             //Log.i("Song Url: ", url);
+         }
+         return url;
+     }
+
+     @Override
+     protected void onPostExecute(String url) {
+         super.onPostExecute(url);
+         geniusWebView.getSettings().setJavaScriptEnabled(true);
+         geniusWebView.setWebViewClient(new WebViewClient());
+         geniusWebView.loadUrl(url);
+
+         Toast.makeText(context, "Genius Fetched:"+url, Toast.LENGTH_LONG).show();
+     }
+ }
 
 

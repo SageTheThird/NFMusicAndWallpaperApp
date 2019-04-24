@@ -21,6 +21,84 @@
             "package_name": "com.homie.customadapter",
             "certificate_hash": "cfba0d9fcb0877dd1c94f8523e77dec259108600"
           }
+        },
+        {
+          "client_id": "258800438992-n4tcrafrot2pt7d4idk33ilhd1cet5c9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQYKlQQbkeRafw2uXMLFcvMfdNwSZ32ns"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "258800438992-n4tcrafrot2pt7d4idk33ilhd1cet5c9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:258800438992:android:d78d2b0a8002fd97",
+        "android_client_info": {
+          "package_name": "com.homie.fiirebaserecyclerview"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "258800438992-54a4e2fq83vcq8eb6slhqkcr324cj6r0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.homie.fiirebaserecyclerview",
+            "certificate_hash": "cfba0d9fcb0877dd1c94f8523e77dec259108600"
+          }
+        },
+        {
+          "client_id": "258800438992-n4tcrafrot2pt7d4idk33ilhd1cet5c9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQYKlQQbkeRafw2uXMLFcvMfdNwSZ32ns"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "258800438992-n4tcrafrot2pt7d4idk33ilhd1cet5c9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:258800438992:android:3f0453b565750520",
+        "android_client_info": {
+          "package_name": "com.homie.geniusfetch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "258800438992-1hc0dgptoki5257tg5qjuobbilfcho5e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.homie.geniusfetch",
+            "certificate_hash": "cfba0d9fcb0877dd1c94f8523e77dec259108600"
+          }
+        },
+        {
+          "client_id": "258800438992-n4tcrafrot2pt7d4idk33ilhd1cet5c9.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
@@ -54,6 +132,47 @@
             "package_name": "com.homie.nf",
             "certificate_hash": "cfba0d9fcb0877dd1c94f8523e77dec259108600"
           }
+        },
+        {
+          "client_id": "258800438992-n4tcrafrot2pt7d4idk33ilhd1cet5c9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQYKlQQbkeRafw2uXMLFcvMfdNwSZ32ns"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "258800438992-n4tcrafrot2pt7d4idk33ilhd1cet5c9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:258800438992:android:c82c5673378ecf3d",
+        "android_client_info": {
+          "package_name": "com.homie.recyclerview"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "258800438992-at3jsrqqtn936bit1vk53atk3usiq3pi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.homie.recyclerview",
+            "certificate_hash": "cfba0d9fcb0877dd1c94f8523e77dec259108600"
+          }
+        },
+        {
+          "client_id": "258800438992-n4tcrafrot2pt7d4idk33ilhd1cet5c9.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
