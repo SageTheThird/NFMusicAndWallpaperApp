@@ -2,66 +2,68 @@ package com.homie.nf;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PorterDuff;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.NonNull;
+import android.os.Handler;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import abak.tr.com.boxedverticalseekbar.BoxedVertical;
+import me.tankery.lib.circularseekbar.CircularSeekBar;
+
 import static com.homie.nf.PlayerActivity.currentPosition;
-import static com.homie.nf.PlayerActivity.geniusWebView;
 import static com.homie.nf.PlayerActivity.mediaPlayer;
-import static com.homie.nf.PlayerActivity.songseekBar;
+import static com.homie.nf.PlayerActivity.seekBar;
 import static java.lang.Thread.sleep;
 
-public class PlayerActivity extends AppCompatActivity {
+
+public class PlayerActivity extends AppCompatActivity implements genius_fragment.OnFragmentInteractionListener {
     static MediaPlayer mediaPlayer;
     static TextView lyrics_textView;
-    Button btn_pause, btn_previous, btn_next, back_arrow, genius_btn, lyrics_button, shuffle_btn, repeat_btn,genius_back_btn,queue_btn;
+    static int currentPosition = 0;
+    static CircularSeekBar seekBar;
+    Button btn_pause, btn_previous, btn_next,
+            back_arrow, genius_btn, lyrics_button,
+            shuffle_btn, repeat_btn,
+            queue_btn, volume_btn;
     TextView songnameView;
-    static SeekBar songseekBar;
-    int positionSong;
+
     ArrayList<File> mySongs;
     Thread updateseekBar;
-    String sname;
-    TextView startDur, totalDur;
-    static  int currentPosition = 0;
+
     NestedScrollView nestedScrollView;
     boolean tester = true;
-    String text = "";
+    String lyrics_text = "";
     String lyrics_file;
     Intent intent;
-    static WebView geniusWebView;
-
     String genius_file;
-    FirebaseDatabase firebaseDatabase;
-    DatabaseReference mRef;
     LinearLayout linearLayout;
+    ArrayList<String> song_list;
+    AudioManager audioManager;
+    BoxedVertical boxedVerticalSeekBar;
+    private boolean verticalSeekBarTester = true;
+    private FrameLayout frameLayout;
+
+
+
 
 
     @Override
@@ -69,51 +71,53 @@ public class PlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_player);
-        //startDur=findViewById(R.id.running_time);
-        //totalDur=findViewById(R.id.total_time);
 
-
+        song_list = new ArrayList<>();
+        boxedVerticalSeekBar = findViewById(R.id.boxed_vertical);
+        volume_btn = findViewById(R.id.volume_btn);
+        frameLayout = findViewById(R.id.frameLayout);
+        btn_pause = findViewById(R.id.pause);
+        songnameView = findViewById(R.id.songtextView);
+        boxedVerticalSeekBar = findViewById(R.id.boxed_vertical);
+        seekBar = findViewById(R.id.circularSeekBar);
+        back_arrow = findViewById(R.id.back_button);
+        genius_btn = findViewById(R.id.geniusbutton);
+        lyrics_button = findViewById(R.id.lyrics_button);
+        linearLayout = findViewById(R.id.linearLayout);
+        nestedScrollView = findViewById(R.id.nestScrollView);
+        lyrics_textView = findViewById(R.id.lyricstextView);
+        queue_btn = findViewById(R.id.queue_button);
         intent = getIntent();
 
+        String fileName101 = intent.getStringExtra("songname");
+        String songPath = Environment.getExternalStorageDirectory().getAbsolutePath()
+                + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/"
+                + fileName101;
 
-        btn_pause =        findViewById(R.id.pause);
-        btn_previous =     findViewById(R.id.previous);
-        btn_next =         findViewById(R.id.next);
-        songnameView =     findViewById(R.id.songtextView);
-        songseekBar =      findViewById(R.id.seekBar);
-        back_arrow =       findViewById(R.id.back_button);
-        shuffle_btn =      findViewById(R.id.shuffle);
-        repeat_btn =       findViewById(R.id.repeat);
-        geniusWebView =    findViewById(R.id.geniusWebView);
-        genius_btn =       findViewById(R.id.geniusbutton);
-        lyrics_button =    findViewById(R.id.lyrics_button);
-        linearLayout =     findViewById(R.id.linearLayout);
-        nestedScrollView = findViewById(R.id.nestScrollView);
-        genius_back_btn=   findViewById(R.id.genius_back);
-        lyrics_textView =  findViewById(R.id.lyricstextView);
-        queue_btn =        findViewById(R.id.queue_button);
+
+
+        mediaPlayer=MediaPlayer.create(PlayerActivity.this,Uri.parse(songPath));
+        seekBar.setMax(mediaPlayer.getDuration());
+
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
+
+        int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+
+        //getting current volume from system phone
+        int curVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        boxedVerticalSeekBar.setMax(maxVolume);
+        //setting current volume
+        boxedVerticalSeekBar.setDefaultValue(curVolume);
 
 
         lyrics_file = intent.getStringExtra("LYRICSFILE");
         genius_file = intent.getStringExtra("GENIUSFILENAME");
-        Toast.makeText(this, "Genius: " + genius_file, Toast.LENGTH_SHORT).show();
 
-        firebaseDatabase = FirebaseDatabase.getInstance();
-        mRef = firebaseDatabase.getReference("genius");
 
-        mRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                GeniusFetch geniusFetch=new GeniusFetch(genius_file,PlayerActivity.this);
-                geniusFetch.execute(dataSnapshot);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+        /*BackgroundSeekAsync backgroundSeekAsync = new BackgroundSeekAsync(PlayerActivity.this);
+        backgroundSeekAsync.execute(songPath);
+*/
 
 
         //to edit the actionBar
@@ -121,46 +125,28 @@ public class PlayerActivity extends AppCompatActivity {
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
-
-
-
-
-        genius_btn.setOnClickListener(new View.OnClickListener() {
+        volume_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                linearLayout.setVisibility(View.VISIBLE);
-                //geniusWebView.setVisibility(View.VISIBLE);
 
-                btn_pause.setVisibility(View.INVISIBLE);
-                btn_next.setVisibility(View.INVISIBLE);
-                btn_previous.setVisibility(View.INVISIBLE);
-                shuffle_btn.setVisibility(View.INVISIBLE);
-                repeat_btn.setVisibility(View.INVISIBLE);
-                lyrics_button.setVisibility(View.INVISIBLE);
-                genius_btn.setVisibility(View.INVISIBLE);
-                back_arrow.setVisibility(View.INVISIBLE);
-                queue_btn.setVisibility(View.INVISIBLE);
+                if (verticalSeekBarTester) {
 
+                    boxedVerticalSeekBar.setVisibility(View.VISIBLE);
+                    verticalSeekBarTester = false;
+                } else if (!verticalSeekBarTester) {
+
+                    boxedVerticalSeekBar.setVisibility(View.INVISIBLE);
+                    verticalSeekBarTester = true;
+                }
 
             }
         });
 
-        genius_back_btn.setOnClickListener(new View.OnClickListener() {
+        genius_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                linearLayout.setVisibility(View.INVISIBLE);
-                //geniusWebView.setVisibility(View.VISIBLE);
-
-                btn_pause.setVisibility(View.VISIBLE);
-                btn_next.setVisibility(View.VISIBLE);
-                btn_previous.setVisibility(View.VISIBLE);
-                shuffle_btn.setVisibility(View.VISIBLE);
-                repeat_btn.setVisibility(View.VISIBLE);
-                lyrics_button.setVisibility(View.VISIBLE);
-                genius_btn.setVisibility(View.VISIBLE);
-                back_arrow.setVisibility(View.VISIBLE);
+                openGeniusFragment(genius_file);
 
             }
         });
@@ -171,79 +157,36 @@ public class PlayerActivity extends AppCompatActivity {
             public void onClick(View v) {
 
 
-                if (tester) {
-
-                    lyrics_textView.setVisibility(View.VISIBLE);
-                    nestedScrollView.setVisibility(View.VISIBLE);
-
-                    btn_pause.setVisibility(View.INVISIBLE);
-                    btn_next.setVisibility(View.INVISIBLE);
-                    btn_previous.setVisibility(View.INVISIBLE);
-                    shuffle_btn.setVisibility(View.INVISIBLE);
-                    repeat_btn.setVisibility(View.INVISIBLE);
-
-
-                    try {
-
-                        InputStream inputStream = getAssets().open(lyrics_file);
-                        int size = inputStream.available();
-                        byte[] buffer = new byte[size];
-
-                        inputStream.read(buffer);
-                        inputStream.close();
-                        text = new String(buffer);
-
-
-                    } catch (IOException ex) {
-
-                        ex.printStackTrace();
-                    }
-                    lyrics_textView.setText(text);
-
-                    tester = false;
-
-                } else if (!tester) {
-
-                    lyrics_textView.setVisibility(View.INVISIBLE);
-                    nestedScrollView.setVisibility(View.INVISIBLE);
-
-                    btn_pause.setVisibility(View.VISIBLE);
-                    btn_next.setVisibility(View.VISIBLE);
-                    btn_previous.setVisibility(View.VISIBLE);
-                    shuffle_btn.setVisibility(View.VISIBLE);
-                    repeat_btn.setVisibility(View.VISIBLE);
-                    tester = true;
-
-
-                }
+             openLyricsFragment(lyrics_file);
 
             }
         });
 
 
-       updateseekBar = new Thread() {
-            @Override
-            public void run() {
+     updateseekBar=new Thread(){
+         @Override
+         public void run() {
+             int totalDuration=mediaPlayer.getDuration();
+             int currentPosition=0;
 
+             while(currentPosition<totalDuration)
+             {
 
-                int totalDuration = mediaPlayer.getDuration();
+                 try {
+                     sleep(500);
 
+                     currentPosition=mediaPlayer.getCurrentPosition();
+                     seekBar.setProgress(currentPosition);
+                 } catch (InterruptedException e) {
+                     e.printStackTrace();
+                 }
 
-                while (currentPosition < totalDuration) {
-                    try {
-                        sleep(500);
-                        currentPosition = mediaPlayer.getCurrentPosition();
-                        //songseekBar.setEnabled(true);
-                        songseekBar.setProgress(currentPosition);
+             }
 
+         }
+     };
 
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            }
-        };
+        //seekBar.setMax(mediaPlayer.getDuration());
 
         if (mediaPlayer != null) {
 
@@ -252,33 +195,19 @@ public class PlayerActivity extends AppCompatActivity {
         }
 
 
-        String fileName101 = intent.getStringExtra("songname");
-        String nextSongname = intent.getStringExtra("nextsong");
-        Log.i("File Name: ", fileName101);
-
-        String songPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/" + fileName101;
-        final String nextSongPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/" + nextSongname;
-
 
         try {
-            final Uri[] u = {Uri.parse(songPath)};
+            mediaPlayer.release();
+            final Uri u = Uri.parse(songPath);
+            // mediaPlayer.setDataSource(hashname);
 
-            mediaPlayer = MediaPlayer.create(PlayerActivity.this, u[0]);
+            mediaPlayer = MediaPlayer.create(PlayerActivity.this, u);
             //  mediaPlayer.setDataSource(songPath);
             mediaPlayer.prepare();
 
             mediaPlayer.start();
+            seekBar.setMax(mediaPlayer.getDuration());
 
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    u[1] = Uri.parse(nextSongPath);
-                    mp = MediaPlayer.create(PlayerActivity.this, u[0]);
-                    mp.start();
-
-
-                }
-            });
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -287,81 +216,58 @@ public class PlayerActivity extends AppCompatActivity {
         }
 
         // mediaPlayer.start();
-        final int totalLength = mediaPlayer.getDuration();
-        songseekBar.setMax(totalLength);
+        //final int totalLength = mediaPlayer.getDuration();
+
         //totalDur.setText(totalLength);
 
-        updateseekBar.start();
+        //updateseekBar.start();
         //to change color of the seekBar //following 2 lines
-        songseekBar.getProgressDrawable().setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.MULTIPLY);
-        songseekBar.getThumb().setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.SRC_IN);
+        // songseekBar.getProgressDrawable().setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.MULTIPLY);
+        //songseekBar.getThumb().setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.SRC_IN);
 
-        songseekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        seekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            public void onProgressChanged(CircularSeekBar circularSeekBar, float progress, boolean fromUser) {
+
+             /*   int h = Math.round(progress);
+                //In the above line we are converting the float value into int because
+                // media player required int value and seekbar library gives progress in float
+                if (mediaPlayer != null && fromUser) {
+                    mediaPlayer.seekTo(h);
+                }*/
+            }
+
+            @Override
+            public void onStopTrackingTouch(CircularSeekBar seekBar) {
+                mediaPlayer.seekTo((int) seekBar.getProgress());
 
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
+            public void onStartTrackingTouch(CircularSeekBar seekBar) {
 
             }
 
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-                mediaPlayer.seekTo(seekBar.getProgress());
-            }
         });
 
 
         btn_pause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                songseekBar.setMax(totalLength);
+                //seekBar.setMax(totalLength);
+                seekBar.setMax(mediaPlayer.getDuration());
 
                 if (mediaPlayer.isPlaying()) {
 
                     btn_pause.setBackgroundResource(R.drawable.play_button);
                     mediaPlayer.pause();
-                } else {
+                } else if(!mediaPlayer.isPlaying()) {
                     btn_pause.setBackgroundResource(R.drawable.pause_button);
                     mediaPlayer.start();
                 }
             }
         });
 
-        btn_next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mediaPlayer.stop();
-                mediaPlayer.release();
-
-
-                positionSong = ((positionSong + 1) % mySongs.size());
-                Uri uri = Uri.parse(mySongs.get(positionSong).toString());
-                mediaPlayer = MediaPlayer.create(PlayerActivity.this, uri);
-
-                sname = mySongs.get(positionSong).getName().toString();
-                songnameView.setText(sname);
-                mediaPlayer.start();
-            }
-        });
-
-        btn_previous.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mediaPlayer.stop();
-                mediaPlayer.release();
-                positionSong = ((positionSong - 1) < 0) ? (mySongs.size() - 1) : (positionSong - 1);
-                Uri uri = Uri.parse(mySongs.get(positionSong).toString());
-                mediaPlayer = MediaPlayer.create(PlayerActivity.this, uri);
-                sname = mySongs.get(positionSong).getName().toString();
-                songnameView.setText(sname);
-                mediaPlayer.start();
-
-            }
-        });
 
         back_arrow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -370,52 +276,173 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
+        boxedVerticalSeekBar.setOnBoxedPointsChangeListener(new BoxedVertical.OnValuesChangeListener() {
+            @Override
+            public void onPointsChanged(BoxedVertical boxedPoints, final int value) {
+                System.out.println(value);
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, value, 0);
+            }
+
+            @Override
+            public void onStartTrackingTouch(BoxedVertical boxedPoints) {
+                //Toast.makeText(MainActivity.this, "onStartTrackingTouch", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onStopTrackingTouch(BoxedVertical boxedPoints) {
+                //Toast.makeText(MainActivity.this, "onStopTrackingTouch", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+       /* Intent currSong = getIntent();
+        Bundle b = currSong.getExtras();*/
+
+    /*    // load initial index only once
+        mCurrentIndex = (int) b.get("songIndex");
+
+        btnPrevious.setOnClickListener(new View.OnClickListener() {
+                                           @Override
+                                           public void onClick(View v) {
+                                               mCurrentIndex = mCurrentIndex > 0 ? mCurrentIndex - 1 : mSongList.size() - 1;
+                                               playSongNumber(mCurrentIndex);
+                                           }
+                                       }
+
+                btnNext.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mCurrentIndex++;
+                        mCurrentIndex %= mSongList.size();
+                        playSongNumber(mCurrentIndex);
+                    }
+                }
 
     }
 
+    private void playSongNumber(int index) {
 
+        try {
+            mMediaPlayer.stop();
+            mMediaPlayer.reset();
+            mMediaPlayer.setDataSource(mSongList.get(index).getData());
+            mMediaPlayer.prepareAsync();
+            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mp.start();
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    }*/
+
+
+    }
+
+    public void openGeniusFragment(String genius_url) {
+
+        genius_fragment genius_fragment = com.homie.nf.genius_fragment.newInstance(genius_url);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_right);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.add(R.id.frameLayout, genius_fragment, "GENIUS_FRAGMENT").commit();
+
+    }
+    public void openLyricsFragment(String lyrics_file) {
+
+       lyrics_fragment lyrics_fragment1 = lyrics_fragment.newInstance(lyrics_file);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_right);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.add(R.id.frameLayout, lyrics_fragment1, "LYRICS_FRAGMENT").commit();
+
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+        onBackPressed();
+    }
 
 
 }
 
- class GeniusFetch extends AsyncTask<DataSnapshot, Void, String> {
 
-    String genius_fileUrl;
+class BackgroundSeekAsync extends AsyncTask<String, Void, String> {
+
+
+    String songLocation;
     Context context;
 
-     public GeniusFetch(String genius_fileUrl, Context context) {
-         this.genius_fileUrl = genius_fileUrl;
-         this.context = context;
-     }
+    public BackgroundSeekAsync(Context context) {
 
-     @Override
-     protected void onPreExecute() {
-         super.onPreExecute();
+        this.context = context;
+    }
 
-     }
-
-     @Override
-     protected String doInBackground(DataSnapshot... dataSnapshots) {
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
 
 
-         String url = null;
-         for (DataSnapshot ds : dataSnapshots[0].getChildren()) {
-             url = (String) ds.child(genius_fileUrl).getValue();
+        //  mediaPlayer.setDataSource(songPath);
 
-             //Log.i("Song Url: ", url);
-         }
-         return url;
-     }
 
-     @Override
-     protected void onPostExecute(String url) {
-         super.onPostExecute(url);
-         geniusWebView.getSettings().setJavaScriptEnabled(true);
-         geniusWebView.setWebViewClient(new WebViewClient());
-         geniusWebView.loadUrl(url);
+    }
 
-         Toast.makeText(context, "Genius Fetched:"+url, Toast.LENGTH_LONG).show();
-     }
- }
+    @Override
+    protected String doInBackground(String... strings) {
+        songLocation = strings[0];
+
+
+        return songLocation;
+    }
+
+
+    @Override
+    protected void onPostExecute(String songPath1) {
+        super.onPostExecute(songPath1);
+        try {
+            //mediaPlayer.release();
+            mediaPlayer = MediaPlayer.create(context, Uri.parse(songPath1));
+            mediaPlayer.prepare();
+            //mediaPlayer.prepareAsync();
+
+            mediaPlayer.start();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        int totalDuration = mediaPlayer.getDuration();
+
+        seekBar.setMax(totalDuration);
+
+        while (currentPosition < totalDuration) {
+            try {
+                sleep(500);
+
+                currentPosition = mediaPlayer.getCurrentPosition();
+
+                //seekBar.setEnabled(true);
+
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            seekBar.setProgress(currentPosition);
+
+        }
+
+        Toast.makeText(context, "Async: Successful", Toast.LENGTH_LONG).show();
+
+    }
+
+}
 
 

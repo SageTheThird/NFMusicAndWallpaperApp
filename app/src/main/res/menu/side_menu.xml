@@ -1,34 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group>
+        <item
+            android:id="@+id/menu_home"
+            android:icon="@drawable/ic_home"
+            android:title="home" />
+    </group>
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/menu_playlist"
+            android:icon="@drawable/ic_playlist"
+            android:title="playlist" />
+        <item
+            android:id="@+id/menu_wallpapers"
+            android:icon="@drawable/ic_home"
+            android:title="wallpapers" />
+        <item
+            android:id="@+id/extra_sideMenu"
+            android:icon="@drawable/ic_home"
+            android:title="extras" />
+    </group>
 
 
-    <item
-        android:id="@+id/menu_home"
-        android:icon="@drawable/ic_home"
-        android:title="home"
-        />
+    <item android:title="communicate">
+        <menu>
+            <item
+                android:id="@+id/menu_about"
+                android:icon="@drawable/ic_about"
+                android:title="about us " />
+            <item
+                android:id="@+id/menu_contact"
+                android:icon="@drawable/ic_contact"
+                android:title="contact" />
+            <item
+                android:id="@+id/menu_send"
+                android:icon="@drawable/ic_send_black_24dp"
+                android:title="send"
+                />
+        </menu>
 
-    <item
-        android:id="@+id/menu_playlist"
-        android:icon="@drawable/ic_playlist"
-        android:title="playlist" />
-    <item
-        android:id="@+id/menu_wallpapers"
-        android:icon="@drawable/ic_home"
-        android:title="wallpapers"
-        />
-    <item
-        android:id="@+id/menu_about"
-        android:icon="@drawable/ic_about"
-        android:title="about us " />
-    <item
-        android:id="@+id/menu_contact"
-        android:icon="@drawable/ic_contact"
-        android:title="contact" />
-    <item
-        android:id="@+id/menu_search"
-        android:icon="@drawable/ic_search"
-        android:title="Search"
-        app:actionViewClass="android.widget.SearchView" />
+    </item>
 </menu>

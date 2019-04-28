@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/backgroundnew"
+    android:background="@drawable/player_background_blurred2"
     tools:context="com.homie.nf.PlayerActivity">
 
 
@@ -35,7 +35,6 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.547"
         tools:layout_editor_absoluteX="0dp" />
 
 
@@ -63,118 +62,40 @@
         app:layout_constraintVertical_bias="0.0"
         tools:layout_editor_absoluteX="0dp" />
 
-
-    <SeekBar
-        android:id="@+id/seekBar"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/songtextView2"
-        android:layout_centerHorizontal="true"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/songtextView2" />
+    <ImageView
+        android:layout_width="96dp"
+        android:layout_height="89dp"
+        android:src="@drawable/pause_shadow"
+        tools:layout_editor_absoluteX="147dp"
+        tools:layout_editor_absoluteY="438dp"
+        android:clickable="false"/>
 
 
     <Button
         android:id="@+id/pause"
-        android:layout_width="116dp"
-        android:layout_height="114dp"
+        android:layout_width="95dp"
+        android:layout_height="89dp"
 
         android:layout_alignParentBottom="true"
 
         android:layout_centerHorizontal="true"
 
 
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+
+        android:layout_marginTop="388dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/pause_button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/back_view"
-        app:layout_constraintStart_toStartOf="@+id/back_view"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.864"
-        tools:ignore="MissingConstraints" />
-
-
-    <Button
-        android:id="@+id/next"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
-
-
-        android:layout_alignParentRight="true"
-
-        android:layout_alignParentBottom="true"
-
-        android:layout_marginStart="124dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/next_button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/pause"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.822"
-        tools:ignore="MissingConstraints" />
-
-
-    <Button
-        android:id="@+id/previous"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
-
-
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/prev_button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/pause"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.822"
-        tools:ignore="MissingConstraints" />
-
-
-    <Button
-        android:id="@+id/shuffle"
-        android:layout_width="23dp"
-        android:layout_height="23dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/shuffle"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/back_view"
-        app:layout_constraintHorizontal_bias="0.585"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.806"
-        tools:ignore="MissingConstraints" />
-
-
-    <Button
-        android:id="@+id/repeat"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/repeat"
+        android:stateListAnimator="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.425"
-        app:layout_constraintStart_toEndOf="@+id/back_view"
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.808"
+        app:layout_constraintVertical_bias="0.058"
         tools:ignore="MissingConstraints" />
+
 
     <Button
         android:id="@+id/back_button"
@@ -183,29 +104,80 @@
         android:layout_alignParentLeft="true"
 
         android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="26dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/back_arrow"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.003" />
+        app:layout_constraintVertical_bias="0.003"
+        android:stateListAnimator="@null"/>
 
-
-    <ImageView
-        android:id="@+id/cover"
-        android:layout_width="240dp"
-        android:layout_height="250dp"
-
-
+    <me.tankery.lib.circularseekbar.CircularSeekBar
+        android:id="@+id/circularSeekBar"
+        android:layout_width="220dp"
+        android:layout_height="216dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-
+        android:layout_marginBottom="4dp"
+        app:cs_circle_color="#56000000"
+        app:cs_circle_progress_color="#147E87"
+        app:cs_circle_stroke_width="1dp"
+        app:cs_pointer_color="#FFF"
+        app:cs_pointer_stroke_width="14dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.2" />
+        app:layout_constraintVertical_bias="0.179"
+        />
+
+    <abak.tr.com.boxedverticalseekbar.BoxedVertical
+        android:id="@+id/boxed_vertical"
+        android:layout_width="36dp"
+        android:layout_height="250dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="8dp"
+
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="308dp"
+        android:layout_marginBottom="8dp"
+        android:layout_weight="1"
+        android:visibility="invisible"
+        app:backgroundColor="#83041016"
+        app:imageEnabled="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.435"
+        app:progressColor="#0BDBA2"
+        app:textBottomPadding="20"
+        app:textColor="#FFF"
+        app:textEnabled="true"
+        app:textSize="12sp"
+        app:touchDisabled="true" />
+
+
+    <ImageView
+        android:id="@+id/cover"
+        android:layout_width="202dp"
+        android:layout_height="199dp"
+
+
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:src="@drawable/cover"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.195" />
 
 
     <Button
@@ -217,124 +189,72 @@
         android:layout_marginTop="24dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/queue_icon"
+        android:background="@drawable/top_right_playlist"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.003" />
-
-
-    <ImageView
-        android:id="@+id/back_view"
-        android:layout_width="200dp"
-        android:layout_height="45dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/button_backview"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.818"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintVertical_bias="0.003"
+        android:stateListAnimator="@null"/>
 
 
     <Button
         android:id="@+id/lyrics_button"
-        android:layout_width="80dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_width="180dp"
+        android:layout_height="70dp"
+        android:layout_marginTop="579dp"
         android:background="@drawable/lyrics_button"
-        android:text="lyrics"
         android:textAllCaps="false"
         android:textColor="#FFF"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/shuffle"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp"
+        android:stateListAnimator="@null"/>
 
 
     <Button
         android:id="@+id/geniusbutton"
-        android:layout_width="80dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_width="180dp"
+        android:layout_height="65dp"
+        android:layout_marginStart="180dp"
+
+        android:layout_marginTop="579dp"
         android:background="@drawable/genius_button"
-        android:text="genius"
         android:textAllCaps="false"
         android:textColor="#FFF"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints"
+        android:stateListAnimator="@null"/>
+
+    <Button
+        android:id="@+id/volume_btn"
+        android:layout_width="39dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="304dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/ic_volume_up_black_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.851"
-        app:layout_constraintStart_toEndOf="@+id/lyrics_button"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.937"
-        tools:ignore="MissingConstraints" />
-
-    <android.support.v4.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="472dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="16dp"
-        android:background="@color/blacktransparent"
-        android:id="@+id/nestScrollView"
-        android:visibility="invisible"
-
-       >
-
-        <TextView
-
-            android:id="@+id/lyricstextView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="50dp"
-            android:layout_marginBottom="50dp"
-
-            android:gravity="center"
-            android:text="ANYTHING"
-            android:textColor="#fff"
-            android:textSize="17dp"
-            />
+        app:layout_constraintHorizontal_bias="0.888"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/boxed_vertical"
+        app:layout_constraintVertical_bias="0.0"
+        android:stateListAnimator="@null"/>
 
 
-    </android.support.v4.widget.NestedScrollView>
-    <LinearLayout
+
+
+
+
+    <FrameLayout
+        android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:visibility="invisible"
-        android:id="@+id/linearLayout">
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp" />
 
-        <Button
-            android:layout_width="43dp"
-            android:layout_height="50dp"
-            android:id="@+id/genius_back"
-            android:background="@drawable/genius_back_arrow"
-            android:layout_weight="2"
-            />
-
-        <WebView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/geniusWebView"
-            android:layout_weight="8"
-             >
-
-        </WebView>
-
-    </LinearLayout>
 
 
 

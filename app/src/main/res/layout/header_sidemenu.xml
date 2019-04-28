@@ -15,7 +15,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="20dp"
         android:layout_marginRight="20dp"
-        android:src="@drawable/hqdefault" />
+         />
 
     <!--<com.mikhaellopez.circularimageview.CircularImageView
 
