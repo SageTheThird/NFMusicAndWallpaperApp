@@ -3,8 +3,6 @@ package com.homie.nf;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.TypedArray;
-import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -14,17 +12,11 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Toast;
-
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -37,35 +29,27 @@ import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
 
 
 public class playlist_Activity extends AppCompatActivity {
 
 
 
+
     private FirebaseFirestore firebaseFirestore=FirebaseFirestore.getInstance();
     private CollectionReference collectionReference=firebaseFirestore.collection("songs");
     static RecyclerView recyclerView;
-    ImageRecyclerView imageRecyclerViewAdapter;
-
-
-    //static ListView listView_songs;
-
-
+    SongRecyclerView songRecyclerViewAdapter;
     FirebaseStorage firebaseStorage;
     StorageReference storageReference;
-
     ImageView playlist_background,imageView_title,imageView_sideButton;
     ArrayList<String> song_list;
-    Map<String, Integer> songs_map;
-    String directorypath;
+    ConnectivityManager connectivityManager;
+    NetworkInfo networkInfo;
+
 
 
 
@@ -74,6 +58,7 @@ public class playlist_Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_playlist_);
+
         playlist_background=findViewById(R.id.playlist_background);
         imageView_sideButton=findViewById(R.id.playlist_sideButton);
         imageView_title=findViewById(R.id.playlistimageView_title);
@@ -102,14 +87,13 @@ public class playlist_Activity extends AppCompatActivity {
                 .into(imageView_sideButton);
 
 
-        String path = Environment.getExternalStorageDirectory().getPath() + "/Documents";
+
 
         final String directory=Environment.getExternalStorageDirectory().getAbsolutePath() +
                 "/Android/data/" + this.getPackageName() + "/files/Documents";
 
 
-        File direct = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
-                "/Android/data/" + this.getPackageName() + "/files/Documents");
+        File direct = new File(directory);
 
         if (!direct.exists()) {
             File myDirectory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/" + this.getPackageName() + "/files/Documents");
@@ -117,11 +101,15 @@ public class playlist_Activity extends AppCompatActivity {
         }
 
         setupRecyclerView();
+        //Internet Connectivity
+        connectivityManager = (ConnectivityManager)
+                playlist_Activity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        networkInfo = connectivityManager.getActiveNetworkInfo();
 
 
 
 
-        imageRecyclerViewAdapter.setOnItemClickListener(new ImageRecyclerView.onItemClickListener() {
+        songRecyclerViewAdapter.setOnItemClickListener(new SongRecyclerView.onItemClickListener() {
             @Override
             public void onItemClick(DocumentSnapshot documentSnapshot, int position) {
 
@@ -129,32 +117,48 @@ public class playlist_Activity extends AppCompatActivity {
                 String id=documentSnapshot.getId();
                 String path=documentSnapshot.getReference().getPath();
                 String downloadUrl=documentSnapshot.getString("downloadUrl");*/
+
+
                 String genius_url=documentSnapshot.getString("genius_url");
-
                 String song_name=documentSnapshot.getString("song_name");
+                String songFull=song_name+".mp3";
 
-                String lyrics=documentSnapshot.getString("song_name").replace(".mp3",".txt");
+                String lyricsFetch=documentSnapshot.getString("song_name");
+                String lyrics_file_name=lyricsFetch.replace(".mp3",".txt");
 
                 String path101 = Environment.getExternalStorageDirectory().getAbsolutePath()
                         + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/"+song_name;
+
+
+
+
 
                 if (new File(path101).exists()) {
 
                     //Do something
 
+
                     showToast("Playing..");
                     startActivity(new Intent(playlist_Activity.this, PlayerActivity.class)
                             .putExtra("songname", song_name)
                             .putExtra("GENIUSFILENAME",genius_url)
-                            .putExtra("LYRICSFILE",lyrics)
+                            .putExtra("LYRICSFILE",lyrics_file_name)
                     );
 
 
 
-                } else {
 
-                    download(song_name,directory);
-                    showToast("Downloading File...");
+                } else {
+                    if ((networkInfo == null || !networkInfo.isConnected() )) {
+                        showToast("Please Check Your Internet Connection!");
+                        return;
+                    } else {
+                        download(song_name,directory);
+                        showToast("Downloading File...");
+
+
+                    }
+
 
                 }
 
@@ -179,7 +183,7 @@ public class playlist_Activity extends AppCompatActivity {
 
     public void download(final String fileNameInto, final String downloadDirectory) {
 
-        storageReference = firebaseStorage.getInstance().getReference();
+        storageReference = firebaseStorage.getInstance().getReference("songs");
         storageReference = storageReference.child(fileNameInto);
         storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
@@ -187,8 +191,6 @@ public class playlist_Activity extends AppCompatActivity {
                 //after download url from file is fetched it will download file
 
                 String url = uri.toString();
-                // downloadFiles(playlist_Activity.this, fileNameInto, "", Environment.DIRECTORY_DOCUMENTS, url);
-
                 DownloadFiles downloadFiles=new DownloadFiles(playlist_Activity.this,"",downloadDirectory,fileNameInto);
                 downloadFiles.execute(url);
 
@@ -206,20 +208,20 @@ public class playlist_Activity extends AppCompatActivity {
     }
 
 
-    private boolean checkConnectivity() {
+  /*  private boolean checkConnectivity() {
         boolean enabled = true;
 
         ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
 
         if ((info == null || !info.isConnected() )) {
-            showToast("No internet connection!");
+            showToast("Fake one");
             return false;
         } else {
             return true;
         }
 
-    }
+    }*/
 
 
 
@@ -227,18 +229,18 @@ public class playlist_Activity extends AppCompatActivity {
 
 
     public void setupRecyclerView (){
-        Query query=collectionReference.orderBy("priority",Query.Direction.ASCENDING);
+        Query query=collectionReference.orderBy("id",Query.Direction.DESCENDING);
 
         FirestoreRecyclerOptions<RowItem> firebaseRecyclerOptions=new FirestoreRecyclerOptions.Builder<RowItem>()
                 .setQuery(query,RowItem.class)
                 .build();
 
-        imageRecyclerViewAdapter=new ImageRecyclerView(firebaseRecyclerOptions,this);
+        songRecyclerViewAdapter =new SongRecyclerView(firebaseRecyclerOptions,this);
 
         recyclerView=findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(imageRecyclerViewAdapter);
+        recyclerView.setAdapter(songRecyclerViewAdapter);
 
 
 
@@ -247,14 +249,14 @@ public class playlist_Activity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        imageRecyclerViewAdapter.startListening();
+        songRecyclerViewAdapter.startListening();
     }
 
 
     @Override
     protected void onStop() {
         super.onStop();
-        imageRecyclerViewAdapter.stopListening();
+        songRecyclerViewAdapter.stopListening();
 
     }
 
@@ -264,8 +266,11 @@ public class playlist_Activity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onBackPressed() {
 
-
+        super.onBackPressed();
+    }
 }
 
 class DownloadFiles extends AsyncTask<String,Void,Void>{
@@ -298,6 +303,8 @@ class DownloadFiles extends AsyncTask<String,Void,Void>{
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+
+
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
             request.setDestinationUri(Uri.fromFile(new File(destinationDirectory,fileName+fileExtension)));
@@ -305,6 +312,7 @@ class DownloadFiles extends AsyncTask<String,Void,Void>{
 
         if(downloadManager!=null) {
             downloadManager.enqueue(request);
+
         }
 
 

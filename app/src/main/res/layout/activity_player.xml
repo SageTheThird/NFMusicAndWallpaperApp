@@ -65,19 +65,26 @@
     <ImageView
         android:layout_width="96dp"
         android:layout_height="89dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:clickable="false"
         android:src="@drawable/pause_shadow"
-        tools:layout_editor_absoluteX="147dp"
-        tools:layout_editor_absoluteY="438dp"
-        android:clickable="false"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.592"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.801"
+        tools:ignore="MissingConstraints" />
 
 
     <Button
         android:id="@+id/pause"
         android:layout_width="95dp"
-        android:layout_height="89dp"
-
+        android:layout_height="97dp"
         android:layout_alignParentBottom="true"
-
         android:layout_centerHorizontal="true"
 
 
@@ -86,7 +93,7 @@
         android:layout_marginTop="388dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/pause_button"
+        android:background="@drawable/play_button"
         android:stateListAnimator="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -102,7 +109,6 @@
         android:layout_width="22dp"
         android:layout_height="8dp"
         android:layout_alignParentLeft="true"
-
         android:layout_marginStart="16dp"
         android:layout_marginTop="26dp"
         android:layout_marginBottom="8dp"
@@ -133,33 +139,7 @@
         app:layout_constraintVertical_bias="0.179"
         />
 
-    <abak.tr.com.boxedverticalseekbar.BoxedVertical
-        android:id="@+id/boxed_vertical"
-        android:layout_width="36dp"
-        android:layout_height="250dp"
-        android:layout_gravity="center"
-        android:layout_marginStart="8dp"
 
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="308dp"
-        android:layout_marginBottom="8dp"
-        android:layout_weight="1"
-        android:visibility="invisible"
-        app:backgroundColor="#83041016"
-        app:imageEnabled="false"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.435"
-        app:progressColor="#0BDBA2"
-        app:textBottomPadding="20"
-        app:textColor="#FFF"
-        app:textEnabled="true"
-        app:textSize="12sp"
-        app:touchDisabled="true" />
 
 
     <ImageView
@@ -226,22 +206,7 @@
         tools:ignore="MissingConstraints"
         android:stateListAnimator="@null"/>
 
-    <Button
-        android:id="@+id/volume_btn"
-        android:layout_width="39dp"
-        android:layout_height="35dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="304dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/ic_volume_up_black_24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.888"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/boxed_vertical"
-        app:layout_constraintVertical_bias="0.0"
-        android:stateListAnimator="@null"/>
+
 
 
 

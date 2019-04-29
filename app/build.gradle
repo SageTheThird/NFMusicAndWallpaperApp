@@ -46,6 +46,9 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     implementation 'me.tankery.lib:circularSeekBar:1.1.7'
     implementation 'com.github.alpbak:BoxedVerticalSeekBar:1.1.1'
+    implementation('com.alibaba.android:ultraviewpager:1.0.7.7@aar') {
+        transitive = true
+    }
 
     //CODE ANALYSIS IN THE END
     //CODE ANALYSIS IN THE END

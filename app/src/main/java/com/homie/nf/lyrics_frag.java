@@ -4,17 +4,29 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.Button;
+import android.widget.TextView;
 
-public class genius_fragment extends Fragment {
+import java.io.IOException;
+import java.io.InputStream;
+
+
+/**
+ * A simple {@link Fragment} subclass.
+ * Activities that contain this fragment must implement the
+ * {@link lyrics_frag.OnFragmentInteractionListener} interface
+ * to handle interaction events.
+ * Use the {@link lyrics_frag#newInstance} factory method to
+ * create an instance of this fragment.
+ */
+public class lyrics_frag extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String genius_url = "param1";
+    private static final String lyrics_file = "param1";
+
 
     // TODO: Rename and change types of parameters
     private String url;
@@ -22,17 +34,22 @@ public class genius_fragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    private WebView geniusWebView;
+    private NestedScrollView nestedScrollView;
+    private TextView lyrics_textView;
+    String lyrics_text="";
+    private Context mContext;
 
-    public genius_fragment() {
+
+    public lyrics_frag() {
         // Required empty public constructor
     }
 
+
     // TODO: Rename and change types and number of parameters
-    public static genius_fragment newInstance(String url) {
-        genius_fragment fragment = new genius_fragment();
+    public static lyrics_frag newInstance(String param1) {
+        lyrics_frag fragment = new lyrics_frag();
         Bundle args = new Bundle();
-        args.putString(genius_url, url);
+        args.putString(lyrics_file, param1);
 
         fragment.setArguments(args);
         return fragment;
@@ -42,7 +59,7 @@ public class genius_fragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            url = getArguments().getString(genius_url);
+            url = getArguments().getString(lyrics_file);
 
         }
     }
@@ -51,13 +68,30 @@ public class genius_fragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view=inflater.inflate(R.layout.fragment_genius_fragment, container, false);
+        View view=inflater.inflate(R.layout. fragment_lyrics_frag, container, false);
         //genius_back_btn=view.findViewById(R.id.genius_back);
-        geniusWebView=view.findViewById(R.id.geniusWebView);
+        nestedScrollView=view.findViewById(R.id.nestScrollView);
+        lyrics_textView=view.findViewById(R.id.lyricstextView);
 
-        geniusWebView.getSettings().setJavaScriptEnabled(true);
-        geniusWebView.setWebViewClient(new WebViewClient());
-        geniusWebView.loadUrl(url);
+
+        try {
+
+            InputStream inputStream = getActivity().getAssets().open(lyrics_file);
+            int size = inputStream.available();
+            byte[] buffer = new byte[size];
+
+            inputStream.read(buffer);
+            inputStream.close();
+            lyrics_text = new String(buffer);
+
+
+        } catch (IOException ex) {
+
+            ex.printStackTrace();
+        }
+        lyrics_textView.setText(lyrics_text);
+
+
 
 
         return view;
@@ -73,6 +107,8 @@ public class genius_fragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+        mContext=context;
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {

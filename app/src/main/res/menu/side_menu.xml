@@ -18,16 +18,17 @@
             android:title="playlist" />
         <item
             android:id="@+id/menu_wallpapers"
-            android:icon="@drawable/ic_home"
+            android:icon="@drawable/ic_wallpaper"
             android:title="wallpapers" />
         <item
             android:id="@+id/extra_sideMenu"
-            android:icon="@drawable/ic_home"
+            android:icon="@drawable/ic_extras"
             android:title="extras" />
     </group>
 
 
-    <item android:title="communicate">
+    <item android:title="communicate"
+        >
         <menu>
             <item
                 android:id="@+id/menu_about"

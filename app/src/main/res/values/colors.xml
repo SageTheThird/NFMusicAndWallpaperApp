@@ -7,4 +7,8 @@
 
     <color name="black">#000000</color>
     <color name="blacktransparent">#BF000000</color>
+    <color name="IndicatorsNormal">#A8000000</color>
+    <color name="IndicatorsFocused">#CD728094</color>
+    <color name="BottomNv">#3C1111</color>
+    <color name="transparentBlack">#61000000</color>
 </resources>
