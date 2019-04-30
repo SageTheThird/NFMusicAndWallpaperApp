@@ -9,7 +9,10 @@
     app:layout_constraintTop_toTopOf="parent"
     tools:layout_editor_absoluteX="16dp"
     android:background="@color/blacktransparent"
-    android:id="@+id/nestScrollView">
+    android:id="@+id/nestScrollView"
+    android:fadingEdgeLength="250dp"
+    android:requiresFadingEdge="vertical"
+    >
 
 <TextView
 
@@ -22,6 +25,7 @@
     android:text="ANYTHING"
     android:textColor="#fff"
     android:textSize="17dp"
+
     />
 
     </android.support.v4.widget.NestedScrollView>

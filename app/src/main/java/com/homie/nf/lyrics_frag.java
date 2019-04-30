@@ -74,7 +74,7 @@ public class lyrics_frag extends Fragment {
         lyrics_textView=view.findViewById(R.id.lyricstextView);
 
 
-        try {
+       /* try {
 
             InputStream inputStream = getActivity().getAssets().open(lyrics_file);
             int size = inputStream.available();
@@ -88,8 +88,8 @@ public class lyrics_frag extends Fragment {
         } catch (IOException ex) {
 
             ex.printStackTrace();
-        }
-        lyrics_textView.setText(lyrics_text);
+        }*/
+        lyrics_textView.setText(R.string.lyrics);
 
 
 

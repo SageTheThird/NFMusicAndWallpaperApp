@@ -5,77 +5,58 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.homie.nf.SplashScreen"
-    android:background="#1E1E23">
+    >
 
     <ImageView
-        android:id="@+id/sideLinesImageView"
+        android:id="@+id/backgroundsplash_imageView"
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        android:scaleType="fitXY"
+ />
+
+    <ImageView
+        android:id="@+id/outcast_fontImageView"
         android:layout_width="179dp"
         android:layout_height="200dp"
-        android:layout_marginStart="204dp"
-        android:layout_marginBottom="456dp"
+        android:layout_marginStart="76dp"
+        android:layout_marginBottom="192dp"
         android:padding="0dp"
-        android:src="@drawable/side_lines"
+        android:src="@drawable/logooutcast"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-
     <ImageView
-        android:id="@+id/logo_imageView"
-
-        android:layout_width="220dp"
-        android:layout_height="220dp"
-        android:layout_marginTop="168dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.559"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.196" />
-
-   <!-- <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/splashImageView"
-        android:layout_centerInParent="true"
-        android:layout_centerVertical="true"
-        android:layout_marginTop="-29dp"
-        android:text="outcast"
-        android:textColor="#FFF"
-        android:textSize="28dp" />-->
-    <ImageView
-        android:id="@+id/outcast_imageView"
-        android:layout_width="190dp"
-        android:layout_height="139dp"
+        android:id="@+id/right_box_imageView"
+        android:layout_width="61dp"
+        android:layout_height="82dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:src="@drawable/outcast"
+        android:src="@drawable/t"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.692"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.849" />
+        app:layout_constraintVertical_bias="0.496" />
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
+    <ImageView
+        android:id="@+id/left_boxes_imageView"
+        android:layout_width="128dp"
+        android:layout_height="77dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:text="www.impeccable.com"
-        android:textColor="#FFF"
-        android:textSize="9dp"
+        android:src="@drawable/left_boxes"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.314"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toTopOf="parent" />
+
 
 </android.support.constraint.ConstraintLayout>

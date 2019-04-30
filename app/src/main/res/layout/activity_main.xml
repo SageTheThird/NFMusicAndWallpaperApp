@@ -64,7 +64,8 @@
         android:layout_height="match_parent"
 
         tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp">
+        tools:layout_editor_absoluteY="0dp"
+        >
 
         <android.support.design.widget.NavigationView
             android:id="@+id/navigationView"
@@ -73,9 +74,16 @@
             android:layout_height="match_parent"
 
             android:layout_gravity="end"
+            android:background="#272F32"
 
             app:headerLayout="@layout/header_sidemenu"
-            app:menu="@menu/side_menu">
+            app:menu="@menu/side_menu"
+
+            app:itemTextColor="#fff"
+            app:itemIconPadding="8dp"
+
+
+            >
 
         </android.support.design.widget.NavigationView>
 

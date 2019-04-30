@@ -15,9 +15,10 @@ import com.squareup.picasso.Picasso;
 
 public class SplashScreen extends AppCompatActivity {
 
-    ImageView imageView_outcast;
-    ImageView imageView_sideLine;
-    ImageView imageView_logo;
+    ImageView imageView_rightBox;
+    ImageView imageView_fontOutcast;
+    ImageView imageView_background;
+    ImageView imageView_left_boxes;
 
     AnimationDrawable logoAnimation;
     @Override
@@ -26,21 +27,23 @@ public class SplashScreen extends AppCompatActivity {
        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
        setContentView(R.layout.activity_splash_screen);
 
-        imageView_logo=findViewById(R.id.logo_imageView);
-        imageView_sideLine=findViewById(R.id.sideLinesImageView);
-        imageView_outcast=findViewById(R.id.outcast_imageView);
+        imageView_background=findViewById(R.id.backgroundsplash_imageView);
+        imageView_fontOutcast =findViewById(R.id.outcast_fontImageView);
+        imageView_left_boxes=findViewById(R.id.left_boxes_imageView);
+        imageView_rightBox =findViewById(R.id.right_box_imageView);
         Picasso
                 .with(this)
-                .load(R.drawable.logo)
+                .load(R.drawable.splash_background)
                 .resize(342,444)
-                .into(imageView_logo);
+                .into(imageView_background);
 
 
         Animation myAnim= AnimationUtils.loadAnimation(this,R.anim.mytransition);
         Animation myAnim2= AnimationUtils.loadAnimation(this,R.anim.slide_in_rightoutcast);
-        imageView_sideLine.startAnimation(myAnim);
-        imageView_logo.startAnimation(myAnim);
-        imageView_outcast.startAnimation(myAnim2);
+        imageView_background.startAnimation(myAnim);
+        imageView_fontOutcast.startAnimation(myAnim);
+        imageView_left_boxes.startAnimation(myAnim);
+        imageView_rightBox.startAnimation(myAnim2);
 
 
        /* imageView.setBackgroundResource(R.drawable.animation);
