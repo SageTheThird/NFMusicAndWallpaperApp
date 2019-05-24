@@ -8,7 +8,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowAnimationStyle">@style/CustomActivityAnimation</item>
     </style>
-    
+    <!--THEME FOR ANIMATION-->
     <style name="CustomActivityAnimation" parent="@android:style/Animation.Activity">
         <item name="android:activityOpenEnterAnimation">@anim/slide_in_right</item>
         <item name="android:activityOpenExitAnimation">@anim/slide_out_left</item>
@@ -18,6 +18,20 @@
 
 
 
+    </style>
+
+    <style name="cutomFloat">
+        <item name="android:background">#000</item>
+        <item name="android:textColor">#fff</item>
+
+    </style>
+
+    <!--Custom style for SPOTS Progress Dialog-->
+    <style name="Custom" parent="android:Theme.DeviceDefault.Dialog">
+        <item name="DialogTitleAppearance">@android:style/TextAppearance.Medium</item>
+        <item name="DialogTitleText">Downloading For Offline Use…</item>
+        <item name="DialogSpotColor">@android:color/holo_orange_dark</item>
+        <item name="DialogSpotCount">5</item>
     </style>
 
 </resources>

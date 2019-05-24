@@ -6,8 +6,13 @@
     android:layout_height="match_parent"
 
 
-    tools:context="com.homie.nf.playlist_Activity"
+    tools:context="com.homie.nf.Songs.playlist_Activity"
     >
+
+
+
+
+
 
 
     <ImageView
@@ -30,7 +35,9 @@
         app:layout_constraintHorizontal_bias="0.125"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.736" />
+        app:layout_constraintVertical_bias="0.736"
+        android:fadingEdgeLength="100dp"
+        android:requiresFadingEdge="vertical"/>
 
 
     <ImageView
@@ -45,8 +52,8 @@
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.975"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.943"
+        app:layout_constraintStart_toEndOf="@+id/playlistimageView_title"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.013"
         app:srcCompat="@drawable/sidebutton" />
@@ -63,6 +70,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/title" />
+
+
 
 
 </android.support.constraint.ConstraintLayout>

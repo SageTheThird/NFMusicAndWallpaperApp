@@ -3,7 +3,6 @@ package com.homie.nf;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -14,11 +13,17 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.homie.nf.Songs.playlist_Activity;
+import com.homie.nf.Wallpapers.WallpaperMain;
 import com.squareup.picasso.Picasso;
 
 
@@ -27,10 +32,7 @@ public class MainActivity extends AppCompatActivity {
     public DrawerLayout myDrawerMain;
     public ActionBarDrawerToggle myToggle;
     public NavigationView navView;
-    ImageView imageView;
-    ImageView imageView_title;
-    ImageView imageView_sideButton;
-
+    ImageView imageView,imageView_sideButton,imageView_title;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
         imageView =              findViewById(R.id.background_imageview);
         imageView_title =        findViewById(R.id.imageView_title);
         imageView_sideButton =   findViewById(R.id.imageView_sideButton);
+
+        firebaseNotificationSetup();
 
 
         Picasso
@@ -61,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 .into(imageView_sideButton);
         Picasso
                 .with(this)
-                .load(R.drawable.test_background1)
+                .load(R.drawable.test_background)
                 .resize(800, 800)
 
                 .placeholder(R.drawable.madeinsociety)
@@ -92,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+
+
         //ImageView side_button=(ImageView)findViewById(R.id.imageView2);
 
         //for drawer open close through actionbar
@@ -105,6 +111,27 @@ public class MainActivity extends AppCompatActivity {
         myToggle.syncState();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);//For Drawer*/
+
+
+    }
+
+    private void firebaseNotificationSetup() {
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("TOKEN FAIL:", "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+
+                        Log.d("TOKEN SUCCESS", token);
+                        // Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
+                    }
+                });
 
 
     }

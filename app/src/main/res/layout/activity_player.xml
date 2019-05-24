@@ -5,15 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/player_background_blurred2"
-    tools:context="com.homie.nf.PlayerActivity">
+    tools:context="com.homie.nf.Songs.PlayerActivity">
 
 
-       <!-- <com.mikhaellopez.circularimageview.CircularImageView
-            android:layout_width="250dp"
-            android:layout_height="250dp"
-            android:src="@drawable/hqdefault"
-            android:layout_gravity="center"
-            android:layout_marginTop="90dp"/>-->
     <TextView
         android:id="@+id/songtextView"
         android:layout_width="match_parent"
@@ -23,11 +17,12 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:ellipsize="marquee"
+        android:fontFamily="@font/francois_one"
         android:gravity="center"
         android:marqueeRepeatLimit="marquee_forever"
         android:scrollHorizontally="true"
-        android:singleLine="true"
 
+        android:singleLine="true"
         android:text="NF-Remember This"
         android:textAlignment="center"
         android:textColor="#FFF"
@@ -38,7 +33,6 @@
         tools:layout_editor_absoluteX="0dp" />
 
 
-
     <TextView
         android:id="@+id/songtextView2"
         android:layout_width="match_parent"
@@ -47,14 +41,15 @@
         android:layout_marginTop="40dp"
         android:layout_marginBottom="8dp"
         android:ellipsize="marquee"
+        android:fontFamily="@font/francois_one"
         android:gravity="center"
         android:marqueeRepeatLimit="marquee_forever"
         android:scrollHorizontally="true"
         android:singleLine="true"
         android:text="NF"
+
+
         android:textAlignment="center"
-
-
         android:textColor="#FFF"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -73,34 +68,33 @@
         android:src="@drawable/pause_shadow"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.592"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.801"
+        app:layout_constraintTop_toBottomOf="@+id/songtextView2"
+        app:layout_constraintVertical_bias="0.356"
         tools:ignore="MissingConstraints" />
 
 
     <Button
         android:id="@+id/pause"
-        android:layout_width="95dp"
-        android:layout_height="97dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
 
 
         android:layout_marginStart="8dp"
 
-        android:layout_marginTop="388dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/play_button"
         android:stateListAnimator="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.058"
+        app:layout_constraintTop_toBottomOf="@+id/songtextView2"
+        app:layout_constraintVertical_bias="0.264"
         tools:ignore="MissingConstraints" />
 
 
@@ -121,12 +115,10 @@
 
     <me.tankery.lib.circularseekbar.CircularSeekBar
         android:id="@+id/circularSeekBar"
-        android:layout_width="220dp"
-        android:layout_height="216dp"
+        android:layout_width="194dp"
+        android:layout_height="250dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="4dp"
         app:cs_circle_color="#56000000"
         app:cs_circle_progress_color="#147E87"
         app:cs_circle_stroke_width="1dp"
@@ -134,20 +126,16 @@
         app:cs_pointer_stroke_width="14dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.474"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.179"
-        />
-
-
+        app:layout_constraintVertical_bias="0.182" />
 
 
     <ImageView
         android:id="@+id/cover"
-        android:layout_width="202dp"
-        android:layout_height="199dp"
-
-
+        android:layout_width="186dp"
+        android:layout_height="180dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
@@ -180,31 +168,32 @@
     <Button
         android:id="@+id/lyrics_button"
         android:layout_width="180dp"
-        android:layout_height="70dp"
-        android:layout_marginTop="579dp"
+        android:layout_height="65dp"
+        android:layout_marginEnd="47dp"
         android:background="@drawable/lyrics_button"
+        android:stateListAnimator="@null"
         android:textAllCaps="false"
         android:textColor="#FFF"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="0dp"
-        android:stateListAnimator="@null"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/geniusbutton"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="MissingConstraints" />
 
 
     <Button
         android:id="@+id/geniusbutton"
         android:layout_width="180dp"
         android:layout_height="65dp"
-        android:layout_marginStart="180dp"
 
-        android:layout_marginTop="579dp"
+
         android:background="@drawable/genius_button"
+        android:stateListAnimator="@null"
         android:textAllCaps="false"
         android:textColor="#FFF"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="MissingConstraints"
-        android:stateListAnimator="@null"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="MissingConstraints" />
 
 
 

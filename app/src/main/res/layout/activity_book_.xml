@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
 
 
-    tools:context=".Book_Activity"
+    tools:context=".Wallpapers.Book_Activity"
     >
 
     <android.support.design.widget.AppBarLayout
@@ -26,12 +26,44 @@
             android:layout_height="match_parent"
             android:background="#000">
 
-            <include
-                layout="@layout/bottom_navigation_layout"/>
-
 
 
         </com.tmall.ultraviewpager.UltraViewPager>
+
+
+    <com.getbase.floatingactionbutton.FloatingActionsMenu
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:fab_addButtonColorNormal="#FFAB00"
+        app:fab_addButtonColorPressed="#051D2E"
+        app:fab_addButtonPlusIconColor="#FFF"
+        app:fab_labelStyle="@style/cutomFloat"
+        app:layout_anchor="@+id/ultraViewPager"
+        app:layout_anchorGravity="right|bottom">
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/actionBtn1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_colorNormal="#000"
+            app:fab_colorPressed="#FFF"
+            app:fab_icon="@drawable/ic_download"
+            app:fab_size="mini"
+            app:fab_title="Download" />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/actionBtn2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_colorNormal="#000"
+
+            app:fab_colorPressed="#FFF"
+            app:fab_icon="@drawable/ic_download"
+            app:fab_size="mini"
+            app:fab_title="Set As Wallpaper" />
+    </com.getbase.floatingactionbutton.FloatingActionsMenu>
+
+
 
 
 

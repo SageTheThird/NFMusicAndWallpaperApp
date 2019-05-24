@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#81000000"
+    android:background="@drawable/gradient"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/transparentBlack">
+        android:background="@color/transparentBlack2">
 
         <include
             layout="@layout/action_bar"/>

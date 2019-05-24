@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.homie.nf">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,9 +14,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".WallpaperMain"></activity>
-        <activity android:name=".Book_Activity"></activity>
+        android:theme="@style/AppTheme"
+        >
+        <activity android:name=".Wallpapers.WallpaperMain"></activity>
+        <activity android:name=".Wallpapers.Book_Activity"></activity>
         <activity
             android:name=".SplashScreen"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
@@ -25,9 +27,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".playlist_Activity" />
+        <activity android:name=".Songs.playlist_Activity" />
         <activity
-            android:name=".PlayerActivity"
+            android:name=".Songs.PlayerActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".MainActivity"
@@ -38,6 +40,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+
+
     </application>
 
 </manifest>

@@ -15,11 +15,7 @@ android:title="list"
         android:icon="@drawable/ic_search_black_24dp"
         android:id="@+id/tool_search"
         />
-    <item
-        android:title="tool_refresh"
-        android:icon="@drawable/ic_refresh_black_24dp"
-        android:id="@+id/tool_refresh"
-        />
+
 
 
 

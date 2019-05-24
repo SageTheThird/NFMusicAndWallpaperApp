@@ -9,7 +9,6 @@
 
     app:cardCornerRadius="30dp"
     app:cardUseCompatPadding="true"
-    android:background="#14000000"
     app:cardBackgroundColor="#14000000"
 
 
@@ -19,7 +18,7 @@
         android:layout_width="459dp"
         android:layout_height="68dp"
         android:orientation="vertical"
-        android:background="#14000000">
+       >
 
         <com.mikhaellopez.circularimageview.CircularImageView
             android:id="@+id/playlist_thumbnail_pic"

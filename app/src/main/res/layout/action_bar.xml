@@ -6,12 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="50dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/transparentBlack"
     app:title=" "
     app:layout_scrollFlags="scroll|enterAlways"
-
-
-
 
     >
 
@@ -21,10 +17,12 @@
 <Button
 
       android:layout_marginRight="10dp"
-        android:id="@+id/tool_back"
-        android:layout_width="26dp"
-        android:layout_height="26dp"
-        android:background="@drawable/ic_arrow_back_black_24dp"/>
+        android:id="@+id/tool_back_wallpaper"
+        android:layout_width="49dp"
+        android:layout_height="49dp"
+
+        android:background="@drawable/ic_arrow_back_black_24dp"
+    android:drawablePadding="20dp"/>
 
     <TextView
         android:paddingLeft="10dp"
@@ -33,19 +31,13 @@
         android:text="Wallpapers"
         android:textColor="#FFF"
         android:textSize="23sp"/>
-    <Button
-        android:id="@+id/tool_refresh"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="117dp"
-        android:background="@drawable/ic_refresh_black_24dp"
-        />
-    <Button
+
+    <!--<Button
         android:id="@+id/tool_list"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginLeft="10dp"
         android:background="@drawable/ic_list_black_24dp"
         />
-
+-->
 </android.support.v7.widget.Toolbar>
