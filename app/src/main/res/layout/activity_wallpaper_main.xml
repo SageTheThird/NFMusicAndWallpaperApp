@@ -1,31 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#111010"
+    android:background="@drawable/white_grey_border_recycler"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <android.support.design.widget.AppBarLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/transparentBlack2">
+        android:id="@+id/relativeLayout1">
 
         <include
-            layout="@layout/action_bar"/>
+            layout="@layout/snippet_top_wallpaperbar"/>
 
-    </android.support.design.widget.AppBarLayout>
+    </RelativeLayout>
 
 
-
-    <android.support.v7.widget.RecyclerView
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/recyclerView"
+        android:layout_below="@id/relativeLayout1">
 
-        >
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/recyclerView"
 
-    </android.support.v7.widget.RecyclerView>
-</android.support.design.widget.CoordinatorLayout>
+            >
+
+        </android.support.v7.widget.RecyclerView>
+
+    </RelativeLayout>
+
+
+
+</RelativeLayout>

@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.Toolbar
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
 
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="50dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#3E000000"
-    app:title=" "
-    app:layout_scrollFlags="scroll|enterAlways">
+    app:layout_scrollFlags="scroll|enterAlways"
+    app:title=" ">
 
-     <!--Above atttr make it hide on scroll -->
+    <!--Above atttr make it hide on scroll -->
 
-  <Button
+    <Button
 
-      android:layout_marginRight="10dp"
         android:id="@+id/tool_back_viewPager"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:background="@drawable/ic_arrow_back_black_24dp"/>
-
+        android:layout_marginRight="10dp"
+        android:background="@drawable/ic_arrow_back_black_24dp" />
 
 
 </android.support.v7.widget.Toolbar>

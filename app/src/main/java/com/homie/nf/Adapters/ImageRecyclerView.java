@@ -9,12 +9,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.homie.nf.Models.Wallpaper;
 import com.homie.nf.R;
+import com.homie.nf.Utils.Animation;
+import com.homie.nf.Utils.UniversalImageLoader;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
@@ -24,6 +27,7 @@ public class ImageRecyclerView extends FirestoreRecyclerAdapter<Wallpaper,ImageR
 
     private  onItemClickListener listener;
     Context context;
+    private int previousPosition;
 
 
     public ImageRecyclerView(@NonNull FirestoreRecyclerOptions<Wallpaper> options, Context context) {
@@ -38,31 +42,18 @@ public class ImageRecyclerView extends FirestoreRecyclerAdapter<Wallpaper,ImageR
 
 
         //holder.imageViewWall.setText(model.getDownloadUrl());
-        holder.cardView.setAnimation(AnimationUtils.loadAnimation(context,R.anim.fade_scale_animation));
+       // holder.cardView.setAnimation(AnimationUtils.loadAnimation(context,R.anim.fade_scale_animation));
+        if(position > previousPosition){
+            Animation.animate(holder,true);
+        }else {
+            Animation.animate(holder,false);
+        }
 
-        Picasso.with(context)
-                .load(model.getDownloadUrl())
-                .networkPolicy(NetworkPolicy.OFFLINE)
-                .resize(176, 298)
-                .placeholder(R.drawable.ic_search_black_24dp)
-                .into(holder.imageViewWall, new Callback() {
-                    @Override
-                    public void onSuccess() {
+        previousPosition=position;
 
-                    }
 
-                    @Override
-                    public void onError() {
-                        // Try again online if cache failed
-                        Picasso.with(context)
-                                .load(model.getDownloadUrl())
-                                .placeholder(R.drawable.ic_search_black_24dp)
-                                .error(R.drawable.common_google_signin_btn_icon_dark)
-                                .resize(176, 298)
+        UniversalImageLoader.setImage(model.getDownloadUrl(),holder.imageViewWall,holder.progressBar,"");
 
-                                .into(holder.imageViewWall);
-                    }
-                });
 
     }
 
@@ -78,14 +69,16 @@ public class ImageRecyclerView extends FirestoreRecyclerAdapter<Wallpaper,ImageR
 
     class ImageHolder extends RecyclerView.ViewHolder{
 
-        ImageView imageViewWall;
-        CardView cardView;
+         ImageView imageViewWall;
+         CardView cardView;
+         ProgressBar progressBar;
 
         public ImageHolder(@NonNull View itemView) {
 
             super(itemView);
             imageViewWall=itemView.findViewById(R.id.wallpaper_id);
             cardView=itemView.findViewById(R.id.cardview_id);
+            progressBar=itemView.findViewById(R.id.wall_progressBar);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

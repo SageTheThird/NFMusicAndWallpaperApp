@@ -7,47 +7,5 @@
     android:background="#FFF"
 
     android:src="@drawable/drawer_background"
-    android:scaleType="centerCrop"
-
-    >
-
-
-
-    <!--<com.mikhaellopez.circularimageview.CircularImageView
-
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginRight="20dp"
-        android:background="@drawable/hqdefault" />
-        -->
-<!--    <LinearLayout
-        android:layout_marginTop="65dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-
-        >
-        <TextView
-            android:layout_marginTop="15dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#000000"
-            android:text="Kurzgesagt_fo20"
-            android:textSize="13dp"
-            />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="www.inaNutshell.com"
-            android:textColor="#000000"
-            android:textSize="12dp" />
-
-
-
-    </LinearLayout>-->
-
-
+    android:scaleType="centerCrop">
 </ImageView>

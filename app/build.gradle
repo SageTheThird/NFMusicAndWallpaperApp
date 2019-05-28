@@ -45,6 +45,9 @@ dependencies {
     implementation 'com.akaita.android:circular-seek-bar:1.0'
     implementation 'com.squareup.picasso:picasso:2.5.2'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    //Universal Image Loader
+    implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
+
     implementation 'me.tankery.lib:circularSeekBar:1.1.7'
     implementation 'com.github.d-max:spots-dialog:1.1@aar'
 

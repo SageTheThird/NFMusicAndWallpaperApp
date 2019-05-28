@@ -2,24 +2,14 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-
+    android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/coordinatorLayout"
+    tools:context=".Wallpapers.Book_Activity">
 
-
-    tools:context=".Wallpapers.Book_Activity"
-    >
-
-    <android.support.design.widget.AppBarLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/transparentBlack">
-
-
-
-    </android.support.design.widget.AppBarLayout>
-
+        android:layout_height="match_parent">
 
         <android.support.v4.view.ViewPager
             android:id="@+id/ultraViewPager"
@@ -28,8 +18,12 @@
             android:background="#161414">
 
 
-
         </android.support.v4.view.ViewPager>
+
+
+
+    </RelativeLayout>
+
 
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu
@@ -46,7 +40,7 @@
             android:id="@+id/actionBtn1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:fab_colorNormal="#272020"
+            app:fab_colorNormal="#141111"
             app:fab_colorPressed="#FFF"
             app:fab_icon="@drawable/ic_download"
             app:fab_size="mini"
@@ -56,18 +50,13 @@
             android:id="@+id/actionBtn2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:fab_colorNormal="#272020"
+            app:fab_colorNormal="#141111"
 
             app:fab_colorPressed="#FFF"
             app:fab_icon="@drawable/ic_set"
             app:fab_size="mini"
             app:fab_title="Set As Wallpaper" />
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
-
-
-
-
-
 
 
 </android.support.design.widget.CoordinatorLayout>

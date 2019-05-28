@@ -3,7 +3,22 @@
     <string name="open">Open</string>
     <string name="close">Close</string>
 
-   <string name="lyrics">"Too many faces, too many faces, too many faces
+
+    <!--Db Collection Paths-->
+    <string name="collection_wallpapers">wallpapers</string>
+
+    <!--Fields-->
+    <string name="field_priority">priority</string>
+    <string name="field_downloadUrl">downloadUrl</string>
+
+    <!--Intent Extras-->
+    <string name="imagesUrl">imagesUrl</string>
+    <string name="position">position</string>
+    <string name="downloadUrl">downloadUrl</string>
+
+
+
+    <string name="lyrics">"Too many faces, too many faces, too many faces
 Yeah, what's your definition of success? (Ayy!)
 I don't trust the thoughts that come inside my head (woo!)
 I don't trust this thing that beats inside my chest

@@ -9,8 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import com.homie.nf.R;
+import com.homie.nf.Utils.UniversalImageLoader;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
@@ -55,6 +57,8 @@ public class UltraPagerAdapter extends PagerAdapter {
         View item_view = mInflater.inflate(R.layout.fullscreen_image, container, false);
 
         final ImageView imageView = item_view.findViewById(R.id.fullscreen_imageView);
+        //final ProgressBar progressBar = item_view.findViewById(R.id.wallpaper_progressBar);
+
 
 
         //mUrlPosition=position;
@@ -62,7 +66,8 @@ public class UltraPagerAdapter extends PagerAdapter {
         Log.d(TAG, "mUrlPosition: "+mUrlPosition);
 
 
-        Picasso
+        UniversalImageLoader.setImage(mImagesUrls.get(position),imageView,null,"");
+        /*Picasso
                 .with(context)
                 .load(mImagesUrls.get(position))
                 .fetch(new Callback() {
@@ -83,7 +88,7 @@ public class UltraPagerAdapter extends PagerAdapter {
                     public void onError() {
 
                     }
-                });
+                });*/
 
         container.addView(item_view);
 //        linearLayout.getLayoutParams().width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 180, container.getContext().getResources().getDisplayMetrics());

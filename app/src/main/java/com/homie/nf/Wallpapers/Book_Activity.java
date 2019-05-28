@@ -60,46 +60,35 @@ public class Book_Activity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setContentView(R.layout.activity_wallpaper);
 
-        setContentView(R.layout.activity_book_);
+        //methods
+        initWidgets();
+        getIncomingIntent();
+        adapterSetup();
+
+        //listeners
+        downloadBtn.setOnClickListener(downloadBtnClickListener);
+        setBtn.setOnClickListener( setWallClickListener);
+
+
+    }
+
+    private void initWidgets(){
         back_viewPager = findViewById(R.id.tool_back_viewPager);
         downloadBtn = findViewById(R.id.actionBtn1);
         setBtn = findViewById(R.id.actionBtn2);
         coordinatorLayout=findViewById(R.id.coordinatorLayout);
 
-
-
-        Intent intent = getIntent();
-        downloadUrl = intent.getStringExtra("downloadUrl");
-        imagesUrlLis = intent.getStringArrayListExtra("imagesUrl");
-        urlPosition = intent.getIntExtra("position", 5);
-
-        Log.d(TAG, "onCreate: Position : " + urlPosition);
-        for (int i = 0; i < imagesUrlLis.size(); i++) {
-            String url = imagesUrlLis.get(i);
-            Log.d(TAG, "imageUrlsArrayList: " + url);
-        }
-
-        adapterSetup();
-
-
-        downloadBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DownloadImage(downloadUrl);
-
-                //Toast.makeText(Book_Activity.this, "Downloading", Toast.LENGTH_LONG).show();
-            }
-        });
-        setBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showSnackbar("Setting Wallpaper");
-            }
-        });
-
     }
 
+    private void getIncomingIntent(){
+        Intent intent = getIntent();
+        downloadUrl = intent.getStringExtra(getString(R.string.downloadUrl));
+        imagesUrlLis = intent.getStringArrayListExtra(getString(R.string.imagesUrl));
+        urlPosition = intent.getIntExtra(getString(R.string.position), 5);
+
+    }
     public void showToast(String msg) {
         Toast.makeText(Book_Activity.this, msg, Toast.LENGTH_LONG).show();
 
@@ -128,30 +117,10 @@ public class Book_Activity extends AppCompatActivity {
     private void adapterSetup() {
 
         ViewPager ultraViewPager = findViewById(R.id.ultraViewPager);
-        ////ultraViewPager.setScrollMode(UltraViewPager.ScrollMode.VERTICAL);
-        //initialize UltraPagerAdapter，and add child view to UltraViewPager
         PagerAdapter adapter = new UltraPagerAdapter(false, imagesUrlLis, Book_Activity.this, urlPosition);
         ultraViewPager.setAdapter(adapter);
         ultraViewPager.setCurrentItem(urlPosition);
 
-
-        //initialize built-in indicator
-        ////ultraViewPager.initIndicator();
-        //set style of indicators
-        //// ultraViewPager.getIndicator()
-        //.setOrientation(UltraViewPager.Orientation.VERTICAL)
-        //.setFocusColor(Color.WHITE)
-        //.setNormalColor(R.color.IndicatorsNormal)
-        // .setRadius((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics()));
-        //set the alignment
-        ////ultraViewPager.getIndicator().setGravity(Gravity.CENTER_HORIZONTAL | Gravity.START);
-        //construct built-in indicator, and add it to  UltraViewPager
-        ////ultraViewPager.getIndicator().build();
-
-        //set an infinite loop
-        ////ultraViewPager.setInfiniteLoop(true);
-        //enable auto-scroll mode
-        //ultraViewPager.setAutoScroll(2500);
     }
 
     public static void showSnackbar(String msg){
@@ -162,6 +131,7 @@ public class Book_Activity extends AppCompatActivity {
     View.OnClickListener downloadBtnClickListener=new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            DownloadImage(downloadUrl);
 
         }
     };
@@ -169,6 +139,7 @@ public class Book_Activity extends AppCompatActivity {
     View.OnClickListener setWallClickListener=new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            showSnackbar("Setting Wallpaper");
 
         }
     };
