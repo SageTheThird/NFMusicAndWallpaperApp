@@ -7,7 +7,7 @@
     android:layout_height="299dp"
     android:layout_margin="2dp"
     android:clickable="true"
-    cardview:cardCornerRadius="2dp">
+    cardview:cardCornerRadius="6dp">
 
     <ImageView
 

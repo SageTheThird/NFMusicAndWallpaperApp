@@ -5,6 +5,7 @@
 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/coordinatorLayout"
 
 
     tools:context=".Wallpapers.Book_Activity"
@@ -20,15 +21,15 @@
     </android.support.design.widget.AppBarLayout>
 
 
-        <com.tmall.ultraviewpager.UltraViewPager
+        <android.support.v4.view.ViewPager
             android:id="@+id/ultraViewPager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#000">
+            android:background="#161414">
 
 
 
-        </com.tmall.ultraviewpager.UltraViewPager>
+        </android.support.v4.view.ViewPager>
 
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu
@@ -45,7 +46,7 @@
             android:id="@+id/actionBtn1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:fab_colorNormal="#000"
+            app:fab_colorNormal="#272020"
             app:fab_colorPressed="#FFF"
             app:fab_icon="@drawable/ic_download"
             app:fab_size="mini"
@@ -55,10 +56,10 @@
             android:id="@+id/actionBtn2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:fab_colorNormal="#000"
+            app:fab_colorNormal="#272020"
 
             app:fab_colorPressed="#FFF"
-            app:fab_icon="@drawable/ic_download"
+            app:fab_icon="@drawable/ic_set"
             app:fab_size="mini"
             app:fab_title="Set As Wallpaper" />
     </com.getbase.floatingactionbutton.FloatingActionsMenu>

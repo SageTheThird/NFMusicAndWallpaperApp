@@ -6,20 +6,20 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -27,9 +27,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
-import com.homie.nf.R;
 import com.homie.nf.Adapters.UltraPagerAdapter;
-import com.tmall.ultraviewpager.UltraViewPager;
+import com.homie.nf.R;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,23 +38,22 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
+import static com.homie.nf.Wallpapers.Book_Activity.showSnackbar;
+
 
 public class Book_Activity extends AppCompatActivity {
     private static final String TAG = "Book_Activity";
 
-   // android:centerColor="#203A43"
-
-
-
+    // android:centerColor="#203A43"
+    ArrayList<String> imagesUrlLis = new ArrayList<>();
     private BottomNavigationView bottomNavigationView;
     private Button back_viewPager;
     private String downloadUrl;
-
     private ImageView img;
-    private FloatingActionButton downloadBtn,setBtn;
-    ArrayList<String> imagesUrlLis=new ArrayList<>();
-
+    private FloatingActionButton downloadBtn, setBtn;
     private int urlPosition;
+
+    private static CoordinatorLayout coordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,16 +63,22 @@ public class Book_Activity extends AppCompatActivity {
 
         setContentView(R.layout.activity_book_);
         back_viewPager = findViewById(R.id.tool_back_viewPager);
-        downloadBtn= (FloatingActionButton) findViewById(R.id.actionBtn1);
-        setBtn=(FloatingActionButton) findViewById(R.id.actionBtn2);
+        downloadBtn = findViewById(R.id.actionBtn1);
+        setBtn = findViewById(R.id.actionBtn2);
+        coordinatorLayout=findViewById(R.id.coordinatorLayout);
+
 
 
         Intent intent = getIntent();
         downloadUrl = intent.getStringExtra("downloadUrl");
-        imagesUrlLis=intent.getStringArrayListExtra("imagesUrl");
-        urlPosition=  intent.getIntExtra("position",1);
+        imagesUrlLis = intent.getStringArrayListExtra("imagesUrl");
+        urlPosition = intent.getIntExtra("position", 5);
 
-        Log.d(TAG, "onCreate: Position : "+urlPosition);
+        Log.d(TAG, "onCreate: Position : " + urlPosition);
+        for (int i = 0; i < imagesUrlLis.size(); i++) {
+            String url = imagesUrlLis.get(i);
+            Log.d(TAG, "imageUrlsArrayList: " + url);
+        }
 
         adapterSetup();
 
@@ -84,13 +88,13 @@ public class Book_Activity extends AppCompatActivity {
             public void onClick(View v) {
                 DownloadImage(downloadUrl);
 
-                Toast.makeText(Book_Activity.this, "Downloading", Toast.LENGTH_LONG).show();
+                //Toast.makeText(Book_Activity.this, "Downloading", Toast.LENGTH_LONG).show();
             }
         });
         setBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(Book_Activity.this, "Setting Wallpaper", Toast.LENGTH_LONG).show();
+                showSnackbar("Setting Wallpaper");
             }
         });
 
@@ -102,18 +106,16 @@ public class Book_Activity extends AppCompatActivity {
     }
 
 
-
-
     void DownloadImage(String ImageUrl) {
 
         if (ContextCompat.checkSelfPermission(Book_Activity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(Book_Activity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(Book_Activity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 123);
             ActivityCompat.requestPermissions(Book_Activity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 123);
-            showToast("Need Permissions");
+            showSnackbar("Need Permissions");
         } else {
 
-            showToast("Downloading Image..");
+            showSnackbar("Downloading Image..");
             //Asynctask to create a thread to downlaod image in the background
 
             DownloadsImage downloadsImage = new DownloadsImage(Book_Activity.this);
@@ -125,33 +127,51 @@ public class Book_Activity extends AppCompatActivity {
 
     private void adapterSetup() {
 
-        UltraViewPager ultraViewPager =findViewById(R.id.ultraViewPager);
-        ultraViewPager.setScrollMode(UltraViewPager.ScrollMode.VERTICAL);
+        ViewPager ultraViewPager = findViewById(R.id.ultraViewPager);
+        ////ultraViewPager.setScrollMode(UltraViewPager.ScrollMode.VERTICAL);
         //initialize UltraPagerAdapter，and add child view to UltraViewPager
-        PagerAdapter adapter = new UltraPagerAdapter(false, imagesUrlLis, Book_Activity.this,urlPosition);
+        PagerAdapter adapter = new UltraPagerAdapter(false, imagesUrlLis, Book_Activity.this, urlPosition);
         ultraViewPager.setAdapter(adapter);
         ultraViewPager.setCurrentItem(urlPosition);
 
 
         //initialize built-in indicator
-        ultraViewPager.initIndicator();
+        ////ultraViewPager.initIndicator();
         //set style of indicators
-        ultraViewPager.getIndicator()
-                .setOrientation(UltraViewPager.Orientation.VERTICAL)
-                .setFocusColor(Color.WHITE)
-                .setNormalColor(R.color.IndicatorsNormal)
-                .setRadius((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics()));
+        //// ultraViewPager.getIndicator()
+        //.setOrientation(UltraViewPager.Orientation.VERTICAL)
+        //.setFocusColor(Color.WHITE)
+        //.setNormalColor(R.color.IndicatorsNormal)
+        // .setRadius((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics()));
         //set the alignment
-        ultraViewPager.getIndicator().setGravity(Gravity.CENTER_HORIZONTAL | Gravity.START);
+        ////ultraViewPager.getIndicator().setGravity(Gravity.CENTER_HORIZONTAL | Gravity.START);
         //construct built-in indicator, and add it to  UltraViewPager
-        ultraViewPager.getIndicator().build();
+        ////ultraViewPager.getIndicator().build();
 
         //set an infinite loop
-        ultraViewPager.setInfiniteLoop(true);
+        ////ultraViewPager.setInfiniteLoop(true);
         //enable auto-scroll mode
         //ultraViewPager.setAutoScroll(2500);
     }
 
+    public static void showSnackbar(String msg){
+        Snackbar snackbar=Snackbar.make(coordinatorLayout,msg,Snackbar.LENGTH_SHORT);
+        snackbar.show();
+    }
+
+    View.OnClickListener downloadBtnClickListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+        }
+    };
+
+    View.OnClickListener setWallClickListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+        }
+    };
 }
 
 class DownloadsImage extends AsyncTask<String, Void, Void> {
@@ -213,11 +233,14 @@ class DownloadsImage extends AsyncTask<String, Void, Void> {
     protected void onPostExecute(Void imageFile) {
         super.onPostExecute(imageFile);
 
+       // Toast.makeText(context, "Image Saved to Gallery ..", Toast.LENGTH_LONG).show();
+        showSnackbar(" Image Saved to Gallery");
 
-        Toast.makeText(context, "Image Saved to Gallery ..", Toast.LENGTH_LONG).show();
 
 
     }
+
+
 }
 
 

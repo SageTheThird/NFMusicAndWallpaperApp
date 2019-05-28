@@ -3,6 +3,7 @@ package com.homie.nf.Adapters;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +18,9 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 public class UltraPagerAdapter extends PagerAdapter {
+    private static final String TAG = "UltraPagerAdapter";
 
-    Context context;
+    private Context context;
     private boolean isMultiScr;
     private ArrayList<String> mImagesUrls;
     private int mUrlPosition;
@@ -49,21 +51,26 @@ public class UltraPagerAdapter extends PagerAdapter {
     public Object instantiateItem(final ViewGroup container, final int position) {
 
 
-        LayoutInflater mInflater = LayoutInflater.from(container.getContext());
+        LayoutInflater mInflater = LayoutInflater.from(context);
         View item_view = mInflater.inflate(R.layout.fullscreen_image, container, false);
 
         final ImageView imageView = item_view.findViewById(R.id.fullscreen_imageView);
 
 
+        //mUrlPosition=position;
+        Log.d(TAG, "AdapterPosition: "+position);
+        Log.d(TAG, "mUrlPosition: "+mUrlPosition);
+
+
         Picasso
-                .with(container.getContext())
+                .with(context)
                 .load(mImagesUrls.get(position))
                 .fetch(new Callback() {
 
                     @Override
                     public void onSuccess() {
                         Picasso
-                                .with(container.getContext())
+                                .with(context)
                                 .load(mImagesUrls.get(position))
                                 .networkPolicy(NetworkPolicy.OFFLINE)
                                 .placeholder(R.drawable.ic_change_history_black_24dp)
