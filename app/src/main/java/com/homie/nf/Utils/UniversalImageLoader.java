@@ -2,6 +2,7 @@ package com.homie.nf.Utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -85,5 +86,7 @@ public class UniversalImageLoader {
         });
 
     }
+
+
 
 }

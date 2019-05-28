@@ -17,6 +17,7 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -36,6 +37,8 @@ import com.google.firebase.storage.StorageReference;
 import com.homie.nf.Adapters.SongRecyclerView;
 import com.homie.nf.Models.RowItem;
 import com.homie.nf.R;
+import com.homie.nf.Utils.UniversalImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -65,6 +68,10 @@ public class playlist_Activity extends AppCompatActivity {
     //static Progress progress;
     private ArrayList<RowItem> arrayList;
     private BroadcastReceiver onDownloadComplete;
+    private Context mContext=playlist_Activity.this;
+    private String directory;
+
+    private ArrayList<String> filesNameList=new ArrayList<>();
 
 
     @Override
@@ -73,20 +80,71 @@ public class playlist_Activity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_playlist_);
 
-
-
-
         song_list = new ArrayList<>();
 
         firebaseFirestore = FirebaseFirestore.getInstance();
         collectionReference = firebaseFirestore.collection("songs");
+        directorySetup();
 
 
-        picassoImageLoading();
+        //------------------------------------------TEST---------------------------
+        CollectionReference wallCollection=firebaseFirestore.collection("songs");
+        wallCollection.orderBy("id",Query.Direction.DESCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
 
-        final String directory = Environment.getExternalStorageDirectory().getAbsolutePath() +
+                int index=0;
+                for (DocumentSnapshot ds:queryDocumentSnapshots){
+                    String name=ds.getString("song_name");
+
+                    filesNameList.add(index,name);
+                    index++;
+                }
+
+                int indexDif=0;
+                for(String indivUrl:filesNameList){
+
+                    Log.d(TAG, "onEvent: Index : "+indexDif + " "  +indivUrl);
+                    indexDif++;
+
+                }
+            }
+
+        });
+
+        //String path = directory;
+        Log.d("Folder Files", "Path: " + directory);
+        File directoryFolder = new File(directory);
+        File[] files = directoryFolder.listFiles();
+        Log.d("Folder Files", "Size: "+ files.length);
+        for (int i = 0; i < files.length; i++)
+        {
+            Log.d("Files", "FileName:" + files[i].getName());
+        }
+
+        //-------------------------------------------TEST--------------------------------
+        //methods
+        initImageLoader();
+        layoutImageLoading();
+
+        internetConnectivity();
+        setupRecyclerView();
+
+        //listeners
+        songRecyclerViewAdapter.setOnItemClickListener(SongClickListener);
+
+
+
+
+    }
+
+
+
+
+    private void directorySetup(){
+        //directory
+        directory = Environment.getExternalStorageDirectory().getAbsolutePath() +
                 "/Android/data/" + this.getPackageName() + "/files/Documents";
-
 
         File direct = new File(directory);
 
@@ -95,16 +153,19 @@ public class playlist_Activity extends AppCompatActivity {
             myDirectory.mkdir();
         }
 
-        setupRecyclerView();
+    }
+    private void internetConnectivity(){
         //Internet Connectivity
         connectivityManager = (ConnectivityManager)
                 playlist_Activity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
         networkInfo = connectivityManager.getActiveNetworkInfo();
 
+    }
 
-        songRecyclerViewAdapter.setOnItemClickListener(new SongRecyclerView.onItemClickListener() {
-            @Override
-            public void onItemClick(DocumentSnapshot documentSnapshot, int position) {
+    SongRecyclerView.onItemClickListener SongClickListener=new SongRecyclerView.onItemClickListener() {
+        @Override
+        public void onItemClick(DocumentSnapshot documentSnapshot, int position) {
+
 
                /* RowItem rowItem=documentSnapshot.toObject(RowItem.class);
                 String id=documentSnapshot.getId();
@@ -112,47 +173,44 @@ public class playlist_Activity extends AppCompatActivity {
                 String downloadUrl=documentSnapshot.getString("downloadUrl");*/
 
 
-                String genius_url = documentSnapshot.getString("genius_url");
-                String song_name = documentSnapshot.getString("song_name");
-                String songFull = song_name + ".mp3";
+            String genius_url = documentSnapshot.getString("genius_url");
+            String song_name = documentSnapshot.getString("song_name");
+            String songFull = song_name + ".mp3";
 
-                String lyricsFetch = documentSnapshot.getString("song_name");
-                String lyrics_file_name = lyricsFetch.replace(".mp3", ".txt");
+            String lyricsFetch = documentSnapshot.getString("song_name");
+            String lyrics_file_name = lyricsFetch.replace(".mp3", ".txt");
 
-                String path101 = Environment.getExternalStorageDirectory().getAbsolutePath()
-                        + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/" + song_name;
-
-
-                if (new File(path101).exists()) {
-
-                    //Do something
+            String path101 = Environment.getExternalStorageDirectory().getAbsolutePath()
+                    + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/" + song_name;
 
 
-                    showToast("Playing..");
-                    startActivity(new Intent(playlist_Activity.this, PlayerActivity.class)
-                            .putExtra("songname", song_name)
-                            .putExtra("GENIUSFILENAME", genius_url)
-                            .putExtra("LYRICSFILE", lyrics_file_name)
-                    );
+            if (new File(path101).exists()) {
+
+                //Do something
 
 
+                showToast("Playing..");
+                startActivity(new Intent(playlist_Activity.this, PlayerActivity.class)
+                        .putExtra("songname", song_name)
+                        .putExtra("GENIUSFILENAME", genius_url)
+                        .putExtra("LYRICSFILE", lyrics_file_name)
+                );
+
+
+            } else {
+                if ((networkInfo == null || !networkInfo.isConnected())) {
+                    showToast("Please Check Your Internet Connection!");
+                    return;
                 } else {
-                    if ((networkInfo == null || !networkInfo.isConnected())) {
-                        showToast("Please Check Your Internet Connection!");
-                        return;
-                    } else {
 
-                        //dialog for when downloading
-                        dialog = new SpotsDialog.Builder()
-                                .setContext(playlist_Activity.this)
-                                .setTheme(R.style.Custom)
-                                .setCancelable(false)
-                                .build();
-                        //download file
-                        download(song_name, directory);
-
-
-                    }
+                    //dialog for when downloading
+                    dialog = new SpotsDialog.Builder()
+                            .setContext(playlist_Activity.this)
+                            .setTheme(R.style.Custom)
+                            .setCancelable(false)
+                            .build();
+                    //download file
+                    download(song_name, directory);
 
 
                 }
@@ -161,21 +219,33 @@ public class playlist_Activity extends AppCompatActivity {
             }
 
 
-                /*startActivity(new Intent(playlist_Activity.this,PlayerActivity.class)
-                        .putExtra("downloadUrl",downloadUrl));*/
-
-
-        });
-
-
+        }
+    };
+    private void initImageLoader(){
+        UniversalImageLoader universalImageLoader = new UniversalImageLoader(mContext);
+        ImageLoader.getInstance().init(universalImageLoader.getConfig());
     }
-
-    private void picassoImageLoading() {
+    private void layoutImageLoading() {
         playlist_background = findViewById(R.id.playlist_background);
         imageView_sideButton = findViewById(R.id.playlist_sideButton);
         imageView_title = findViewById(R.id.playlistimageView_title);
 
-        Picasso
+        //Playlist Background Image
+        String imageUri1 = "drawable://" + R.drawable.playlist_blurred;
+        UniversalImageLoader.setImage(imageUri1,playlist_background,null,"");
+
+        //Side Button ImageView
+        String imageUri2 = "drawable://" + R.drawable.sidebutton;
+        UniversalImageLoader.setImage(imageUri2,imageView_sideButton,null,"");
+
+        //title ImageView
+        //Side Button ImageView
+        String imageUri3 = "drawable://" + R.drawable.title;
+        UniversalImageLoader.setImage(imageUri3,imageView_title,null,"");
+
+
+
+        /*Picasso
                 .with(this)
                 .load(R.drawable.playlist_blurred)
                 .resize(700, 700)
@@ -195,7 +265,7 @@ public class playlist_Activity extends AppCompatActivity {
 
                 .placeholder(R.drawable.ic_search_black_24dp)
                 .into(imageView_sideButton);
-
+*/
     }
 
     private void search(String s) {
