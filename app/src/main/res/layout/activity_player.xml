@@ -8,6 +8,20 @@
     tools:context="com.homie.nf.Songs.PlayerActivity">
 
 
+    <Button
+        android:id="@+id/nextBtn"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="128dp"
+        android:background="@color/colorPrimaryDark"
+        android:text="Next"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/geniusbutton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.426"
+        app:layout_constraintStart_toEndOf="@+id/pause" />
     <TextView
         android:id="@+id/songtextView"
         android:layout_width="match_parent"

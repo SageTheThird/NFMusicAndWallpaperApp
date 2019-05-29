@@ -6,15 +6,29 @@
 
     <!--Db Collection Paths-->
     <string name="collection_wallpapers">wallpapers</string>
+    <string name="storage_song_db">songs</string>
+    <string name="store_song_db">songs</string>
 
     <!--Fields-->
     <string name="field_priority">priority</string>
     <string name="field_downloadUrl">downloadUrl</string>
+    <string name="field_song_name">song_name</string>
+    <string name="field_genius_url">genius_url</string>
+    <string name="field_id">id</string>
 
     <!--Intent Extras-->
     <string name="imagesUrl">imagesUrl</string>
     <string name="position">position</string>
     <string name="downloadUrl">downloadUrl</string>
+    <string name="LYRICSFILE">LYRICSFILE</string>
+    <string name="GENIUSFILENAME">GENIUSFILENAME</string>
+    <string name="songname">songname</string>
+
+    <!--Random String-->
+    <string name="drawable_universal">drawable://</string>
+    <string name="mp3_extenstion">.mp3</string>
+    <string name="txt_extenstion">.txt</string>
+
 
 
 

@@ -39,7 +39,6 @@ import com.homie.nf.Models.RowItem;
 import com.homie.nf.R;
 import com.homie.nf.Utils.UniversalImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -71,6 +70,7 @@ public class playlist_Activity extends AppCompatActivity {
     private Context mContext=playlist_Activity.this;
     private String directory;
 
+    private ArrayList<String> serverNameList =new ArrayList<>();
     private ArrayList<String> filesNameList=new ArrayList<>();
 
 
@@ -83,26 +83,29 @@ public class playlist_Activity extends AppCompatActivity {
         song_list = new ArrayList<>();
 
         firebaseFirestore = FirebaseFirestore.getInstance();
-        collectionReference = firebaseFirestore.collection("songs");
+        collectionReference = firebaseFirestore.collection(getString(R.string.store_song_db));
         directorySetup();
 
 
         //------------------------------------------TEST---------------------------
-        CollectionReference wallCollection=firebaseFirestore.collection("songs");
+
+        //getting song names from server and adding to serverNameList
+        // arraylist along with index and displaying in logs
+        CollectionReference wallCollection=firebaseFirestore.collection(getString(R.string.storage_song_db));
         wallCollection.orderBy("id",Query.Direction.DESCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
 
                 int index=0;
                 for (DocumentSnapshot ds:queryDocumentSnapshots){
-                    String name=ds.getString("song_name");
+                    String name=ds.getString(getString(R.string.field_song_name));
 
-                    filesNameList.add(index,name);
+                    serverNameList.add(index,name);
                     index++;
                 }
 
                 int indexDif=0;
-                for(String indivUrl:filesNameList){
+                for(String indivUrl: serverNameList){
 
                     Log.d(TAG, "onEvent: Index : "+indexDif + " "  +indivUrl);
                     indexDif++;
@@ -112,6 +115,10 @@ public class playlist_Activity extends AppCompatActivity {
 
         });
 
+        //getting song names from folder of songs and adding to filesNameList arraylist
+
+        // arraylist along with index and displaying in logs
+        int filesIndex=0;
         //String path = directory;
         Log.d("Folder Files", "Path: " + directory);
         File directoryFolder = new File(directory);
@@ -120,6 +127,14 @@ public class playlist_Activity extends AppCompatActivity {
         for (int i = 0; i < files.length; i++)
         {
             Log.d("Files", "FileName:" + files[i].getName());
+            filesNameList.add(filesIndex,files[i].getName());
+            filesIndex++;
+
+        }
+        int displayIndex=0;
+        for(String file:filesNameList){
+            Log.d(TAG, "files from folder: " +displayIndex+" "+file );
+            displayIndex++;
         }
 
         //-------------------------------------------TEST--------------------------------
@@ -166,59 +181,47 @@ public class playlist_Activity extends AppCompatActivity {
         @Override
         public void onItemClick(DocumentSnapshot documentSnapshot, int position) {
 
+            String genius_url = documentSnapshot.getString(getString(R.string.field_genius_url));
+            String song_name = documentSnapshot.getString(getString(R.string.field_song_name));
+            String songFull = song_name + getString(R.string.mp3_extenstion);
 
-               /* RowItem rowItem=documentSnapshot.toObject(RowItem.class);
-                String id=documentSnapshot.getId();
-                String path=documentSnapshot.getReference().getPath();
-                String downloadUrl=documentSnapshot.getString("downloadUrl");*/
+            String lyricsFetchfromSongName = documentSnapshot.getString(getString(R.string.field_song_name));
+            String lyrics_file_name = lyricsFetchfromSongName
+                    .replace(getString(R.string.mp3_extenstion), getString(R.string.txt_extenstion));
 
+            //if file is there in the fileNameList i-e present in the folder it will play it
+               if(filesNameList.contains(documentSnapshot.getString(getString(R.string.field_song_name)))){
+                   Log.d(TAG, "onItemClick: song found in the arrayList/directory");
+                   showToast("Playing..");
 
-            String genius_url = documentSnapshot.getString("genius_url");
-            String song_name = documentSnapshot.getString("song_name");
-            String songFull = song_name + ".mp3";
-
-            String lyricsFetch = documentSnapshot.getString("song_name");
-            String lyrics_file_name = lyricsFetch.replace(".mp3", ".txt");
-
-            String path101 = Environment.getExternalStorageDirectory().getAbsolutePath()
-                    + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/" + song_name;
-
-
-            if (new File(path101).exists()) {
-
-                //Do something
-
-
-                showToast("Playing..");
-                startActivity(new Intent(playlist_Activity.this, PlayerActivity.class)
-                        .putExtra("songname", song_name)
-                        .putExtra("GENIUSFILENAME", genius_url)
-                        .putExtra("LYRICSFILE", lyrics_file_name)
-                );
+                   startActivity(new Intent(playlist_Activity.this, PlayerActivity.class)
+                           .putExtra("position",position)
+                           .putStringArrayListExtra("songslist",filesNameList)
+                           .putExtra(getString(R.string.songname), song_name)
+                           .putExtra(getString(R.string.GENIUSFILENAME), genius_url)
+                           .putExtra(getString(R.string.LYRICSFILE), lyrics_file_name)
+                   );
 
 
-            } else {
-                if ((networkInfo == null || !networkInfo.isConnected())) {
-                    showToast("Please Check Your Internet Connection!");
-                    return;
-                } else {
+               }
+               //if not download it
+               else {
+                   Log.d(TAG, "onItemClick: song not found");
+                   if ((networkInfo == null || !networkInfo.isConnected())) {
+                       showToast("Please Check Your Internet Connection!");
+                       return;
+                   } else {
 
-                    //dialog for when downloading
-                    dialog = new SpotsDialog.Builder()
-                            .setContext(playlist_Activity.this)
-                            .setTheme(R.style.Custom)
-                            .setCancelable(false)
-                            .build();
-                    //download file
-                    download(song_name, directory);
-
-
-                }
-
-
-            }
-
-
+                       //dialog for when downloading
+                       dialog = new SpotsDialog.Builder()
+                               .setContext(playlist_Activity.this)
+                               .setTheme(R.style.Custom)
+                               .setCancelable(false)
+                               .build();
+                       //download file
+                       download(song_name, directory);
+                   }
+               }
         }
     };
     private void initImageLoader(){
@@ -231,41 +234,18 @@ public class playlist_Activity extends AppCompatActivity {
         imageView_title = findViewById(R.id.playlistimageView_title);
 
         //Playlist Background Image
-        String imageUri1 = "drawable://" + R.drawable.playlist_blurred;
+        String imageUri1 = getString(R.string.drawable_universal) + R.drawable.playlist_blurred;
         UniversalImageLoader.setImage(imageUri1,playlist_background,null,"");
 
         //Side Button ImageView
-        String imageUri2 = "drawable://" + R.drawable.sidebutton;
+        String imageUri2 = getString(R.string.drawable_universal) + R.drawable.sidebutton;
         UniversalImageLoader.setImage(imageUri2,imageView_sideButton,null,"");
 
         //title ImageView
         //Side Button ImageView
-        String imageUri3 = "drawable://" + R.drawable.title;
+        String imageUri3 = getString(R.string.drawable_universal) + R.drawable.title;
         UniversalImageLoader.setImage(imageUri3,imageView_title,null,"");
 
-
-
-        /*Picasso
-                .with(this)
-                .load(R.drawable.playlist_blurred)
-                .resize(700, 700)
-                .into(playlist_background);
-
-        Picasso
-                .with(this)
-                .load(R.drawable.title)
-                // .resize(700,700)
-
-                .placeholder(R.drawable.back_arrow)
-                .into(imageView_title);
-        Picasso
-                .with(this)
-                .load(R.drawable.sidebutton)
-                // .resize(700,700)
-
-                .placeholder(R.drawable.ic_search_black_24dp)
-                .into(imageView_sideButton);
-*/
     }
 
     private void search(String s) {
@@ -300,7 +280,7 @@ public class playlist_Activity extends AppCompatActivity {
 
     public void download(final String fileNameInto, final String downloadDirectory) {
 
-        storageReference = firebaseStorage.getInstance().getReference("songs");
+        storageReference = firebaseStorage.getInstance().getReference(getString(R.string.storage_song_db));
         storageReference = storageReference.child(fileNameInto);
         storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
@@ -365,7 +345,7 @@ public class playlist_Activity extends AppCompatActivity {
 
 
     public void setupRecyclerView() {
-        Query query = collectionReference.orderBy("id", Query.Direction.DESCENDING);
+        Query query = collectionReference.orderBy(getString(R.string.field_id), Query.Direction.DESCENDING);
 
         FirestoreRecyclerOptions<RowItem> firebaseRecyclerOptions = new FirestoreRecyclerOptions.Builder<RowItem>()
                 .setQuery(query, RowItem.class)

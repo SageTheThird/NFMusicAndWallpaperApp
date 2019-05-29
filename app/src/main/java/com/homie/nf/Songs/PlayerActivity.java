@@ -25,11 +25,13 @@ import me.tankery.lib.circularseekbar.CircularSeekBar;
 
 
 public class PlayerActivity extends AppCompatActivity implements genius_fragment.OnFragmentInteractionListener, lyrics_frag.OnFragmentInteractionListener {
+    private static final String TAG = "PlayerActivity";
+
     static MediaPlayer mediaPlayer;
 
     CircularSeekBar seekBar;
     Button btn_pause, back_arrow, genius_btn, lyrics_button,
-            queue_btn;
+            queue_btn,nextBtn;
     TextView songnameView;
 
     String lyrics_file="", genius_file="", fileName101="";
@@ -40,6 +42,9 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
     ArrayList<String> song_list;
     private FrameLayout frameLayout;
     private Handler myHandler = new Handler();
+    //for song list
+    private int positonAdapter;
+    private ArrayList<String> songs_list=new ArrayList<>();
 
 
     @Override
@@ -48,7 +53,62 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_player);
 
-        song_list     =    new  ArrayList<>();
+        song_list = new ArrayList<>();
+
+        initWidgets();
+        getIncomingIntent();
+
+        if (mediaPlayer != null ) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+        }
+
+        playerSetup();
+
+        Thread thread = new runThread();
+        thread.start();
+
+
+        //listeners
+        genius_btn.setOnClickListener(GeniusClickListener);
+        lyrics_button.setOnClickListener(LyricsClickListener);
+        seekBar.setOnSeekBarChangeListener(SeekBarChangeListener);
+        btn_pause.setOnClickListener(PauseClickListener);
+        back_arrow.setOnClickListener(BackClickListener);
+        nextBtn.setOnClickListener(NextClickListener);
+
+
+    }
+    View.OnClickListener NextClickListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+           /* Log.d(TAG, "onClick: Next");
+            mediaPlayer.stop();
+            uri = Uri.parse(link[position + 1]);
+            mediaPlayer.setDataSource(getApplicationContext(), uri);
+            mediaPlayer.prepare();
+            mediaPlayer.start();*/
+        }
+    };
+
+    private void getIncomingIntent(){
+        intent        =    getIntent();
+
+        lyrics_file   =    intent.getStringExtra(getString(R.string.LYRICSFILE));
+        genius_file   =    intent.getStringExtra(getString(R.string.GENIUSFILENAME));
+        fileName101   =    intent.getStringExtra(getString(R.string.songname));
+        positonAdapter   =    intent.getIntExtra("position",0);
+        song_list=    intent.getStringArrayListExtra("songslist");
+
+        //songTextView setup
+        String songNameOnly=fileName101.replace(".mp3","");
+        songnameView.setText(songNameOnly);
+
+    }
+
+
+    private void initWidgets(){
         frameLayout   =    findViewById(R.id.frameLayout);
         btn_pause     =    findViewById(R.id.pause);
         songnameView  =    findViewById(R.id.songtextView);
@@ -58,95 +118,7 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         lyrics_button =    findViewById(R.id.lyrics_button);
         linearLayout  =    findViewById(R.id.linearLayout);
         queue_btn     =    findViewById(R.id.queue_button);
-
-        intent        =    getIntent();
-
-        lyrics_file   =    intent.getStringExtra("LYRICSFILE");
-        genius_file   =    intent.getStringExtra("GENIUSFILENAME");
-        fileName101   =    intent.getStringExtra("songname");
-        final String songPath    =    Environment.getExternalStorageDirectory().getAbsolutePath()
-                           + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/"
-                           + fileName101;
-
-
-        String songNameOnly=fileName101.replace(".mp3","");
-        songnameView.setText(songNameOnly);
-        if (mediaPlayer != null ) {
-            mediaPlayer.stop();
-            mediaPlayer.release();
-        }
-        playerSetup(songPath);
-
-        Thread thread = new runThread();
-        thread.start();
-
-
-        genius_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openGeniusFragment(genius_file);
-            }
-        });
-
-
-        lyrics_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openLyricsFragment(lyrics_file);
-            }
-        });
-
-
-        seekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(CircularSeekBar circularSeekBar, float progress, boolean fromUser) {
-
-                int h = Math.round(progress);
-                //In the above line we are converting the float value into int because
-                // media player required int value and seekbar library gives progress in float
-                if (mediaPlayer != null && fromUser) {
-                    mediaPlayer.seekTo(h);
-                }
-            }
-
-            @Override
-            public void onStopTrackingTouch(CircularSeekBar seekBar) {
-                mediaPlayer.seekTo((int) seekBar.getProgress());
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(CircularSeekBar seekBar) {
-
-            }
-
-        });
-
-
-        btn_pause.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //seekBar.setMax(totalLength);
-                seekBar.setMax(mediaPlayer.getDuration());
-
-                if (mediaPlayer.isPlaying()) {
-
-                    btn_pause.setBackgroundResource(R.drawable.play_button);
-                    mediaPlayer.pause();
-                } else if (!mediaPlayer.isPlaying()) {
-                    btn_pause.setBackgroundResource(R.drawable.pause_button);
-                    mediaPlayer.start();
-                }
-            }
-        });
-
-
-        back_arrow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(PlayerActivity.this, playlist_Activity.class));
-            }
-        });
+        nextBtn     =    findViewById(R.id.nextBtn);
 
 
     }
@@ -178,7 +150,13 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         onBackPressed();
     }
 
-    public void playerSetup(final String song) {
+    public void playerSetup() {
+        String songName=song_list.get(positonAdapter);
+
+        String folederPath= Environment.getExternalStorageDirectory().getAbsolutePath()
+                + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/";
+
+        final String song_full=folederPath+songName;
         if (btn_pause.getBackground().equals(R.drawable.pause_button)) {
             mediaPlayer.stop();
             mediaPlayer.reset();
@@ -193,7 +171,7 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
                     try {
 
                         mediaPlayer = new MediaPlayer();
-                        mediaPlayer.setDataSource(song);
+                        mediaPlayer.setDataSource(song_full);
                         mediaPlayer.prepareAsync();
                         mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                             @Override
@@ -234,6 +212,7 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
     }
 
+
     public class runThread extends Thread {
 
 
@@ -261,5 +240,71 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         }
 
     }
+
+      ////------------------------------LISTENERS---------------------------------------------////
+
+    View.OnClickListener GeniusClickListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            openGeniusFragment(genius_file);
+
+        }
+    };
+    View.OnClickListener LyricsClickListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            openLyricsFragment(lyrics_file);
+
+        }
+    };
+    View.OnClickListener BackClickListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            startActivity(new Intent(PlayerActivity.this, playlist_Activity.class));
+
+
+        }
+    };
+    View.OnClickListener PauseClickListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            //seekBar.setMax(totalLength);
+            seekBar.setMax(mediaPlayer.getDuration());
+
+            if (mediaPlayer.isPlaying()) {
+
+                btn_pause.setBackgroundResource(R.drawable.play_button);
+                mediaPlayer.pause();
+            } else if (!mediaPlayer.isPlaying()) {
+                btn_pause.setBackgroundResource(R.drawable.pause_button);
+                mediaPlayer.start();
+            }
+
+        }
+    };
+    CircularSeekBar.OnCircularSeekBarChangeListener SeekBarChangeListener=new CircularSeekBar.OnCircularSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(CircularSeekBar circularSeekBar, float progress, boolean fromUser) {
+            int h = Math.round(progress);
+            //In the above line we are converting the float value into int because
+            // media player required int value and seekbar library gives progress in float
+            if (mediaPlayer != null && fromUser) {
+                mediaPlayer.seekTo(h);
+            }
+        }
+
+        @Override
+        public void onStopTrackingTouch(CircularSeekBar seekBar) {
+            mediaPlayer.seekTo((int) seekBar.getProgress());
+
+        }
+
+        @Override
+        public void onStartTrackingTouch(CircularSeekBar seekBar) {
+
+        }
+    };
+
+    ////------------------------------LISTENERS---------------------------------------------////
 }
 
