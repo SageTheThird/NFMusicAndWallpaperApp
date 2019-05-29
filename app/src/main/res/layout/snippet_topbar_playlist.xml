@@ -3,7 +3,7 @@
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="43dp"
-        android:background="@color/transparentBlack">
+        android:background="@color/black">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/profileToolbar"
@@ -16,11 +16,11 @@
 
                 <ImageView
                     android:id="@+id/back_button"
-                    android:layout_width="43dp"
-                    android:layout_height="43dp"
+                    android:layout_width="160dp"
+                    android:layout_height="80dp"
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
-                    android:background="@drawable/ic_downward_arrow" />
+                    android:background="@drawable/ic_title" />
 
                 <!--<ImageView
                     android:layout_width="50dp"

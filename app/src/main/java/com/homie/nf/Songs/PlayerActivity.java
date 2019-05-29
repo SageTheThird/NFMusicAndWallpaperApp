@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,11 +34,12 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
     private Context mContext = PlayerActivity.this;
     static MediaPlayer mediaPlayer;
     private CircularSeekBar seekBar;
-    private Button mPause_btn, mBack_arrow, mGenius_btn, mLyrics_btn,mNext_btn, mPrev_btn;
+    private Button mPause_btn, mGenius_btn, mLyrics_btn,mNext_btn, mPrev_btn;
     private TextView mSongname_view, mTotal_duration_view, mCurrent_duration_view;
     private String mLyric_file = "", mGenius_file = "";
     private Intent intent;
     private ArrayList<String> mSongs_list;
+    private ImageView mBack_arrow;
 
     private Handler myHandler = new Handler();
     //for song list

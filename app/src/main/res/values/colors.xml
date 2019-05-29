@@ -10,7 +10,7 @@
     <color name="IndicatorsNormal">#A8000000</color>
     <color name="IndicatorsFocused">#CD728094</color>
     <color name="BottomNv">#3C1111</color>
-    <color name="transparentBlack">#1B000000</color>
+    <color name="transparentBlack">#0D000000</color>
     <color name="transparentBlack2">#A3000000</color>
     <color name="grey">#bfbfbf</color>
     <color name="white">#fff</color>

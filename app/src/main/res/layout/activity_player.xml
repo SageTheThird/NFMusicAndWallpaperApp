@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,275 +8,60 @@
     tools:context="com.homie.nf.Songs.PlayerActivity">
 
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="160dp"
-        android:layout_marginEnd="8dp"
-        android:text="8:21"
-        android:textColor="@color/white"
-        android:textSize="19sp"
-        app:layout_constraintEnd_toStartOf="@+id/cover"
-        app:layout_constraintHorizontal_bias="0.133"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/back_button"
-        android:id="@+id/fullDurationView"/>
-
-    <TextView
-        android:id="@+id/currentDuration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="160dp"
-        android:layout_marginEnd="8dp"
-        android:text="00:00"
-        android:textColor="@color/white"
-        android:textSize="19sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.51"
-        app:layout_constraintStart_toEndOf="@+id/circularSeekBar"
-        app:layout_constraintTop_toBottomOf="@+id/queue_button" />
-    <Button
-        android:id="@+id/nextBtn"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="128dp"
-        android:background="@color/colorPrimaryDark"
-        android:text="Next"
-        android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@+id/geniusbutton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.426"
-        app:layout_constraintStart_toEndOf="@+id/pause"
-        android:stateListAnimator="@null"
-        />
-
-    <Button
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginStart="44dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="128dp"
-        android:background="@color/colorPrimaryDark"
-        app:layout_constraintBottom_toTopOf="@+id/lyrics_button"
-        app:layout_constraintEnd_toStartOf="@+id/imageView"
-        app:layout_constraintHorizontal_bias="0.2"
-        app:layout_constraintStart_toStartOf="parent"
-        android:id="@+id/prevBtn"
-        android:textColor="@color/white"
-        android:text="Prev"
-        android:stateListAnimator="@null"
-        />
-    <TextView
-        android:id="@+id/songtextView"
+    <!--Top Bar-->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/relative1"
+        >
 
-        android:layout_below="@id/cover"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:ellipsize="marquee"
-        android:fontFamily="@font/francois_one"
-        android:gravity="center"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:scrollHorizontally="true"
+        <include
+            layout="@layout/snippet_top_playerbar"/>
+    </RelativeLayout>
 
-        android:singleLine="true"
-        android:text="NF-Remember This"
-        android:textAlignment="center"
-        android:textColor="#FFF"
-        android:textSize="23sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp" />
-
-
-    <TextView
-        android:id="@+id/songtextView2"
+    <!--Circlular ImageView and TextViews-->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="24dp"
-        android:layout_below="@+id/songtextView"
-        android:layout_marginTop="40dp"
-        android:layout_marginBottom="8dp"
-        android:ellipsize="marquee"
-        android:fontFamily="@font/francois_one"
-        android:gravity="center"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:scrollHorizontally="true"
-        android:singleLine="true"
-        android:text="NF"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/relative1"
+        android:id="@+id/relative2"
+        android:layout_marginTop="45dp">
+
+        <include
+            layout="@layout/layout_below_top_player"/>
+    </RelativeLayout>
+
+    <!--Pause, Next, Prev Buttons-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/relative2"
+        android:id="@+id/relative3"
+        android:layout_marginTop="50dp">
+        <include
+            layout="@layout/layout_below_cover_player"/>
 
 
-        android:textAlignment="center"
-        android:textColor="#FFF"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/songtextView"
-        app:layout_constraintVertical_bias="0.0"
-        tools:layout_editor_absoluteX="0dp" />
+    </RelativeLayout>
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="96dp"
-        android:layout_height="89dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:clickable="false"
-        android:src="@drawable/pause_shadow"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/songtextView2"
-        app:layout_constraintVertical_bias="0.356"
-        tools:ignore="MissingConstraints" />
-
-
-    <Button
-        android:id="@+id/pause"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-
-
-        android:layout_marginStart="8dp"
-
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/play_button"
-        android:stateListAnimator="@null"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/songtextView2"
-        app:layout_constraintVertical_bias="0.264"
-        tools:ignore="MissingConstraints" />
-
-
-    <Button
-        android:id="@+id/back_button"
-        android:layout_width="22dp"
-        android:layout_height="8dp"
-        android:layout_alignParentLeft="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="26dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/back_arrow"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.003"
-        android:stateListAnimator="@null"/>
-
-    <me.tankery.lib.circularseekbar.CircularSeekBar
-        android:id="@+id/circularSeekBar"
-        android:layout_width="194dp"
-        android:layout_height="250dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        app:cs_circle_color="#56000000"
-        app:cs_circle_progress_color="#147E87"
-        app:cs_circle_stroke_width="1dp"
-        app:cs_pointer_color="#FFF"
-        app:cs_pointer_stroke_width="14dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.474"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.182" />
-
-
-    <ImageView
-        android:id="@+id/cover"
-        android:layout_width="186dp"
-        android:layout_height="180dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:src="@drawable/cover"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.195" />
-
-
-    <Button
-        android:id="@+id/queue_button"
-        android:layout_width="24dp"
-        android:layout_height="10dp"
-        android:layout_alignParentRight="true"
-
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/top_right_playlist"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.003"
-        android:stateListAnimator="@null"/>
-
-
-    <Button
-        android:id="@+id/lyrics_button"
-        android:layout_width="180dp"
-        android:layout_height="65dp"
-        android:layout_marginEnd="47dp"
-        android:background="@drawable/lyrics_button"
-        android:stateListAnimator="@null"
-        android:textAllCaps="false"
-        android:textColor="#FFF"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/geniusbutton"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="MissingConstraints" />
-
-
-    <Button
-        android:id="@+id/geniusbutton"
-        android:layout_width="180dp"
-        android:layout_height="65dp"
-
-
-        android:background="@drawable/genius_button"
-        android:stateListAnimator="@null"
-        android:textAllCaps="false"
-        android:textColor="#FFF"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:ignore="MissingConstraints" />
+    <!--Bottom Buttons-->
+    <include
+        layout="@layout/layout_bottom_player"/>
 
 
 
-
-
-
-
-
-   <!-- <FrameLayout
+   <FrameLayout
         android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp" />-->
+        tools:layout_editor_absoluteY="0dp" />
 
 
 
 
 
-</android.support.constraint.ConstraintLayout>
+</RelativeLayout>
 
 
 

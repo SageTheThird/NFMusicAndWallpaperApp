@@ -2,7 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimary"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <RelativeLayout
@@ -22,8 +21,8 @@
             android:scrollHorizontally="true"
             android:singleLine="true"
             android:text="NF-Remember This"
-            android:textColor="@color/black"
-            android:textSize="23sp"
+            android:textColor="@color/white"
+            android:textSize="20sp"
             android:textStyle="bold"
              />
 
@@ -39,7 +38,7 @@
             android:scrollHorizontally="true"
             android:singleLine="true"
             android:text="NF"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="18sp"
              />
 
@@ -54,16 +53,16 @@
 
         <Button
             android:id="@+id/pause"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="68dp"
+            android:layout_height="68dp"
             android:layout_centerHorizontal="true"
             android:background="@drawable/play_button"
             android:stateListAnimator="@null"
              />
         <Button
             android:id="@+id/nextBtn"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:background="@drawable/ic_next"
             android:stateListAnimator="@null"
             android:layout_toRightOf="@id/pause"
@@ -73,8 +72,8 @@
             />
 
         <Button
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:background="@drawable/ic_prev"
             android:id="@+id/prevBtn"
             android:layout_toLeftOf="@id/pause"
