@@ -8,6 +8,35 @@
     tools:context="com.homie.nf.Songs.PlayerActivity">
 
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="160dp"
+        android:layout_marginEnd="8dp"
+        android:text="8:21"
+        android:textColor="@color/white"
+        android:textSize="19sp"
+        app:layout_constraintEnd_toStartOf="@+id/cover"
+        app:layout_constraintHorizontal_bias="0.133"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/back_button"
+        android:id="@+id/fullDurationView"/>
+
+    <TextView
+        android:id="@+id/currentDuration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="160dp"
+        android:layout_marginEnd="8dp"
+        android:text="00:00"
+        android:textColor="@color/white"
+        android:textSize="19sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.51"
+        app:layout_constraintStart_toEndOf="@+id/circularSeekBar"
+        app:layout_constraintTop_toBottomOf="@+id/queue_button" />
     <Button
         android:id="@+id/nextBtn"
         android:layout_width="60dp"
@@ -21,7 +50,26 @@
         app:layout_constraintBottom_toTopOf="@+id/geniusbutton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.426"
-        app:layout_constraintStart_toEndOf="@+id/pause" />
+        app:layout_constraintStart_toEndOf="@+id/pause"
+        android:stateListAnimator="@null"
+        />
+
+    <Button
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="44dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="128dp"
+        android:background="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toTopOf="@+id/lyrics_button"
+        app:layout_constraintEnd_toStartOf="@+id/imageView"
+        app:layout_constraintHorizontal_bias="0.2"
+        app:layout_constraintStart_toStartOf="parent"
+        android:id="@+id/prevBtn"
+        android:textColor="@color/white"
+        android:text="Prev"
+        android:stateListAnimator="@null"
+        />
     <TextView
         android:id="@+id/songtextView"
         android:layout_width="match_parent"
@@ -72,6 +120,7 @@
         tools:layout_editor_absoluteX="0dp" />
 
     <ImageView
+        android:id="@+id/imageView"
         android:layout_width="96dp"
         android:layout_height="89dp"
         android:layout_marginStart="8dp"
@@ -216,12 +265,12 @@
 
 
 
-    <FrameLayout
+   <!-- <FrameLayout
         android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp" />
+        tools:layout_editor_absoluteY="0dp" />-->
 
 
 

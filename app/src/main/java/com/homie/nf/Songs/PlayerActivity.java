@@ -1,5 +1,6 @@
 package com.homie.nf.Songs;
 
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -16,6 +17,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.homie.nf.R;
 
@@ -25,26 +27,23 @@ import me.tankery.lib.circularseekbar.CircularSeekBar;
 
 
 public class PlayerActivity extends AppCompatActivity implements genius_fragment.OnFragmentInteractionListener, lyrics_frag.OnFragmentInteractionListener {
+
     private static final String TAG = "PlayerActivity";
-
+    public static final int DEFAULT_INT_VALUE = 0;
+    private Context mContext = PlayerActivity.this;
     static MediaPlayer mediaPlayer;
+    private CircularSeekBar seekBar;
+    private Button mPause_btn, mBack_arrow, mGenius_btn, mLyrics_btn,mNext_btn, mPrev_btn;
+    private TextView mSongname_view, mTotal_duration_view, mCurrent_duration_view;
+    private String mLyric_file = "", mGenius_file = "";
+    private Intent intent;
+    private ArrayList<String> mSongs_list;
 
-    CircularSeekBar seekBar;
-    Button btn_pause, back_arrow, genius_btn, lyrics_button,
-            queue_btn,nextBtn;
-    TextView songnameView;
-
-    String lyrics_file="", genius_file="", fileName101="";
-    Intent intent;
-
-
-    LinearLayout linearLayout;
-    ArrayList<String> song_list;
-    private FrameLayout frameLayout;
     private Handler myHandler = new Handler();
     //for song list
-    private int positonAdapter;
-    private ArrayList<String> songs_list=new ArrayList<>();
+    private int mCurrentIndex;
+
+
 
 
     @Override
@@ -53,75 +52,67 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_player);
 
-        song_list = new ArrayList<>();
+        mSongs_list = new ArrayList<>();
 
+        //methods
         initWidgets();
         getIncomingIntent();
-
-        if (mediaPlayer != null ) {
-            mediaPlayer.stop();
-            mediaPlayer.release();
-        }
-
-        playerSetup();
+        playSong(mCurrentIndex);
 
         Thread thread = new runThread();
         thread.start();
 
 
         //listeners
-        genius_btn.setOnClickListener(GeniusClickListener);
-        lyrics_button.setOnClickListener(LyricsClickListener);
+        mGenius_btn.setOnClickListener(GeniusClickListener);
+        mLyrics_btn.setOnClickListener(LyricsClickListener);
         seekBar.setOnSeekBarChangeListener(SeekBarChangeListener);
-        btn_pause.setOnClickListener(PauseClickListener);
-        back_arrow.setOnClickListener(BackClickListener);
-        nextBtn.setOnClickListener(NextClickListener);
+        mPause_btn.setOnClickListener(PauseClickListener);
+        mBack_arrow.setOnClickListener(BackClickListener);
+        mNext_btn.setOnClickListener(NextClickListener);
+        mPrev_btn.setOnClickListener(PrevClickListener);
 
 
     }
-    View.OnClickListener NextClickListener=new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
 
-           /* Log.d(TAG, "onClick: Next");
-            mediaPlayer.stop();
-            uri = Uri.parse(link[position + 1]);
-            mediaPlayer.setDataSource(getApplicationContext(), uri);
-            mediaPlayer.prepare();
-            mediaPlayer.start();*/
-        }
-    };
+    private void getIncomingIntent() {
+        intent = getIntent();
 
-    private void getIncomingIntent(){
-        intent        =    getIntent();
+        mLyric_file = intent.getStringExtra(getString(R.string.LYRICSFILE));
+        mGenius_file = intent.getStringExtra(getString(R.string.GENIUSFILENAME));
 
-        lyrics_file   =    intent.getStringExtra(getString(R.string.LYRICSFILE));
-        genius_file   =    intent.getStringExtra(getString(R.string.GENIUSFILENAME));
-        fileName101   =    intent.getStringExtra(getString(R.string.songname));
-        positonAdapter   =    intent.getIntExtra("position",0);
-        song_list=    intent.getStringArrayListExtra("songslist");
-
+        mCurrentIndex = intent.getIntExtra(getString(R.string.position_song), DEFAULT_INT_VALUE);
+        mSongs_list = intent.getStringArrayListExtra(getString(R.string.songslist));
         //songTextView setup
-        String songNameOnly=fileName101.replace(".mp3","");
-        songnameView.setText(songNameOnly);
+        setSongName(mCurrentIndex);
+
+    }
+
+    private void setSongName(int index) {
+        String currentName = mSongs_list.get(index);
+
+        String songNameOnly = currentName.replace(getString(R.string.mp3_extenstion), "");
+        mSongname_view.setText(songNameOnly);
+
+
+    }
+
+    private void initWidgets() {
+        mPause_btn = findViewById(R.id.pause);
+        mSongname_view = findViewById(R.id.songtextView);
+        seekBar = findViewById(R.id.circularSeekBar);
+        mBack_arrow = findViewById(R.id.back_button);
+        mGenius_btn = findViewById(R.id.geniusbutton);
+        mLyrics_btn = findViewById(R.id.lyrics_button);
+        mNext_btn = findViewById(R.id.nextBtn);
+        mPrev_btn = findViewById(R.id.prevBtn);
+        mTotal_duration_view = findViewById(R.id.fullDurationView);
+        mCurrent_duration_view = findViewById(R.id.currentDuration);
+
 
     }
 
 
-    private void initWidgets(){
-        frameLayout   =    findViewById(R.id.frameLayout);
-        btn_pause     =    findViewById(R.id.pause);
-        songnameView  =    findViewById(R.id.songtextView);
-        seekBar       =    findViewById(R.id.circularSeekBar);
-        back_arrow    =    findViewById(R.id.back_button);
-        genius_btn    =    findViewById(R.id.geniusbutton);
-        lyrics_button =    findViewById(R.id.lyrics_button);
-        linearLayout  =    findViewById(R.id.linearLayout);
-        queue_btn     =    findViewById(R.id.queue_button);
-        nextBtn     =    findViewById(R.id.nextBtn);
-
-
-    }
 
     public void openGeniusFragment(String genius_url) {
 
@@ -130,7 +121,7 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_right);
         fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.add(R.id.frameLayout, genius_fragment, "GENIUS_FRAGMENT").commit();
+        fragmentTransaction.add(R.id.frameLayout, genius_fragment, getString(R.string.GENIUS_FRAGMENT)).commit();
 
     }
 
@@ -141,7 +132,7 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_right);
         fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.add(R.id.frameLayout, lyrics_fragment1, "LYRICS_FRAGMENT").commit();
+        fragmentTransaction.add(R.id.frameLayout, lyrics_fragment1, getString(R.string.LYRICS_FRAGMENT)).commit();
 
     }
 
@@ -150,19 +141,23 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         onBackPressed();
     }
 
-    public void playerSetup() {
-        String songName=song_list.get(positonAdapter);
-
-        String folederPath= Environment.getExternalStorageDirectory().getAbsolutePath()
+    public void playSong(int index) {
+        String songName = null;
+        try {
+            songName = mSongs_list.get(index);
+        } catch (IndexOutOfBoundsException e) {
+            showToast("No offline files in directory");
+            e.printStackTrace();
+        }
+        String FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath()
                 + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/";
-
-        final String song_full=folederPath+songName;
-        if (btn_pause.getBackground().equals(R.drawable.pause_button)) {
+        final String song_full = FOLDER_PATH + songName;
+        if (mPause_btn.getBackground().equals(R.drawable.pause_button)) {
             mediaPlayer.stop();
             mediaPlayer.reset();
             mediaPlayer.release();
             mediaPlayer = null;
-            btn_pause.setBackgroundResource(R.drawable.play_button);
+            mPause_btn.setBackgroundResource(R.drawable.play_button);
         } else {
 
             Runnable runnable = new Runnable() {
@@ -170,6 +165,10 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
                 public void run() {
                     try {
 
+                        if (mediaPlayer != null) {
+                            mediaPlayer.stop();
+                            mediaPlayer.reset();
+                        }
                         mediaPlayer = new MediaPlayer();
                         mediaPlayer.setDataSource(song_full);
                         mediaPlayer.prepareAsync();
@@ -178,19 +177,25 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
                             public void onPrepared(MediaPlayer mp) {
                                 mp.start();
                                 seekBar.setProgress(0);
+                                //set max duration to seek_bar
                                 seekBar.setMax(mediaPlayer.getDuration());
+                                //set total duration to textview
+                                setDuration(mediaPlayer.getDuration(), mTotal_duration_view);
                                 mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                     @Override
                                     public void onCompletion(MediaPlayer mp) {
-                                        btn_pause.setBackgroundResource(R.drawable.play_button);
-
+                                        mPause_btn.setBackgroundResource(R.drawable.play_button);
+                                        mCurrentIndex++;
+                                        mCurrentIndex %= mSongs_list.size();
+                                        setSongName(mCurrentIndex);
+                                        playSong(mCurrentIndex);
 
                                     }
                                 });
                                 Log.d("Prog", "run: " + mediaPlayer.getDuration());
                             }
                         });
-                        btn_pause.setBackgroundResource(R.drawable.pause_button);
+                        mPause_btn.setBackgroundResource(R.drawable.pause_button);
 
 
                     } catch (Exception e) {
@@ -212,6 +217,29 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
     }
 
+    /*
+     * Sets up textview to current position and total duration
+     * */
+    private void setDuration(int currentDuration, TextView textView) {
+        int min = currentDuration / (1000 * 60) % 60;
+        int sec = (currentDuration / 1000) % 60;
+
+        String minutes = Integer.toString(min);
+        String seconds = Integer.toString(sec);
+        if (min <= 9) {
+
+            minutes = "0" + minutes;
+
+        }
+        if (sec <= 9) {
+            seconds = "0" + seconds;
+        }
+        textView.setText(minutes + ":" + seconds);
+    }
+
+    private void showToast(String msg) {
+        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+    }
 
     public class runThread extends Thread {
 
@@ -221,7 +249,7 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
             while (true) {
 
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(75);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -231,6 +259,8 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
                         @Override
                         public void run() {
                             seekBar.setProgress(mediaPlayer.getCurrentPosition());
+                            //set current duration to textview
+                            setDuration(mediaPlayer.getCurrentPosition(), mCurrent_duration_view);
                         }
                     });
 
@@ -241,48 +271,30 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
     }
 
-      ////------------------------------LISTENERS---------------------------------------------////
-
-    View.OnClickListener GeniusClickListener=new View.OnClickListener() {
+    ////--------------------------------------LISTENERS------------------------------------------/////
+    View.OnClickListener NextClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            openGeniusFragment(genius_file);
+            Log.d(TAG, "onClick: next");
+
+            mCurrentIndex++;
+            mCurrentIndex %= mSongs_list.size();
+            setSongName(mCurrentIndex);
+            playSong(mCurrentIndex);
 
         }
     };
-    View.OnClickListener LyricsClickListener=new View.OnClickListener() {
+    View.OnClickListener PrevClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            openLyricsFragment(lyrics_file);
 
+            Log.d(TAG, "onClick: next button");
+            mCurrentIndex = mCurrentIndex > 0 ? mCurrentIndex - 1 : mSongs_list.size() - 1;
+            setSongName(mCurrentIndex);
+            playSong(mCurrentIndex);
         }
     };
-    View.OnClickListener BackClickListener=new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            startActivity(new Intent(PlayerActivity.this, playlist_Activity.class));
-
-
-        }
-    };
-    View.OnClickListener PauseClickListener=new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            //seekBar.setMax(totalLength);
-            seekBar.setMax(mediaPlayer.getDuration());
-
-            if (mediaPlayer.isPlaying()) {
-
-                btn_pause.setBackgroundResource(R.drawable.play_button);
-                mediaPlayer.pause();
-            } else if (!mediaPlayer.isPlaying()) {
-                btn_pause.setBackgroundResource(R.drawable.pause_button);
-                mediaPlayer.start();
-            }
-
-        }
-    };
-    CircularSeekBar.OnCircularSeekBarChangeListener SeekBarChangeListener=new CircularSeekBar.OnCircularSeekBarChangeListener() {
+    CircularSeekBar.OnCircularSeekBarChangeListener SeekBarChangeListener = new CircularSeekBar.OnCircularSeekBarChangeListener() {
         @Override
         public void onProgressChanged(CircularSeekBar circularSeekBar, float progress, boolean fromUser) {
             int h = Math.round(progress);
@@ -304,7 +316,46 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
         }
     };
+    View.OnClickListener GeniusClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            openGeniusFragment(mGenius_file);
 
-    ////------------------------------LISTENERS---------------------------------------------////
+        }
+    };
+    View.OnClickListener LyricsClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            openLyricsFragment(mLyric_file);
+
+        }
+    };
+    View.OnClickListener BackClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            startActivity(new Intent(PlayerActivity.this, playlist_Activity.class));
+
+
+        }
+    };
+    View.OnClickListener PauseClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            //seekBar.setMax(totalLength);
+            seekBar.setMax(mediaPlayer.getDuration());
+
+            if (mediaPlayer.isPlaying()) {
+
+                mPause_btn.setBackgroundResource(R.drawable.play_button);
+                mediaPlayer.pause();
+            } else if (!mediaPlayer.isPlaying()) {
+                mPause_btn.setBackgroundResource(R.drawable.pause_button);
+                mediaPlayer.start();
+            }
+
+        }
+    };
+    ////--------------------------------------LISTENERS------------------------------------------/////
+
 }
 

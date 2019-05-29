@@ -9,6 +9,11 @@
     <string name="storage_song_db">songs</string>
     <string name="store_song_db">songs</string>
 
+    <!--Fragmeny Names-->
+    <string name="LYRICS_FRAGMENT">LYRICS_FRAGMENT</string>
+    <string name="GENIUS_FRAGMENT">GENIUS_FRAGMENT</string>
+
+
     <!--Fields-->
     <string name="field_priority">priority</string>
     <string name="field_downloadUrl">downloadUrl</string>
@@ -23,6 +28,8 @@
     <string name="LYRICSFILE">LYRICSFILE</string>
     <string name="GENIUSFILENAME">GENIUSFILENAME</string>
     <string name="songname">songname</string>
+    <string name="position_song">position_song</string>
+    <string name="songslist">songslist</string>
 
     <!--Random String-->
     <string name="drawable_universal">drawable://</string>

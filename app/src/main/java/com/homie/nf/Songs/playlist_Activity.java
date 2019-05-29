@@ -195,8 +195,8 @@ public class playlist_Activity extends AppCompatActivity {
                    showToast("Playing..");
 
                    startActivity(new Intent(playlist_Activity.this, PlayerActivity.class)
-                           .putExtra("position",position)
-                           .putStringArrayListExtra("songslist",filesNameList)
+                           .putExtra(getString(R.string.position_song),position)
+                           .putStringArrayListExtra(getString(R.string.songslist),filesNameList)
                            .putExtra(getString(R.string.songname), song_name)
                            .putExtra(getString(R.string.GENIUSFILENAME), genius_url)
                            .putExtra(getString(R.string.LYRICSFILE), lyrics_file_name)

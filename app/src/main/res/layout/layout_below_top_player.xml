@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <!--<ImageView
+            android:id="@+id/cover"
+            android:layout_width="186dp"
+            android:layout_height="180dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/cover"
+            android:layout_centerHorizontal="true" />-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="8:21"
+            android:textColor="@color/black"
+            android:textSize="19sp"
+            android:id="@+id/fullDurationView"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/circularSeekBar"
+            android:layout_marginStart="15dp"/>
+
+        <TextView
+            android:id="@+id/currentDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:textColor="@color/black"
+            android:textSize="19sp"
+            android:layout_toLeftOf="@id/circularSeekBar"
+            android:layout_marginEnd="15dp"
+            android:layout_centerVertical="true"
+            />
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:id="@+id/cover"
+            android:layout_width="186dp"
+            android:layout_height="186dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/cover"
+            />
+        <me.tankery.lib.circularseekbar.CircularSeekBar
+            android:id="@+id/circularSeekBar"
+            android:layout_width="186dp"
+            android:layout_height="186dp"
+            android:layout_centerHorizontal="true"
+            app:cs_circle_color="#1B000000"
+            app:cs_circle_progress_color="#147E87"
+            app:cs_circle_stroke_width="20dp"
+            app:cs_pointer_color="#FFF"
+            app:cs_pointer_stroke_width="20dp"
+            />
+
+    </RelativeLayout>
+
+</RelativeLayout>

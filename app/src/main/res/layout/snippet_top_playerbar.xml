@@ -1,0 +1,52 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:background="@color/transparentBlack">
+
+        <android.support.v7.widget.Toolbar
+            android:layout_width="match_parent"
+            android:id="@+id/profileToolbar"
+            android:layout_height="wrap_content">
+            
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/ic_downward_arrow"
+                android:layout_centerVertical="true"
+                android:layout_alignParentLeft="true"
+                    android:id="@+id/back_button"
+                    />
+
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/ic_queue"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginEnd="25dp"
+                    android:id="@+id/queue_button"
+                    />
+
+
+
+                
+                
+            </RelativeLayout>
+
+        </android.support.v7.widget.Toolbar>
+
+
+
+
+    </android.support.design.widget.AppBarLayout>
+
+
+
+
+</merge>
