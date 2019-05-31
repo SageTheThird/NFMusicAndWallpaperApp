@@ -44,6 +44,7 @@
     <!--SharePreferences Keys-->
     <string name="shared_array_list_key">array_list_key</string>
     <string name="shared_current_index">current_index</string>
+    <string name="shared_server_songs_list">shared_server_songs_list</string>
 
 
 

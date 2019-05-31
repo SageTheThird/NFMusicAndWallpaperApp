@@ -3,13 +3,16 @@ package com.homie.nf.Songs;
 import android.app.Activity;
 import android.app.IntentService;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -78,7 +81,25 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
 
     //action_intents
-    Intent pauseIntent,playIntent,stopIntent,nextIntent,prevIntent;
+    private Intent pauseIntent,playIntent,stopIntent,nextIntent,prevIntent;
+
+    //audio focus change
+    private static AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
+
+    //
+    // The volume we set the media player to when we lose audio focus, but are
+    // allowed to reduce the volume instead of stopping playback.
+    private static final float VOLUME_DUCK = 0.2f;
+    // The volume we set the media player when we have audio focus.
+    private static final float VOLUME_NORMAL = 1.0f;
+    // we don't have audio focus, and can't duck (play at a low volume)
+    private static final int AUDIO_NO_FOCUS_NO_DUCK = 0;
+    // we don't have focus, but can duck (play at a low volume)
+    private static final int AUDIO_NO_FOCUS_CAN_DUCK = 1;
+    // we have full audio focus
+    private static final int AUDIO_FOCUSED = 2;
+    private static int mCurrentAudioFocusState = AUDIO_NO_FOCUS_NO_DUCK;
+    private static AudioManager mAudioManager;
 
 
 
@@ -113,15 +134,97 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         //notific
         mediaSessionCompat = new MediaSessionCompat(this, "someTag");
 
-        ArrayList<String> songs=getArrayList(getString(R.string.shared_array_list_key),mContext);
-        Log.d(TAG, "onCreate: "+songs.size());
-
-        int index=getCurrentIndexPref(getString(R.string.shared_current_index),mContext);
-        Log.d(TAG, "onCreate: "+index);
-
+        //audio focus change
+        audioFocusListener();
+        tryToGetAudioFocus(this);
+        
+        IntentFilter filter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        registerReceiver(mNoisyReceiver, filter);
+        Log.d(TAG, "onCreate: Reciever Registered");
         
 
     }
+
+    //-------------------------------AUDIO FOCUS CHANGE LISTENER----------------------/////
+    //-------------------------------AUDIO FOCUS CHANGE LISTENER----------------------/////
+
+
+    public static void tryToGetAudioFocus(Context context){
+        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        int focusRequest = mAudioManager.requestAudioFocus(
+                mOnAudioFocusChangeListener,
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN);
+        switch (focusRequest) {
+            case AudioManager.AUDIOFOCUS_REQUEST_FAILED:
+                // don't start playback
+                Log.d(TAG, "onCreate: AUDIOFOCUS_REQUEST_FAILED");
+            case AudioManager.AUDIOFOCUS_REQUEST_GRANTED:
+                // actually start playback
+                Log.d(TAG, "onCreate: AUDIOFOCUS_REQUEST_GRANTED");
+        }
+
+    }
+    private static void configurePlayerState() {
+
+        if (mCurrentAudioFocusState == AUDIO_NO_FOCUS_NO_DUCK) {
+            // We don't have audio focus and can't duck, so we have to pause
+            mediaPlayer.stop();
+        } else {
+
+            if (mCurrentAudioFocusState == AUDIO_NO_FOCUS_CAN_DUCK) {
+                // We're permitted to play, but only if we 'duck', ie: play softly
+                mediaPlayer.setVolume(VOLUME_DUCK, VOLUME_DUCK);
+            } else {
+                mediaPlayer.setVolume(VOLUME_NORMAL, VOLUME_NORMAL);
+            }
+
+            // If we were playing when we lost focus, we need to resume playing.
+//            if (mPlayOnFocusGain) {
+//                resumeMediaPlayer();
+//                mPlayOnFocusGain = false;
+//            }
+        }
+    }
+    public static void audioFocusListener(){
+
+//…
+        mOnAudioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
+
+            @Override
+            public void onAudioFocusChange(int focusChange) {
+                switch (focusChange) {
+                    case AudioManager.AUDIOFOCUS_GAIN:
+                        mCurrentAudioFocusState = AUDIO_FOCUSED;
+                        Log.d(TAG, "onAudioFocusChange: AUDIOFOCUS_GAIN");
+                        break;
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                        // Audio focus was lost, but it's possible to duck (i.e.: play quietly)
+                        mCurrentAudioFocusState = AUDIO_NO_FOCUS_CAN_DUCK;
+                        Log.d(TAG, "onAudioFocusChange: AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
+                        break;
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                        // Lost audio focus, but will gain it back (shortly), so note whether
+                        // playback should resume
+                        mCurrentAudioFocusState = AUDIO_NO_FOCUS_NO_DUCK;
+                        Log.d(TAG, "onAudioFocusChange: AUDIOFOCUS_LOSS_TRANSIENT");
+                        break;
+                    case AudioManager.AUDIOFOCUS_LOSS:
+                        // Lost audio focus, probably "permanently"
+                        mCurrentAudioFocusState = AUDIO_NO_FOCUS_NO_DUCK;
+                        Log.d(TAG, "onAudioFocusChange: AUDIOFOCUS_LOSS");
+                        break;
+                }
+                if (mediaPlayer != null) {
+                    // Update the player state based on the change
+                    configurePlayerState();
+                }
+            }
+        };
+    }
+    //-------------------------------AUDIO FOCUS CHANGE LISTENER----------------------/////
+    //-------------------------------AUDIO FOCUS CHANGE LISTENER----------------------/////
+
 
     public static void saveCurrentIndexPref(String key,int index,Context context){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -159,7 +262,7 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
         mCurrentIndex = intent.getIntExtra(getString(R.string.position_song), DEFAULT_INT_VALUE);
         mSongs_list = intent.getStringArrayListExtra(getString(R.string.songslist));
-        //saveArrayList(mSongs_list,getString(R.string.shared_array_list_key));
+        //saveArrayList(mSongs_list,getString(R.string.shared_array_list_key),mContext);
         saveCurrentIndexPref(getString(R.string.shared_current_index),mCurrentIndex,mContext);
 
         //songTextView setup
@@ -407,15 +510,12 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         @Override
         public void onClick(View v) {
             openLyricsFragment(mLyric_file);
-
         }
     };
     View.OnClickListener BackClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             startActivity(new Intent(PlayerActivity.this, playlist_Activity.class));
-
-
         }
     };
     View.OnClickListener PauseClickListener = new View.OnClickListener() {
@@ -435,6 +535,13 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
         }
     };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mNoisyReceiver);
+        Log.d(TAG, "onDestroy: Reciever Unregistered");
+    }
     ////--------------------------------------LISTENERS------------------------------------------/////
     ////--------------------------------------NOTIFICATION INTENT------------------------------------------/////
 
@@ -487,6 +594,8 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
 
 
+       Intent  noiseIntent = new Intent(this, NotificationActionService.class)
+                .setAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
 
         pauseIntent = new Intent(this, NotificationActionService.class)
                 .setAction(ACTION_PAUSE);
@@ -514,12 +623,14 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
 
 
+
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_play)
                         .setContentTitle("Why")
                         .setLargeIcon(artwork)
                         .setContentText("NF")
+
 
                         .addAction(new NotificationCompat.Action(R.drawable.ic_prev,
                                 "PrevAction", prevPendingIntent))
@@ -588,7 +699,6 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
         public void playSongNotification(int index){
 
-
            String songName = getSongs_list().get(index);
             String FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath()
                     + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/";
@@ -653,10 +763,24 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         protected void onHandleIntent(Intent intent) {
 
 
+//            if(intent.getAction()==android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY){
+//                Log.d(TAG, "onHandleIntent: ACTION_AUDIO_BECOMING_NOISY");
+//                if(mediaPlayer!=null){
+//                    mediaPlayer.pause();
+//                }
+//                else {
+//                    return;
+//                }
+//            }
             //PAUSE
             if(intent.getAction()==(ACTION_PAUSE)){
                 Log.d(TAG, "onHandleIntent: ACTION PAUSE array : ");
-                mediaPlayer.pause();
+                if(mediaPlayer!=null){
+                    mediaPlayer.pause();
+                }else {
+                    return;
+                }
+
 
             }
 
@@ -673,37 +797,62 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
             //STOP
             if(intent.getAction()==(ACTION_STOP)){
                 Log.d(TAG, "onHandleIntent: ACTION_STOP");
+                if(mediaPlayer!=null){
                 mediaPlayer.stop();
                 mediaPlayer.release();
                 NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID);
                 stopSelf();
+                }
+                else {
+                    NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID);
+                    stopSelf();
+                }
             }
 
             //NEXT
             if(intent.getAction()==(ACTION_NEXT)){
                 Log.d(TAG, "onHandleIntent: ACTION_NEXT");
-                int index=getIndex_current();
-                index++;
-                index %= getSongs_list().size();
-                           // playerActivity.setSongName(mCurrentIndex);
-                playSongNotification(index);
-                Log.d(TAG, "ACTION_NEXT: incremented index : "+index);
-                saveCurrentIndexPref(getString(R.string.shared_current_index),index,this);
+                if(mediaPlayer!=null){
+                    int index=getIndex_current();
+                    index++;
+                    index %= getSongs_list().size();
+                    // playerActivity.setSongName(mCurrentIndex);
+                    playSongNotification(index);
+                    Log.d(TAG, "ACTION_NEXT: incremented index : "+index);
+                    saveCurrentIndexPref(getString(R.string.shared_current_index),index,this);
+                }else {
+                    return;
+                }
+
             }
 
             //PREVIOUS
             if(intent.getAction()==(ACTION_PREV)){
-                Log.d(TAG, "onHandleIntent: ACTION_PREV");
-                int index=getIndex_current();
-                index = index > 0 ? index - 1 : getSongs_list().size() - 1;
-                playSongNotification(index);
-                Log.d(TAG, "ACTION_NEXT: decremented index : "+index);
-                saveCurrentIndexPref(getString(R.string.shared_current_index),index,this);
+                if(mediaPlayer!=null){
+                    Log.d(TAG, "onHandleIntent: ACTION_PREV");
+                    int index=getIndex_current();
+                    index = index > 0 ? index - 1 : getSongs_list().size() - 1;
+                    playSongNotification(index);
+                    Log.d(TAG, "ACTION_NEXT: decremented index : "+index);
+                    saveCurrentIndexPref(getString(R.string.shared_current_index),index,this);
+                }else {
+                    return;
+                }
+
             }
 
 
                 }
         }
+    private BroadcastReceiver mNoisyReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if( mediaPlayer != null && mediaPlayer.isPlaying() ) {
+                mediaPlayer.pause();
+            }
+        }
+    };
+
     }
     ////--------------------------------------NOTIFICATION INTENT------------------------------------------/////
 

@@ -21,6 +21,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -62,7 +63,7 @@ public class playlist_Activity extends AppCompatActivity {
     private CollectionReference collectionReference;
     private SongRecyclerView songRecyclerViewAdapter;
     private StorageReference storageReference;
-    private ImageView playlist_background, imageView_title, imageView_sideButton;
+    private ImageView playlist_background, imageView_title, tick_imageView;
     private ConnectivityManager connectivityManager;
     private NetworkInfo networkInfo;
     //static Progress progress;
@@ -106,6 +107,9 @@ public class playlist_Activity extends AppCompatActivity {
                     index++;
                 }
 
+                //PlayerActivity.saveArrayList(serverNameList,getString(R.string.shared_server_songs_list),mContext);
+
+                Log.d(TAG, "onEvent: Server Songs ArrayList Saved");
                 int indexDif=0;
                 for(String indivUrl: serverNameList){
 
@@ -133,6 +137,7 @@ public class playlist_Activity extends AppCompatActivity {
             filesIndex++;
 
         }
+        PlayerActivity.saveArrayList(filesNameList,getString(R.string.shared_array_list_key),mContext);
         int displayIndex=0;
         for(String file:filesNameList){
             Log.d(TAG, "files from folder: " +displayIndex+" "+file );
@@ -151,6 +156,14 @@ public class playlist_Activity extends AppCompatActivity {
         songRecyclerViewAdapter.setOnItemClickListener(SongClickListener);
 
 
+        for(int i=0;i<serverNameList.size();i++){
+
+            if(serverNameList.contains(filesNameList.get(i))){
+                tick_imageView.setVisibility(View.VISIBLE);
+                Log.d(TAG, "onCreate: items matched : "+i);
+
+            }
+        }
 
 
     }
@@ -236,6 +249,7 @@ public class playlist_Activity extends AppCompatActivity {
         playlist_background = findViewById(R.id.playlist_background);
         //imageView_sideButton = findViewById(R.id.playlist_sideButton);
         imageView_title = findViewById(R.id.playlistimageView_title);
+        tick_imageView = findViewById(R.id.tick);
 
 
         /*//Playlist Background Image
@@ -330,7 +344,7 @@ public class playlist_Activity extends AppCompatActivity {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                showToast("Failed to connect to server:");
+                showToast("Failed to connect to server: "+e.getMessage());
             }
         });
 
