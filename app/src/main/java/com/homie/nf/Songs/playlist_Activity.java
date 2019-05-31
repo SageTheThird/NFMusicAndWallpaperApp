@@ -14,9 +14,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -39,6 +42,7 @@ import com.homie.nf.Models.RowItem;
 import com.homie.nf.R;
 import com.homie.nf.Utils.UniversalImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -57,13 +61,10 @@ public class playlist_Activity extends AppCompatActivity {
     private FirebaseFirestore firebaseFirestore;
     private CollectionReference collectionReference;
     private SongRecyclerView songRecyclerViewAdapter;
-    private FirebaseStorage firebaseStorage;
     private StorageReference storageReference;
     private ImageView playlist_background, imageView_title, imageView_sideButton;
-    private ArrayList<String> song_list;
     private ConnectivityManager connectivityManager;
     private NetworkInfo networkInfo;
-    private TextInputLayout searchInputLayout;
     //static Progress progress;
     private ArrayList<RowItem> arrayList;
     private BroadcastReceiver onDownloadComplete;
@@ -74,13 +75,14 @@ public class playlist_Activity extends AppCompatActivity {
     private ArrayList<String> filesNameList=new ArrayList<>();
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_playlist_);
 
-        song_list = new ArrayList<>();
 
         firebaseFirestore = FirebaseFirestore.getInstance();
         collectionReference = firebaseFirestore.collection(getString(R.string.store_song_db));
@@ -228,23 +230,48 @@ public class playlist_Activity extends AppCompatActivity {
         UniversalImageLoader universalImageLoader = new UniversalImageLoader(mContext);
         ImageLoader.getInstance().init(universalImageLoader.getConfig());
     }
+
+
     private void layoutImageLoading() {
         playlist_background = findViewById(R.id.playlist_background);
-        imageView_sideButton = findViewById(R.id.playlist_sideButton);
+        //imageView_sideButton = findViewById(R.id.playlist_sideButton);
         imageView_title = findViewById(R.id.playlistimageView_title);
 
-        //Playlist Background Image
+
+        /*//Playlist Background Image
         String imageUri1 = getString(R.string.drawable_universal) + R.drawable.playlist_blurred;
         UniversalImageLoader.setImage(imageUri1,playlist_background,null,"");
 
         //Side Button ImageView
-        String imageUri2 = getString(R.string.drawable_universal) + R.drawable.sidebutton;
+        String imageUri2 = getString(R.string.drawable_universal) + R.drawable.ic_drawer;
         UniversalImageLoader.setImage(imageUri2,imageView_sideButton,null,"");
 
         //title ImageView
         //Side Button ImageView
         String imageUri3 = getString(R.string.drawable_universal) + R.drawable.title;
-        UniversalImageLoader.setImage(imageUri3,imageView_title,null,"");
+        UniversalImageLoader.setImage(imageUri3,imageView_title,null,"");*/
+
+        Picasso
+                .with(this)
+                .load(R.drawable.title)
+                // .resize(700,700)
+
+                .placeholder(R.drawable.back_arrow)
+                .into(imageView_title);
+       /* Picasso
+                .with(this)
+                .load(R.drawable.ic_drawer)
+                // .resize(700,700)
+
+                .placeholder(R.drawable.ic_search_black_24dp)
+                .into(imageView_sideButton);*/
+        Picasso
+                .with(this)
+                .load(R.drawable.playlist_blurred)
+                //.resize(800, 800)
+
+                .placeholder(R.drawable.madeinsociety)
+                .into(playlist_background);
 
     }
 
@@ -280,7 +307,7 @@ public class playlist_Activity extends AppCompatActivity {
 
     public void download(final String fileNameInto, final String downloadDirectory) {
 
-        storageReference = firebaseStorage.getInstance().getReference(getString(R.string.storage_song_db));
+        storageReference = FirebaseStorage.getInstance().getReference(getString(R.string.storage_song_db));
         storageReference = storageReference.child(fileNameInto);
         storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override

@@ -31,10 +31,19 @@
     <string name="position_song">position_song</string>
     <string name="songslist">songslist</string>
 
+
     <!--Random String-->
     <string name="drawable_universal">drawable://</string>
     <string name="mp3_extenstion">.mp3</string>
     <string name="txt_extenstion">.txt</string>
+
+    <!--Intent Service Extras-->
+    <string name="service_songs_list">service_songs_list</string>
+    <string name="current_index">current_index</string>
+
+    <!--SharePreferences Keys-->
+    <string name="shared_array_list_key">array_list_key</string>
+    <string name="shared_current_index">current_index</string>
 
 
 
