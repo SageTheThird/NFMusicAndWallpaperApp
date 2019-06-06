@@ -1,11 +1,13 @@
 package com.homie.nf.Wallpapers;
 
 import android.Manifest;
+import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -26,6 +28,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.homie.nf.Adapters.UltraPagerAdapter;
 import com.homie.nf.R;
@@ -34,9 +37,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+
+import needle.Needle;
 
 import static com.homie.nf.Wallpapers.Book_Activity.showSnackbar;
 
@@ -52,6 +59,8 @@ public class Book_Activity extends AppCompatActivity {
     private ImageView img;
     private FloatingActionButton downloadBtn, setBtn;
     private int urlPosition;
+
+    private Context mContext = Book_Activity.this;
 
     private static CoordinatorLayout coordinatorLayout;
 
@@ -69,26 +78,33 @@ public class Book_Activity extends AppCompatActivity {
 
         //listeners
         downloadBtn.setOnClickListener(downloadBtnClickListener);
-        setBtn.setOnClickListener( setWallClickListener);
+        setBtn.setOnClickListener(setWallClickListener);
 
 
     }
 
-    private void initWidgets(){
+    private void initWidgets() {
         back_viewPager = findViewById(R.id.tool_back_viewPager);
         downloadBtn = findViewById(R.id.actionBtn1);
         setBtn = findViewById(R.id.actionBtn2);
-        coordinatorLayout=findViewById(R.id.coordinatorLayout);
+        coordinatorLayout = findViewById(R.id.coordinatorLayout);
 
     }
 
-    private void getIncomingIntent(){
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Animatoo.animateSplit(mContext);
+    }
+
+    private void getIncomingIntent() {
         Intent intent = getIntent();
         downloadUrl = intent.getStringExtra(getString(R.string.downloadUrl));
         imagesUrlLis = intent.getStringArrayListExtra(getString(R.string.imagesUrl));
         urlPosition = intent.getIntExtra(getString(R.string.position), 5);
 
     }
+
     public void showToast(String msg) {
         Toast.makeText(Book_Activity.this, msg, Toast.LENGTH_LONG).show();
 
@@ -123,12 +139,12 @@ public class Book_Activity extends AppCompatActivity {
 
     }
 
-    public static void showSnackbar(String msg){
-        Snackbar snackbar=Snackbar.make(coordinatorLayout,msg,Snackbar.LENGTH_SHORT);
+    public static void showSnackbar(String msg) {
+        Snackbar snackbar = Snackbar.make(coordinatorLayout, msg, Snackbar.LENGTH_SHORT);
         snackbar.show();
     }
 
-    View.OnClickListener downloadBtnClickListener=new View.OnClickListener() {
+    View.OnClickListener downloadBtnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             DownloadImage(downloadUrl);
@@ -136,13 +152,62 @@ public class Book_Activity extends AppCompatActivity {
         }
     };
 
-    View.OnClickListener setWallClickListener=new View.OnClickListener() {
+    View.OnClickListener setWallClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             showSnackbar("Setting Wallpaper");
-
+            setImageAsBackground(downloadUrl);
         }
     };
+    public void setImageAsBackground(final String imageUrl) {
+
+        Needle.onBackgroundThread().execute(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap myBitmap = null;
+                final WallpaperManager myWallpaperManager
+                        = WallpaperManager.getInstance(Book_Activity.this);
+                try {
+
+                    URL url = new URL(imageUrl);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoInput(true);
+                    connection.connect();
+                    InputStream input = connection.getInputStream();
+                    myBitmap = BitmapFactory.decodeStream(input);
+                    myWallpaperManager.setBitmap(myBitmap);
+                    showSnackbar("Done!");
+                } catch (IOException e) {
+                    e.printStackTrace();
+
+                }
+            }
+        });
+
+
+
+    }
+
+    public Bitmap getBitmapFromURL(final String src) {
+        final Bitmap[] bm = {null};
+        Needle.onBackgroundThread().execute(new Runnable() {
+            @Override
+            public void run() {
+                // something cpu-intensive and/or not UI-related
+                URL url = null;
+                try {
+                    url = new URL(src);
+                    bm[0] = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
+        return bm[0];
+    }
 }
 
 class DownloadsImage extends AsyncTask<String, Void, Void> {

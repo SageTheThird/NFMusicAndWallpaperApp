@@ -1,19 +1,18 @@
 package com.homie.nf.Songs;
 
-import android.app.Activity;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,44 +26,46 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.homie.nf.MainActivity;
 import com.homie.nf.R;
 
+
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.List;
 
 import me.tankery.lib.circularseekbar.CircularSeekBar;
 
+import static android.media.audiofx.AudioEffect.CONTENT_TYPE_MUSIC;
+import static android.media.audiofx.AudioEffect.EXTRA_AUDIO_SESSION;
+import static android.media.audiofx.AudioEffect.EXTRA_CONTENT_TYPE;
 
-public class PlayerActivity extends AppCompatActivity implements genius_fragment.OnFragmentInteractionListener, lyrics_frag.OnFragmentInteractionListener {
+
+public class PlayerActivity extends AppCompatActivity{
 
     private static final String TAG = "PlayerActivity";
     public static final int DEFAULT_INT_VALUE = 0;
     private Context mContext = PlayerActivity.this;
-    static MediaPlayer mediaPlayer;
+    public static MediaPlayer mediaPlayer;
     private CircularSeekBar seekBar;
     private Button mPause_btn, mGenius_btn, mLyrics_btn,mNext_btn, mPrev_btn;
     private TextView mSongname_view, mTotal_duration_view, mCurrent_duration_view;
     private String mLyric_file = "", mGenius_file = "";
     private Intent intent;
     private static ArrayList<String> mSongs_list;
-    private ImageView mBack_arrow;
+    private ImageView mBack_arrow,mEquilizer;
 
     private Handler myHandler = new Handler();
     //for song list
@@ -102,6 +103,12 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
     private static AudioManager mAudioManager;
 
 
+    //equilizer
+    public static NotificationCompat.Builder notificationBuilder;
+    public static NotificationManagerCompat notificationManager;
+
+    private static final int REQUEST_EQ = 0;
+
 
 
 
@@ -116,7 +123,9 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         //methods
         initWidgets();
         getIncomingIntent();
+
         playSong(mCurrentIndex);
+
 
         Thread thread = new runThread();
         thread.start();
@@ -141,10 +150,35 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         IntentFilter filter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         registerReceiver(mNoisyReceiver, filter);
         Log.d(TAG, "onCreate: Reciever Registered");
-        
+
+
+        mEquilizer.setOnClickListener(OpenEqualizerListener);
 
     }
 
+
+
+    public void openEqualizer() {
+
+        Intent eqIntent = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+        eqIntent.putExtra(EXTRA_CONTENT_TYPE, CONTENT_TYPE_MUSIC);
+        eqIntent.putExtra(EXTRA_AUDIO_SESSION, CONTENT_TYPE_MUSIC);
+
+        if ((eqIntent.resolveActivity(getPackageManager()) != null)) {
+            startActivityForResult(eqIntent, REQUEST_EQ);
+            //finish();
+        } else {
+            quickReturn();
+        }
+    }
+    public void quickReturn() {
+        Intent goHome = new Intent(Intent.ACTION_MAIN);
+        goHome.addCategory(Intent.CATEGORY_HOME);
+        goHome.setPackage("com.android.launcher");
+        goHome.addCategory(Intent.CATEGORY_LAUNCHER);
+        goHome.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(goHome);
+    }
     //-------------------------------AUDIO FOCUS CHANGE LISTENER----------------------/////
     //-------------------------------AUDIO FOCUS CHANGE LISTENER----------------------/////
 
@@ -169,21 +203,34 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
         if (mCurrentAudioFocusState == AUDIO_NO_FOCUS_NO_DUCK) {
             // We don't have audio focus and can't duck, so we have to pause
-            mediaPlayer.stop();
+            try {
+                mediaPlayer.stop();
+            }catch (NullPointerException e){
+
+                Log.d(TAG, "onHandleIntent: NullPointerException");
+            }catch (IllegalArgumentException e){
+
+                Log.d(TAG, "onHandleIntent: IllegalArgumentException");
+            }catch (IllegalStateException e){
+                Log.d(TAG, "onHandleIntent: IllegalStateException"+e.getMessage());
+            }
         } else {
 
             if (mCurrentAudioFocusState == AUDIO_NO_FOCUS_CAN_DUCK) {
                 // We're permitted to play, but only if we 'duck', ie: play softly
-                mediaPlayer.setVolume(VOLUME_DUCK, VOLUME_DUCK);
+                try {
+                    mediaPlayer.setVolume(VOLUME_DUCK, VOLUME_DUCK);
+                }catch (Exception e){
+                    Log.d(TAG, "configurePlayerState: Exception"+e.getMessage());
+                }
             } else {
-                mediaPlayer.setVolume(VOLUME_NORMAL, VOLUME_NORMAL);
-            }
+                try {
+                    mediaPlayer.setVolume(VOLUME_NORMAL, VOLUME_NORMAL);
 
-            // If we were playing when we lost focus, we need to resume playing.
-//            if (mPlayOnFocusGain) {
-//                resumeMediaPlayer();
-//                mPlayOnFocusGain = false;
-//            }
+                }catch (Exception e){
+                    Log.d(TAG, "configurePlayerState: Exception"+e.getMessage());
+                }
+            }
         }
     }
     public static void audioFocusListener(){
@@ -290,6 +337,7 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         mPrev_btn = findViewById(R.id.prevBtn);
         mTotal_duration_view = findViewById(R.id.fullDurationView);
         mCurrent_duration_view = findViewById(R.id.currentDuration);
+        mEquilizer = findViewById(R.id.equilizer);
 
 
     }
@@ -297,30 +345,32 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
 
     public void openGeniusFragment(String genius_url) {
+        genius_fragment fragment=new genius_fragment();
+        Bundle args=new Bundle();
+        args.putString(getString(R.string.genius_url),genius_url);
+        fragment.setArguments(args);
 
-        genius_fragment genius_fragment = com.homie.nf.Songs.genius_fragment.newInstance(genius_url);
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_right);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.add(R.id.frameLayout, genius_fragment, getString(R.string.GENIUS_FRAGMENT)).commit();
-
-    }
-
-    public void openLyricsFragment(String lyrics_file) {
-
-        lyrics_frag lyrics_fragment1 = lyrics_frag.newInstance(lyrics_file);
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_right);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.add(R.id.frameLayout, lyrics_fragment1, getString(R.string.LYRICS_FRAGMENT)).commit();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_right);
+        transaction.replace(R.id.frameLayout,fragment);
+        transaction.addToBackStack(getString(R.string.GENIUS_FRAGMENT));
+        transaction.commit();
 
     }
 
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-        onBackPressed();
+    public void openLyricsFragment(String lyrics_file_name) {
+
+
+        lyrics_frag fragment=new lyrics_frag();
+        Bundle args=new Bundle();
+        args.putString(getString(R.string.lyrics_file_name),lyrics_file_name);
+        fragment.setArguments(args);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_right);
+        transaction.replace(R.id.frameLayout,fragment);
+        transaction.addToBackStack(getString(R.string.lyrics_fragment));
+        transaction.commit();
     }
 
     public void playSong(int index) {
@@ -358,6 +408,9 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
                             @Override
                             public void onPrepared(MediaPlayer mp) {
                                 mp.start();
+
+
+
                                 seekBar.setProgress(0);
                                 //set max duration to seek_bar
                                 seekBar.setMax(mediaPlayer.getDuration());
@@ -377,11 +430,20 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
                                 Log.d("Prog", "run: " + mediaPlayer.getDuration());
                             }
                         });
+
                         mPause_btn.setBackgroundResource(R.drawable.pause_button);
 
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    }catch (NullPointerException e){
+
+                        Log.d(TAG, "onHandleIntent: NullPointerException");
+                    }catch (IllegalArgumentException e){
+
+                        Log.d(TAG, "onHandleIntent: IllegalArgumentException");
+                    }catch (IllegalStateException e){
+                        Log.d(TAG, "onHandleIntent: IllegalStateException"+e.getMessage());
+                    } catch (IOException e) {
+                        Log.d(TAG, "onHandleIntent: IOException"+e.getMessage());
                     }
                 }
 
@@ -396,6 +458,7 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        Animatoo.animateSplit(mContext);
 
     }
 
@@ -440,9 +503,16 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
                     seekBar.post(new Runnable() {
                         @Override
                         public void run() {
-                            seekBar.setProgress(mediaPlayer.getCurrentPosition());
-                            //set current duration to textview
-                            setDuration(mediaPlayer.getCurrentPosition(), mCurrent_duration_view);
+                            try {
+                                seekBar.setProgress(mediaPlayer.getCurrentPosition());
+                                //set current duration to textview
+                                setDuration(mediaPlayer.getCurrentPosition(), mCurrent_duration_view);
+                            }catch (NullPointerException e){
+                                Log.d(TAG, "run: NullPointerException"+e.getMessage());
+                            }catch (Exception e){
+                                Log.d(TAG, "run: Exception"+e.getMessage());
+                            }
+
                         }
                     });
 
@@ -455,6 +525,14 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
 
     ////--------------------------------------LISTENERS------------------------------------------/////
+
+    View.OnClickListener OpenEqualizerListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Log.d(TAG, "onClick: Open Equalizers");
+            openEqualizer();
+        }
+    };
     View.OnClickListener NextClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -515,23 +593,35 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
     View.OnClickListener BackClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            startActivity(new Intent(PlayerActivity.this, playlist_Activity.class));
+            startActivity(new Intent(PlayerActivity.this, playlist_Activity.class)
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
         }
     };
     View.OnClickListener PauseClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             //seekBar.setMax(totalLength);
-            seekBar.setMax(mediaPlayer.getDuration());
+            try {
+                seekBar.setMax(mediaPlayer.getDuration());
 
-            if (mediaPlayer.isPlaying()) {
+                if (mediaPlayer.isPlaying()) {
 
-                mPause_btn.setBackgroundResource(R.drawable.play_button);
-                mediaPlayer.pause();
-            } else if (!mediaPlayer.isPlaying()) {
-                mPause_btn.setBackgroundResource(R.drawable.pause_button);
-                mediaPlayer.start();
+                    mPause_btn.setBackgroundResource(R.drawable.play_button);
+                    mediaPlayer.pause();
+                } else if (!mediaPlayer.isPlaying()) {
+                    mPause_btn.setBackgroundResource(R.drawable.pause_button);
+                    mediaPlayer.start();
+                }
+            }catch (NullPointerException e){
+
+                Log.d(TAG, "onHandleIntent: NullPointerException");
+            }catch (IllegalArgumentException e){
+
+                Log.d(TAG, "onHandleIntent: IllegalArgumentException");
+            }catch (IllegalStateException e){
+                Log.d(TAG, "onHandleIntent: IllegalStateException"+e.getMessage());
             }
+
 
         }
     };
@@ -551,51 +641,46 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
         super.onStop();
 
-        if(!mediaPlayer.isPlaying()){
-            return;
-        }else{
+        try {
+            if(!mediaPlayer.isPlaying()){
+                return;
+            }else{
 
-            ServiceConnection serviceConnection=new ServiceConnection() {
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-
-                    Log.d(TAG, "onServiceConnected: Service Connected");
-                }
-
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
-
-                }
-            };
-
-
-            Intent intentExtra=new Intent(this,NotificationActionService.class);
+                Intent intentExtra=new Intent(this, NotificationActionService.class);
 //            intentExtra.putStringArrayListExtra(getString(R.string.songslist),mSongs_list);
 //            intentExtra.putExtra(getString(R.string.current_index),mCurrentIndex);
 
 
-            //ContextCompat.startForegroundService(this,intentExtra);
-            mContext.startService(intentExtra);
-            Log.d(TAG, "onStop:  intentExtra started");
+                //ContextCompat.startForegroundService(this,intentExtra);
+                mContext.startService(intentExtra);
+                Log.d(TAG, "onStop:  intentExtra started");
 
-            displayNotification(mContext);
+                displayNotification(mContext);
+            }
+        }catch (RuntimeException e){
+            Log.d(TAG, "onStop: RuntimeException"+e.getMessage());
+        }catch (Exception e){
+            Log.d(TAG, "onStop: Exception"+e.getMessage());
         }
+      
+
+    }
+    public static String songNameNotification(int index,Context context){
+
+
+        ArrayList<String> songs=getArrayList(context.getString(R.string.shared_array_list_key),context);
+        //int index=getCurrentIndexPref(getString(R.string.current_index),this);
+        String songname=songs.get(index);
+        String songnameminusMP3=songname.replace(".mp3","");
+        return songnameminusMP3;
 
     }
     private void displayNotification(Context context) {
 
-        
-
-
-        Bitmap artwork = BitmapFactory.decodeResource(getResources(), R.drawable.songs_thumbnail);
 
 
 
-
-
-
-       Intent  noiseIntent = new Intent(this, NotificationActionService.class)
-                .setAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        Bitmap artwork = BitmapFactory.decodeResource(getResources(), R.drawable.notifi_thumbnail);
 
         pauseIntent = new Intent(this, NotificationActionService.class)
                 .setAction(ACTION_PAUSE);
@@ -607,7 +692,6 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
                 .setAction(ACTION_NEXT);
         prevIntent = new Intent(this, NotificationActionService.class)
                 .setAction(ACTION_PREV);
-
 
         PendingIntent pausePendingIntent = PendingIntent.getService(context, 0,
                 pauseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -624,10 +708,11 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
 
 
-        NotificationCompat.Builder notificationBuilder =
+         notificationBuilder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_play)
-                        .setContentTitle("Why")
+                        .setContentTitle(songNameNotification
+                                (getCurrentIndexPref(getString(R.string.shared_current_index),this),this))
                         .setLargeIcon(artwork)
                         .setContentText("NF")
 
@@ -641,28 +726,34 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
                         .addAction(new NotificationCompat.Action(R.drawable.ic_play,
                                 "PlayAction", playPendingIntent))
 
-                        .addAction(new NotificationCompat.Action(R.drawable.ic_stop,
-                                "StopAction", stopPendingIntent))
-
                         .addAction(new NotificationCompat.Action(R.drawable.ic_next,
                                 "NextAction", nextPendingIntent))
 
+                        .addAction(new NotificationCompat.Action(R.drawable.ic_cross,
+                                "StopAction", stopPendingIntent))
+
                         .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
-                                .setShowActionsInCompactView(0,2,4)
-                                .setMediaSession(mediaSessionCompat.getSessionToken())
-                        )
+                                .setShowActionsInCompactView(0,2,3,4)
+                                .setMediaSession(mediaSessionCompat.getSessionToken()))
                         .setSubText("Playing")
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                ;
 
 
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        notificationManager = NotificationManagerCompat.from(context);
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
 
 
 
+
     }
+
+
+    ////////------------------------------------INTENT SERVICE-------------------////////////
+    ////////------------------------------------INTENT SERVICE-------------------////////////
     public static class NotificationActionService extends IntentService {
+        private static final String TAG = "NotificationActionServi";
         public NotificationActionService() {
             super(NotificationActionService.class.getSimpleName());
             Log.d(TAG, "NotificationActionService: IntentService ");
@@ -673,9 +764,6 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         public void onCreate() {
             super.onCreate();
             Log.d(TAG, "onCreate: IntentService");
-
-          
-
         }
 
         ArrayList<String> songs_list=new ArrayList<>();
@@ -699,13 +787,23 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
 
         public void playSongNotification(int index){
 
-           String songName = getSongs_list().get(index);
+            String songName=null;
+            try {
+                songName = getSongs_list().get(index);
+            }catch (NullPointerException e){
+
+                Log.d(TAG, "onHandleIntent: NullPointerException"+e.getMessage());
+            }catch (IllegalArgumentException e){
+                Log.d(TAG, "onHandleIntent: IllegalArgumentException"+e.getMessage());
+
+            }
+
             String FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath()
                     + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/";
 
             final String song_full = FOLDER_PATH + songName;
 
-            if (mediaPlayer != null) {
+            if (mediaPlayer != null || mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
                 mediaPlayer.reset();
 
@@ -731,12 +829,19 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
             }
         }
 
+        public void updateNotificationName(int index){
+            notificationBuilder.setContentTitle(PlayerActivity
+                    .songNameNotification(index, NotificationActionService.this));
+            PlayerActivity.songNameNotification(index, NotificationActionService.this);
+            notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+        }
+
 
         @Override
         public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
 
             Log.d(TAG, "onStartCommand: IntentService");
-            
+
             if(intent.getAction()==ACTION_NEXT){
 
                 setIndex_current(getCurrentIndexPref(getString(R.string.shared_current_index),this));
@@ -745,6 +850,11 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
             }
             if(intent.getAction()==ACTION_PREV){
                 Log.d(TAG, "onStartCommand: PAUSE");
+                setIndex_current(getCurrentIndexPref(getString(R.string.shared_current_index),this));
+                setSongs_list(getArrayList(getString(R.string.shared_array_list_key),this));
+            }
+            if(intent.getAction()==ACTION_PLAY){
+                Log.d(TAG, "onStartCommand: PLAY");
                 setIndex_current(getCurrentIndexPref(getString(R.string.shared_current_index),this));
                 setSongs_list(getArrayList(getString(R.string.shared_array_list_key),this));
             }
@@ -762,6 +872,7 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
         @Override
         protected void onHandleIntent(Intent intent) {
 
+            Handler mHandler = new Handler(getMainLooper());
 
 //            if(intent.getAction()==android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY){
 //                Log.d(TAG, "onHandleIntent: ACTION_AUDIO_BECOMING_NOISY");
@@ -775,10 +886,29 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
             //PAUSE
             if(intent.getAction()==(ACTION_PAUSE)){
                 Log.d(TAG, "onHandleIntent: ACTION PAUSE array : ");
-                if(mediaPlayer!=null){
-                    mediaPlayer.pause();
-                }else {
-                    return;
+                try {
+                    //Handler mHandler = new Handler(getMainLooper());
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Toast.makeText(getApplicationContext(), "Pause Pressed", Toast.LENGTH_SHORT).show();
+                            if(mediaPlayer!=null && mediaPlayer.isPlaying()){
+                                mediaPlayer.pause();
+                            }else {
+                                Toast.makeText(NotificationActionService.this, "App is Terminated", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                        }
+                    });
+
+                }catch (NullPointerException e){
+
+                    Log.d(TAG, "onHandleIntent: NullPointerException");
+                }catch (IllegalArgumentException e){
+
+                    Log.d(TAG, "onHandleIntent: IllegalArgumentException");
+                }catch (IllegalStateException e){
+                    Log.d(TAG, "onHandleIntent: IllegalStateException"+e.getMessage());
                 }
 
 
@@ -787,63 +917,150 @@ public class PlayerActivity extends AppCompatActivity implements genius_fragment
             //PLAY
             if(intent.getAction()==(ACTION_PLAY)){
                 Log.d(TAG, "onHandleIntent: ACTION_PLAY");
-                if(mediaPlayer.isPlaying()){
-                    return;
-                }else{
-                    mediaPlayer.start();
+                try {
+                    //Handler mHandler = new Handler(getMainLooper());
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Toast.makeText(getApplicationContext(), "Play Pressed", Toast.LENGTH_SHORT).show();
+                            if(mediaPlayer!=null){
+                                return;
+                            }else if(mediaPlayer==null){
+                                Toast.makeText(NotificationActionService.this, "App is Terminated", Toast.LENGTH_LONG).show();
+                            }else if(!mediaPlayer.isPlaying()){
+                                mediaPlayer.start();
+                            }
+                        }
+                    });
+
+                }catch (NullPointerException e){
+
+                    Log.d(TAG, "onHandleIntent: NullPointerException");
+                }catch (IllegalArgumentException e){
+
+                    Log.d(TAG, "onHandleIntent: IllegalArgumentException");
+                }catch (IllegalStateException e){
+                    Log.d(TAG, "onHandleIntent: IllegalStateException"+e.getMessage());
                 }
+
             }
 
             //STOP
             if(intent.getAction()==(ACTION_STOP)){
                 Log.d(TAG, "onHandleIntent: ACTION_STOP");
-                if(mediaPlayer!=null){
-                mediaPlayer.stop();
-                mediaPlayer.release();
-                NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID);
-                stopSelf();
+                try {
+                    //Handler mHandler = new Handler(getMainLooper());
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Toast.makeText(getApplicationContext(), "Stop Pressed", Toast.LENGTH_SHORT).show();
+                            if(mediaPlayer!=null){
+                                mediaPlayer.stop();
+                                NotificationManagerCompat.from(NotificationActionService.this).cancel(NOTIFICATION_ID);
+                                stopSelf();
+                            }
+                            else {
+                                NotificationManagerCompat.from(NotificationActionService.this).cancel(NOTIFICATION_ID);
+                                stopSelf();
+                            }
+                        }
+                    });
+
+                }catch (NullPointerException e){
+
+                    Log.d(TAG, "onHandleIntent: NullPointerException");
+                }catch (IllegalArgumentException e){
+
+                    Log.d(TAG, "onHandleIntent: IllegalArgumentException");
+                }catch (IllegalStateException e){
+                    Log.d(TAG, "onHandleIntent: IllegalStateException"+e.getMessage());
                 }
-                else {
-                    NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID);
-                    stopSelf();
-                }
+
+
             }
 
             //NEXT
             if(intent.getAction()==(ACTION_NEXT)){
                 Log.d(TAG, "onHandleIntent: ACTION_NEXT");
-                if(mediaPlayer!=null){
-                    int index=getIndex_current();
-                    index++;
-                    index %= getSongs_list().size();
-                    // playerActivity.setSongName(mCurrentIndex);
-                    playSongNotification(index);
-                    Log.d(TAG, "ACTION_NEXT: incremented index : "+index);
-                    saveCurrentIndexPref(getString(R.string.shared_current_index),index,this);
-                }else {
-                    return;
+                try {
+
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Toast.makeText(NotificationActionService.this, "Next Pressed", Toast.LENGTH_LONG).show();
+                            if(mediaPlayer!=null){
+                                int index=getIndex_current();
+                                index++;
+                                index %= getSongs_list().size();
+                                // playerActivity.setSongName(mCurrentIndex);
+                                updateNotificationName(index);
+                                playSongNotification(index);
+
+                                Log.d(TAG, "ACTION_NEXT: incremented index : "+index);
+                                saveCurrentIndexPref(getString(R.string.shared_current_index),index, NotificationActionService.this);
+                            }else {
+                                Toast.makeText(NotificationActionService.this, "App is Terminated", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                        }
+                    });
+
+                }catch (NullPointerException e){
+
+                    Log.d(TAG, "onHandleIntent: NullPointerException");
+                }catch (IllegalArgumentException e){
+
+                    Log.d(TAG, "onHandleIntent: IllegalArgumentException");
+                }catch (IllegalStateException e){
+                    Log.d(TAG, "onHandleIntent: IllegalStateException"+e.getMessage());
                 }
 
             }
 
             //PREVIOUS
             if(intent.getAction()==(ACTION_PREV)){
-                if(mediaPlayer!=null){
-                    Log.d(TAG, "onHandleIntent: ACTION_PREV");
-                    int index=getIndex_current();
-                    index = index > 0 ? index - 1 : getSongs_list().size() - 1;
-                    playSongNotification(index);
-                    Log.d(TAG, "ACTION_NEXT: decremented index : "+index);
-                    saveCurrentIndexPref(getString(R.string.shared_current_index),index,this);
-                }else {
-                    return;
+                try {
+                    // Handler mHandler = new Handler(getMainLooper());
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Toast.makeText(getApplicationContext(), "Prev Pressed", Toast.LENGTH_SHORT).show();
+                            if(mediaPlayer!=null){
+                                Log.d(TAG, "onHandleIntent: ACTION_PREV");
+                                int index=getIndex_current();
+                                index = index > 0 ? index - 1 : getSongs_list().size() - 1;
+                                playSongNotification(index);
+                                Log.d(TAG, "ACTION_NEXT: decremented index : "+index);
+                                updateNotificationName(index);
+                                saveCurrentIndexPref(getString(R.string.shared_current_index),index, NotificationActionService.this);
+                            }else {
+                                Toast.makeText(NotificationActionService.this, "App is Terminated", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                        }
+                    });
+
+                }catch (NullPointerException e){
+
+                    Log.d(TAG, "onHandleIntent: NullPointerException");
+                }catch (IllegalArgumentException e){
+
+                    Log.d(TAG, "onHandleIntent: IllegalArgumentException");
+                }catch (IllegalStateException e){
+                    Log.d(TAG, "onHandleIntent: IllegalStateException"+e.getMessage());
                 }
 
             }
 
 
-                }
         }
+    }
+
+    ////////------------------------------------INTENT SERVICE-------------------////////////
+    ////////------------------------------------INTENT SERVICE-------------------////////////
+
+
     private BroadcastReceiver mNoisyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {

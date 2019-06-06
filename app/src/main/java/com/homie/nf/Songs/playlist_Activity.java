@@ -23,9 +23,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -72,8 +74,10 @@ public class playlist_Activity extends AppCompatActivity {
     private Context mContext=playlist_Activity.this;
     private String directory;
 
-    private ArrayList<String> serverNameList =new ArrayList<>();
+
     private ArrayList<String> filesNameList=new ArrayList<>();
+    private EditText mSearchEditText;
+
 
 
 
@@ -85,90 +89,46 @@ public class playlist_Activity extends AppCompatActivity {
         setContentView(R.layout.activity_playlist_);
 
 
+        //references
         firebaseFirestore = FirebaseFirestore.getInstance();
         collectionReference = firebaseFirestore.collection(getString(R.string.store_song_db));
-        directorySetup();
 
-
-        //------------------------------------------TEST---------------------------
-
-        //getting song names from server and adding to serverNameList
-        // arraylist along with index and displaying in logs
-        CollectionReference wallCollection=firebaseFirestore.collection(getString(R.string.storage_song_db));
-        wallCollection.orderBy("id",Query.Direction.DESCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-
-                int index=0;
-                for (DocumentSnapshot ds:queryDocumentSnapshots){
-                    String name=ds.getString(getString(R.string.field_song_name));
-
-                    serverNameList.add(index,name);
-                    index++;
-                }
-
-                //PlayerActivity.saveArrayList(serverNameList,getString(R.string.shared_server_songs_list),mContext);
-
-                Log.d(TAG, "onEvent: Server Songs ArrayList Saved");
-                int indexDif=0;
-                for(String indivUrl: serverNameList){
-
-                    Log.d(TAG, "onEvent: Index : "+indexDif + " "  +indivUrl);
-                    indexDif++;
-
-                }
-            }
-
-        });
-
-        //getting song names from folder of songs and adding to filesNameList arraylist
-
-        // arraylist along with index and displaying in logs
-        int filesIndex=0;
-        //String path = directory;
-        Log.d("Folder Files", "Path: " + directory);
-        File directoryFolder = new File(directory);
-        File[] files = directoryFolder.listFiles();
-        Log.d("Folder Files", "Size: "+ files.length);
-        for (int i = 0; i < files.length; i++)
-        {
-            Log.d("Files", "FileName:" + files[i].getName());
-            filesNameList.add(filesIndex,files[i].getName());
-            filesIndex++;
-
-        }
-        PlayerActivity.saveArrayList(filesNameList,getString(R.string.shared_array_list_key),mContext);
-        int displayIndex=0;
-        for(String file:filesNameList){
-            Log.d(TAG, "files from folder: " +displayIndex+" "+file );
-            displayIndex++;
-        }
-
-        //-------------------------------------------TEST--------------------------------
         //methods
+        directorySetup();
+        getFilesListFromFolder();
         initImageLoader();
         layoutImageLoading();
-
         internetConnectivity();
         setupRecyclerView();
 
         //listeners
         songRecyclerViewAdapter.setOnItemClickListener(SongClickListener);
 
-
-        for(int i=0;i<serverNameList.size();i++){
-
-            if(serverNameList.contains(filesNameList.get(i))){
-                tick_imageView.setVisibility(View.VISIBLE);
-                Log.d(TAG, "onCreate: items matched : "+i);
-
-            }
-        }
-
-
     }
 
 
+    private void getFilesListFromFolder(){
+        int filesIndex=0;
+        //String path = directory;
+        Log.d("Folder Files", "Path: " + directory);
+        File directoryFolder = new File(directory);
+        File[] files = directoryFolder.listFiles();
+        //Log.d("Folder Files", "Size: "+ files.length);
+
+        if(files.length == 0){
+            Log.d(TAG, "onCreate: Folder Empty");
+
+        }else {
+
+            for (int i = 0; i < files.length; i++)
+            {
+                Log.d("Files", "FileName:" + files[i].getName());
+                filesNameList.add(filesIndex,files[i].getName());
+                filesIndex++;
+            }
+            PlayerActivity.saveArrayList(filesNameList,getString(R.string.shared_array_list_key),mContext);
+        }
+    }
 
 
     private void directorySetup(){
@@ -216,6 +176,7 @@ public class playlist_Activity extends AppCompatActivity {
                            .putExtra(getString(R.string.GENIUSFILENAME), genius_url)
                            .putExtra(getString(R.string.LYRICSFILE), lyrics_file_name)
                    );
+                   Animatoo.animateZoom(mContext);
 
 
                }
@@ -245,11 +206,13 @@ public class playlist_Activity extends AppCompatActivity {
     }
 
 
+
     private void layoutImageLoading() {
         playlist_background = findViewById(R.id.playlist_background);
         //imageView_sideButton = findViewById(R.id.playlist_sideButton);
         imageView_title = findViewById(R.id.playlistimageView_title);
         tick_imageView = findViewById(R.id.tick);
+        mSearchEditText = findViewById(R.id.searchEditText);
 
 
         /*//Playlist Background Image
@@ -358,8 +321,13 @@ public class playlist_Activity extends AppCompatActivity {
                 long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                 //Checking if the received broadcast is for our enqueued download by matching download id
                 if (downloadID == id) {
+
+
                     Toast.makeText(context, "File Saved", Toast.LENGTH_SHORT).show();
+                    getFilesListFromFolder();
+                    songRecyclerViewAdapter.notifyDataSetChanged();
                     dialog.dismiss();
+
                 }
             }
         };
@@ -427,6 +395,7 @@ public class playlist_Activity extends AppCompatActivity {
     public void onBackPressed() {
 
         super.onBackPressed();
+        Animatoo.animateSplit(mContext);
     }
 
     @Override

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,7 +8,8 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        tools:ignore="UselessParent">
 
 
         <!--<ImageView
@@ -28,9 +30,9 @@
             android:layout_marginStart="15dp"
             android:layout_toRightOf="@id/circularSeekBar"
             android:fontFamily="@font/francois_one"
-            android:text="8:21"
             android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            tools:ignore="RelativeOverlap" />
 
         <TextView
             android:id="@+id/currentDuration"
@@ -48,18 +50,19 @@
             android:layout_width="160dp"
             android:layout_height="160dp"
             android:layout_centerInParent="true"
+
             />
         <me.tankery.lib.circularseekbar.CircularSeekBar
             android:id="@+id/circularSeekBar"
             android:layout_width="186dp"
             android:layout_height="186dp"
             android:layout_centerHorizontal="true"
-            app:cs_circle_color="#1B000000"
-            app:cs_circle_progress_color="#1B6369"
-            app:cs_circle_stroke_width="14dp"
-            app:cs_pointer_color="#FFF"
-            app:cs_pointer_stroke_width="14dp"
-            app:cs_circle_style = "square"
+            app:cs_circle_color="@color/seekbar_circle"
+            app:cs_circle_progress_color="@color/progress_seek"
+            app:cs_circle_stroke_width="5dp"
+            app:cs_pointer_color="@color/white"
+            app:cs_pointer_stroke_width="20dp"
+            app:cs_circle_style = "round"
             />
 
     </RelativeLayout>

@@ -20,7 +20,7 @@
             android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
             android:singleLine="true"
-            android:text="NF-Remember This"
+            android:text="@string/nf_remember_this"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -37,7 +37,7 @@
             android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
             android:singleLine="true"
-            android:text="NF"
+            android:text="@string/nf"
             android:textColor="@color/white"
             android:textSize="18sp"
              />

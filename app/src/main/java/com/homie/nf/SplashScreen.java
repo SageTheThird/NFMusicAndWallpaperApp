@@ -1,5 +1,6 @@
 package com.homie.nf;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Handler;
@@ -10,15 +11,17 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
+import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.squareup.picasso.Picasso;
 
 
 public class SplashScreen extends AppCompatActivity {
 
-    ImageView imageView_rightBox;
-    ImageView imageView_fontOutcast;
-    ImageView imageView_background;
-    ImageView imageView_left_boxes;
+    private ImageView imageView_rightBox;
+    private ImageView imageView_fontOutcast;
+    private ImageView imageView_background;
+    private ImageView imageView_left_boxes;
+    private Context mContext=SplashScreen.this;
 
     AnimationDrawable logoAnimation;
     @Override
@@ -56,6 +59,7 @@ public class SplashScreen extends AppCompatActivity {
             public void run() {
                 Intent i = new Intent(SplashScreen.this, MainActivity.class);
                 startActivity(i);
+                Animatoo.animateZoom(mContext);
                 finish();
             }
         }, 3000);

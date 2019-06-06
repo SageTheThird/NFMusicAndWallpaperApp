@@ -54,6 +54,9 @@ public class ImageRecyclerView extends FirestoreRecyclerAdapter<Wallpaper,ImageR
 
         UniversalImageLoader.setImage(model.getDownloadUrl(),holder.imageViewWall,holder.progressBar,"");
 
+        int width=context.getResources().getDisplayMetrics().widthPixels;
+        int cardWidth=width/3;
+        holder.cardView.setLayoutParams(new CardView.LayoutParams(cardWidth,900));
 
     }
 

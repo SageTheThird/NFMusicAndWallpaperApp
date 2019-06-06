@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:drawableLeft="@drawable/ic_search"
+        android:layout_marginEnd="50dp"
+        android:layout_marginStart="50dp"
+        android:background="@null"
+        android:focusedByDefault="false"
+        android:inputType="text"
+        android:hint="Search"
+        android:id="@+id/searchEditText"
+        />
+
+</RelativeLayout>
