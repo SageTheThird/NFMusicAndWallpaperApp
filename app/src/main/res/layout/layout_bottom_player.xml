@@ -10,18 +10,22 @@
     <Button
         android:id="@+id/lyrics_button"
         android:layout_width="match_parent"
-        android:layout_height="65dp"
-        android:background="@drawable/lyrics_button"
+        android:layout_height="45dp"
+        android:background="@drawable/rectangle"
         android:stateListAnimator="@null"
+        android:text="lyrics"
+        android:textColor="@color/white"
         android:layout_weight="50"
          />
     <Button
         android:id="@+id/geniusbutton"
         android:layout_width="match_parent"
-        android:layout_height="65dp"
-        android:background="@drawable/genius_button"
+        android:layout_height="45dp"
+        android:background="@drawable/rectangle"
         android:stateListAnimator="@null"
         android:layout_weight="50"
+        android:text="Genius"
+        android:textColor="@color/white"
         />
 
 </LinearLayout>

@@ -24,38 +24,28 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.homie.nf.Adapters.SongRecyclerView;
-import com.homie.nf.Models.RowItem;
-
-import com.homie.nf.Songs.PlayerActivity;
+import com.homie.nf.Extras.Extras;
 import com.homie.nf.Songs.playlist_Activity;
 import com.homie.nf.Utils.UniversalImageLoader;
 import com.homie.nf.Wallpapers.WallpaperMain;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
-
 import java.io.File;
-import java.util.ArrayList;
-
 import dmax.dialog.SpotsDialog;
 
 
@@ -67,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private ActionBarDrawerToggle myToggle;
     private NavigationView navView;
-    private ImageView mBackground_image, mTitle_image;
+    private ImageView mBackground_image;
     private Context mContext = MainActivity.this;
 
     private StorageReference storageReference;
@@ -188,6 +178,12 @@ public class MainActivity extends AppCompatActivity {
                         Animatoo.animateZoom(mContext);
 
                         break;
+                    case R.id.extra_sideMenu:
+                        checkUserPermission();
+                        startActivity(new Intent(MainActivity.this, Extras.class));
+                        Animatoo.animateZoom(mContext);
+
+                        break;
 
 
                 }
@@ -209,17 +205,11 @@ public class MainActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.main_toolbar);
         navView = findViewById(R.id.navigationView);
         mBackground_image = findViewById(R.id.background_imageview);
-        mTitle_image = findViewById(R.id.imageView_title);
+
 
     }
 
     private void imageLoading() {
-
-        Picasso
-                .with(this)
-                .load(R.drawable.title)
-                .placeholder(R.drawable.back_arrow)
-                .into(mTitle_image);
         Picasso
                 .with(this)
                 .load(R.drawable.test_background)

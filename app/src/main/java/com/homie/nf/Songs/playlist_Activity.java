@@ -65,7 +65,7 @@ public class playlist_Activity extends AppCompatActivity {
     private CollectionReference collectionReference;
     private SongRecyclerView songRecyclerViewAdapter;
     private StorageReference storageReference;
-    private ImageView playlist_background, imageView_title, tick_imageView;
+    private ImageView playlist_background;
     private ConnectivityManager connectivityManager;
     private NetworkInfo networkInfo;
     //static Progress progress;
@@ -166,11 +166,12 @@ public class playlist_Activity extends AppCompatActivity {
 
             //if file is there in the fileNameList i-e present in the folder it will play it
                if(filesNameList.contains(documentSnapshot.getString(getString(R.string.field_song_name)))){
+                   int index=filesNameList.indexOf(song_name);
                    Log.d(TAG, "onItemClick: song found in the arrayList/directory");
                    showToast("Playing..");
 
                    startActivity(new Intent(playlist_Activity.this, PlayerActivity.class)
-                           .putExtra(getString(R.string.position_song),position)
+                           .putExtra(getString(R.string.position_song),index)
                            .putStringArrayListExtra(getString(R.string.songslist),filesNameList)
                            .putExtra(getString(R.string.songname), song_name)
                            .putExtra(getString(R.string.GENIUSFILENAME), genius_url)
@@ -210,38 +211,8 @@ public class playlist_Activity extends AppCompatActivity {
     private void layoutImageLoading() {
         playlist_background = findViewById(R.id.playlist_background);
         //imageView_sideButton = findViewById(R.id.playlist_sideButton);
-        imageView_title = findViewById(R.id.playlistimageView_title);
-        tick_imageView = findViewById(R.id.tick);
         mSearchEditText = findViewById(R.id.searchEditText);
 
-
-        /*//Playlist Background Image
-        String imageUri1 = getString(R.string.drawable_universal) + R.drawable.playlist_blurred;
-        UniversalImageLoader.setImage(imageUri1,playlist_background,null,"");
-
-        //Side Button ImageView
-        String imageUri2 = getString(R.string.drawable_universal) + R.drawable.ic_drawer;
-        UniversalImageLoader.setImage(imageUri2,imageView_sideButton,null,"");
-
-        //title ImageView
-        //Side Button ImageView
-        String imageUri3 = getString(R.string.drawable_universal) + R.drawable.title;
-        UniversalImageLoader.setImage(imageUri3,imageView_title,null,"");*/
-
-        Picasso
-                .with(this)
-                .load(R.drawable.title)
-                // .resize(700,700)
-
-                .placeholder(R.drawable.back_arrow)
-                .into(imageView_title);
-       /* Picasso
-                .with(this)
-                .load(R.drawable.ic_drawer)
-                // .resize(700,700)
-
-                .placeholder(R.drawable.ic_search_black_24dp)
-                .into(imageView_sideButton);*/
         Picasso
                 .with(this)
                 .load(R.drawable.playlist_blurred)

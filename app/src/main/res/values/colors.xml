@@ -18,5 +18,6 @@
     <color name="seekbar_circle">#1B000000</color>
     <color name="drawer_background">#272F32</color>
     <color name="wallpaper_background">#0C0F0A</color>
+    <color name="lyric_button">#041016</color>
 
 </resources>

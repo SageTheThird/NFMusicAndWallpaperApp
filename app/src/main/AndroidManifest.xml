@@ -33,6 +33,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".Songs.playlist_Activity" />
+        <activity android:name=".Extras.Extras" />
         <activity
             android:name=".Songs.PlayerActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />

@@ -892,8 +892,12 @@ public class PlayerActivity extends AppCompatActivity{
                         @Override
                         public void run() {
                             //Toast.makeText(getApplicationContext(), "Pause Pressed", Toast.LENGTH_SHORT).show();
-                            if(mediaPlayer!=null && mediaPlayer.isPlaying()){
+                            if(mediaPlayer!=null){
                                 mediaPlayer.pause();
+                            }else if(mediaPlayer.isPlaying()){
+                                mediaPlayer.pause();
+                            }else if(mediaPlayer==null){
+                                Toast.makeText(NotificationActionService.this, "No Track Playing", Toast.LENGTH_LONG).show();
                             }else {
                                 Toast.makeText(NotificationActionService.this, "App is Terminated", Toast.LENGTH_LONG).show();
                                 return;
@@ -924,10 +928,13 @@ public class PlayerActivity extends AppCompatActivity{
                         public void run() {
                             //Toast.makeText(getApplicationContext(), "Play Pressed", Toast.LENGTH_SHORT).show();
                             if(mediaPlayer!=null){
+                                mediaPlayer.start();
                                 return;
                             }else if(mediaPlayer==null){
                                 Toast.makeText(NotificationActionService.this, "App is Terminated", Toast.LENGTH_LONG).show();
                             }else if(!mediaPlayer.isPlaying()){
+                                mediaPlayer.start();
+                            }else if(mediaPlayer!=null && !mediaPlayer.isPlaying()){
                                 mediaPlayer.start();
                             }
                         }

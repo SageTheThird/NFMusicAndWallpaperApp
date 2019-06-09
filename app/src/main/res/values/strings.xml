@@ -48,6 +48,7 @@
     <string name="shared_current_index">current_index</string>
     <string name="shared_server_songs_list">shared_server_songs_list</string>
     <string name="shared_run_once">shared_run_once</string>
+    <string name="extras_songs_list">extras_songs_list</string>
 
 
     <!--Fragment Names-->
@@ -57,6 +58,14 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="nf_remember_this">NF-Remember This</string>
     <string name="nf">NF</string>
+
+    <!--Song Fields-->
+    <string name="song_song_name">song_name</string>
+    <string name="song_id">id</string>
+    <string name="song_download_url">download_url</string>
+    <string name="song_genius_url">genius_url</string>
+
+
 
 
 </resources>
