@@ -125,6 +125,11 @@ public class playlist_Activity extends AppCompatActivity {
                             .putExtra(getString(R.string.songname), song_name)
                             .putExtra(getString(R.string.GENIUSFILENAME), genius_url)
                             .putExtra(getString(R.string.LYRICSFILE), lyrics_file_name)
+                            .putExtra(getString(R.string.coming_from_playlist_activity)
+                                    , getString(R.string.coming_from_playlist_activity))
+                            .putExtra(getString(R.string.coming_from_extra_activity_int)
+                                    ,20)
+
                     );
                     Animatoo.animateZoom(mContext);
 

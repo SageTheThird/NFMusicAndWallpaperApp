@@ -200,6 +200,10 @@ public class Extras extends AppCompatActivity {
                             .putExtra(getString(R.string.songname), song_name)
                             .putExtra(getString(R.string.GENIUSFILENAME), genius_url)
                             .putExtra(getString(R.string.LYRICSFILE), lyrics_file_name)
+                            .putExtra(getString(R.string.coming_from_extra_activity)
+                                    , getString(R.string.coming_from_extra_activity))
+                            .putExtra(getString(R.string.coming_from_extra_activity_int)
+                                    ,10)
                     );
                     Animatoo.animateZoom(mContext);
 

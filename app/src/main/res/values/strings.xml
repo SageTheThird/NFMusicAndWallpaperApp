@@ -70,6 +70,15 @@
     <string name="wall_download_url">download_url</string>
     <string name="wall_id">id</string>
 
+    <!--ExtraActivity Intent-->
+    <string name="coming_from_extra_activity">Extra Activity</string>
+    <string name="coming_from_extra_activity_int">coming_from_extra_int</string>
+    <string name="coming_from_extra_activity_int_value">10</string>
+
+    <!--ExtraActivity Intent-->
+    <string name="coming_from_playlist_activity">PlayList Activity</string>
+    <string name="coming_from_playlist_activity_int">coming_from_playlist</string>
+    <string name="coming_from_playlist_activity_int_value">20</string>
 
 
 </resources>

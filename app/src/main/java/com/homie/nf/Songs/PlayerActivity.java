@@ -104,6 +104,8 @@ public class PlayerActivity extends AppCompatActivity{
 
     private static final int REQUEST_EQ = 0;
 
+    private int activityIdentifier;
+
 
 
 
@@ -119,7 +121,7 @@ public class PlayerActivity extends AppCompatActivity{
         initWidgets();
         getIncomingIntent();
 
-        playSong(mCurrentIndex);
+        playSong(mCurrentIndex,activityIdentifier);
 
 
         Thread thread = new runThread();
@@ -302,6 +304,12 @@ public class PlayerActivity extends AppCompatActivity{
         mLyric_file = intent.getStringExtra(getString(R.string.LYRICSFILE));
         mGenius_file = intent.getStringExtra(getString(R.string.GENIUSFILENAME));
 
+        if(intent.hasExtra(getString(R.string.coming_from_extra_activity))){
+            activityIdentifier=intent.getIntExtra(getString(R.string.coming_from_extra_activity_int),1);
+        }
+        if(intent.hasExtra(getString(R.string.coming_from_playlist_activity))){
+            activityIdentifier=intent.getIntExtra(getString(R.string.coming_from_playlist_activity_int),2);
+        }
         mCurrentIndex = intent.getIntExtra(getString(R.string.position_song), DEFAULT_INT_VALUE);
         mSongs_list = intent.getStringArrayListExtra(getString(R.string.songslist));
         //saveArrayList(mSongs_list,getString(R.string.shared_array_list_key),mContext);
@@ -368,7 +376,8 @@ public class PlayerActivity extends AppCompatActivity{
         transaction.commit();
     }
 
-    public void playSong(int index) {
+    public void playSong(int index, final int activityIdentifier) {
+        Log.d(TAG, "playSong: Identifier : "+activityIdentifier);
         String songName = null;
         try {
             songName = mSongs_list.get(index);
@@ -376,8 +385,17 @@ public class PlayerActivity extends AppCompatActivity{
             showToast("No offline files in directory");
             e.printStackTrace();
         }
-        String FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath()
-                + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/";
+        String FOLDER_PATH=null;
+        if(activityIdentifier==20){
+            FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath()
+                    + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/";
+            Log.d(TAG, "playSong: Identifier : Playlist Path");
+        }
+        if(activityIdentifier==10){
+            FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath()
+                    + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Extras/";
+            Log.d(TAG, "playSong: Identifier : Extras Path : "+FOLDER_PATH);
+        }
         final String song_full = FOLDER_PATH + songName;
         if (mPause_btn.getBackground().equals(R.drawable.pause_button)) {
             mediaPlayer.stop();
@@ -418,7 +436,7 @@ public class PlayerActivity extends AppCompatActivity{
                                         mCurrentIndex++;
                                         mCurrentIndex %= mSongs_list.size();
                                         setSongName(mCurrentIndex);
-                                        playSong(mCurrentIndex);
+                                        playSong(mCurrentIndex,activityIdentifier);
 
                                     }
                                 });
@@ -536,7 +554,7 @@ public class PlayerActivity extends AppCompatActivity{
             mCurrentIndex++;
             mCurrentIndex %= mSongs_list.size();
             setSongName(mCurrentIndex);
-            playSong(mCurrentIndex);
+            playSong(mCurrentIndex,activityIdentifier);
 
         }
     };
@@ -547,7 +565,7 @@ public class PlayerActivity extends AppCompatActivity{
             Log.d(TAG, "onClick: next button");
             mCurrentIndex = mCurrentIndex > 0 ? mCurrentIndex - 1 : mSongs_list.size() - 1;
             setSongName(mCurrentIndex);
-            playSong(mCurrentIndex);
+            playSong(mCurrentIndex,activityIdentifier);
         }
     };
     CircularSeekBar.OnCircularSeekBarChangeListener SeekBarChangeListener = new CircularSeekBar.OnCircularSeekBarChangeListener() {
