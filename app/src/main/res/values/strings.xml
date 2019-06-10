@@ -66,6 +66,10 @@
     <string name="song_genius_url">genius_url</string>
 
 
+    <!--Wallpaper Fields-->
+    <string name="wall_download_url">download_url</string>
+    <string name="wall_id">id</string>
+
 
 
 </resources>

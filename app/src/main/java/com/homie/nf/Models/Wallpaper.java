@@ -2,31 +2,39 @@ package com.homie.nf.Models;
 
 public class Wallpaper {
 
-    private String downloadUrl;
-    private int priority;
+    private String download_url;
+    private String id;
 
     public Wallpaper() {
 
     }
 
-    public Wallpaper(String downloadUrl, int priority) {
-        this.downloadUrl=downloadUrl;
-        this.priority=priority;
+    @Override
+    public String toString() {
+        return "Wallpaper{" +
+                "download_url='" + download_url + '\'' +
+                ", id='" + id + '\'' +
+                '}';
     }
 
-    public String getDownloadUrl() {
-        return downloadUrl;
+    public Wallpaper(String download_url, String id) {
+        this.download_url = download_url;
+        this.id = id;
     }
 
-    public int getPriority() {
-        return priority;
+    public String getDownload_url() {
+        return download_url;
     }
 
-    public void setDownloadUrl(String downloadUrl) {
-        this.downloadUrl = downloadUrl;
+    public void setDownload_url(String download_url) {
+        this.download_url = download_url;
     }
 
-    public void setPriority(int priority) {
-        this.priority = priority;
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

@@ -96,6 +96,8 @@ public class UltraPagerAdapter extends PagerAdapter {
         return item_view;
     }
 
+
+
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.removeView((LinearLayout) object);

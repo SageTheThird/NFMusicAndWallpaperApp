@@ -35,8 +35,8 @@
         android:layout_below="@id/relaTive1">
 
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerview"
+        <ListView
+            android:id="@+id/listViewPlaylist"
             android:layout_width="match_parent"
 
             android:layout_height="match_parent"

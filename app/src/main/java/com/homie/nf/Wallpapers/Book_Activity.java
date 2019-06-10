@@ -63,6 +63,7 @@ public class Book_Activity extends AppCompatActivity {
     private Context mContext = Book_Activity.this;
 
     private static CoordinatorLayout coordinatorLayout;
+    private ViewPager viewpager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,10 +133,10 @@ public class Book_Activity extends AppCompatActivity {
 
     private void adapterSetup() {
 
-        ViewPager ultraViewPager = findViewById(R.id.ultraViewPager);
+        viewpager = findViewById(R.id.ultraViewPager);
         PagerAdapter adapter = new UltraPagerAdapter(false, imagesUrlLis, Book_Activity.this, urlPosition);
-        ultraViewPager.setAdapter(adapter);
-        ultraViewPager.setCurrentItem(urlPosition);
+        viewpager.setAdapter(adapter);
+        viewpager.setCurrentItem(urlPosition);
 
     }
 
@@ -147,7 +148,7 @@ public class Book_Activity extends AppCompatActivity {
     View.OnClickListener downloadBtnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            DownloadImage(downloadUrl);
+            DownloadImage(imagesUrlLis.get(viewpager.getCurrentItem()));
 
         }
     };
@@ -156,7 +157,7 @@ public class Book_Activity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             showSnackbar("Setting Wallpaper");
-            setImageAsBackground(downloadUrl);
+            setImageAsBackground(imagesUrlLis.get(viewpager.getCurrentItem()));
         }
     };
     public void setImageAsBackground(final String imageUrl) {

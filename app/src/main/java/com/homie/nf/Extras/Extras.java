@@ -109,37 +109,35 @@ public class Extras extends AppCompatActivity {
 
         final ArrayList<String> serverSongs=new ArrayList<>();
 
-        CollectionReference collectionReference= FirebaseFirestore.getInstance().collection("songs");
-        collectionReference.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                Log.d(TAG, "onComplete: ");
-
-                for (QueryDocumentSnapshot document:task.getResult()){
-                    String singleSong=document.getString("song_name");
-                    serverSongs.add(singleSong);
-                    Log.d(TAG, "onComplete: "+document.getString("song_name"));
-                }
-
-            }
-        });
-
-
+//        CollectionReference collectionReference= FirebaseFirestore.getInstance().collection("songs");
+//        collectionReference.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//            @Override
+//            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                Log.d(TAG, "onComplete: ");
+//
+//                for (QueryDocumentSnapshot document:task.getResult()){
+//                    String singleSong=document.getString("song_name");
+//                    serverSongs.add(singleSong);
+//                    Log.d(TAG, "onComplete: "+document.getString("song_name"));
+//                }
+//
+//            }
+//        });
 
 
 
 
-//        int i=0;
-//        while(i<=70){
-//            DatabaseReference songRef = FirebaseDatabase.getInstance().getReference().child("songs").push();
+
+
+//        int i=19;
+//        while(i>=0){
+//            DatabaseReference songRef = FirebaseDatabase.getInstance().getReference().child("wallpapers").push();
 //
 //            Map<String,String> map=new HashMap<>();
-//            map.put(getString(R.string.song_id),""+i);
-//            map.put(getString(R.string.song_song_name),"null");
-//            map.put(getString(R.string.song_download_url),"null");
-//            map.put(getString(R.string.song_genius_url),"null");
+//            map.put(getString(R.string.wall_id),""+i);
+//            map.put(getString(R.string.wall_download_url),"null");
 //            songRef.setValue(map);
-//            i++;
+//            i--;
 //        }
 
 

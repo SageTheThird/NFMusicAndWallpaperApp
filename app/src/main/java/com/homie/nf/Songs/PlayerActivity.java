@@ -35,19 +35,14 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.homie.nf.R;
-
-
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-
 import me.tankery.lib.circularseekbar.CircularSeekBar;
-
 import static android.media.audiofx.AudioEffect.CONTENT_TYPE_MUSIC;
 import static android.media.audiofx.AudioEffect.EXTRA_AUDIO_SESSION;
 import static android.media.audiofx.AudioEffect.EXTRA_CONTENT_TYPE;

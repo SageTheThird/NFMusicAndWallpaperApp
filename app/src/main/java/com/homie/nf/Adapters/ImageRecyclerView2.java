@@ -10,28 +10,31 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.homie.nf.Models.Wallpaper;
 import com.homie.nf.R;
 import com.homie.nf.Utils.Animation;
 import com.homie.nf.Utils.UniversalImageLoader;
 
-import java.util.List;
+import static com.homie.nf.Wallpapers.WallpaperMain.recyclerView;
 
-public class ImageRecyclerView extends RecyclerView.Adapter<ImageRecyclerView.ImageHolder> {
+public class ImageRecyclerView2 extends FirestoreRecyclerAdapter<Wallpaper, ImageRecyclerView2.ImageHolder> {
 
     private  onItemClickListener listener;
     Context context;
     private int previousPosition;
-    private List<Wallpaper> walls_list;
 
 
-    public ImageRecyclerView(List<Wallpaper> list, Context context) {
+    public ImageRecyclerView2(@NonNull FirestoreRecyclerOptions<Wallpaper> options, Context context) {
+
+        super(options);
         this.context = context;
-        this.walls_list=list;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final ImageHolder holder, final int position) {
+    protected void onBindViewHolder(@NonNull final ImageHolder holder, final int position, @NonNull final Wallpaper model) {
 
 
 
@@ -46,17 +49,12 @@ public class ImageRecyclerView extends RecyclerView.Adapter<ImageRecyclerView.Im
         previousPosition=position;
 
 
-        UniversalImageLoader.setImage(walls_list.get(position).getDownload_url(),holder.imageViewWall,holder.progressBar,"");
+        UniversalImageLoader.setImage(model.getDownload_url(),holder.imageViewWall,holder.progressBar,"");
 
         int width=context.getResources().getDisplayMetrics().widthPixels;
         int cardWidth=width/3;
         holder.cardView.setLayoutParams(new CardView.LayoutParams(cardWidth,900));
 
-    }
-
-    @Override
-    public int getItemCount() {
-        return walls_list.size();
     }
 
     @NonNull
@@ -89,7 +87,7 @@ public class ImageRecyclerView extends RecyclerView.Adapter<ImageRecyclerView.Im
 
                     if(position!=RecyclerView.NO_POSITION && listener != null){
 
-                        listener.onItemClick(walls_list.get(position),position);
+                        listener.onItemClick(getSnapshots().getSnapshot(position),position);
 
                     }
 
@@ -100,14 +98,18 @@ public class ImageRecyclerView extends RecyclerView.Adapter<ImageRecyclerView.Im
 
     public interface onItemClickListener{
 
-        void onItemClick(Wallpaper documentSnapshot, int position);
+        void onItemClick(DocumentSnapshot documentSnapshot, int position);
     }
     public void setOnItemClickListener(onItemClickListener listener){
 
         this.listener=listener;
     }
 
-
+    @Override
+    public void onDataChanged() {
+        super.onDataChanged();
+        recyclerView.scrollToPosition(0);
+    }
 
 
 

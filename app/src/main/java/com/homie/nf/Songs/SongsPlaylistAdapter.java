@@ -18,7 +18,7 @@ public class SongsPlaylistAdapter extends RecyclerView.Adapter<SongsPlaylistAdap
     private SongsPlaylistAdapter.onItemClickListener listener;
     private Context mContext;
 
-    // RecyclerView recyclerView;
+    // RecyclerView listView;
     public SongsPlaylistAdapter(ArrayList<Song> songs_list, Context context) {
         this.songs_list = songs_list;
         this.mContext=context;
