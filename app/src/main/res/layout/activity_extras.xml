@@ -13,8 +13,50 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp">
+        android:id="@+id/relaTive1">
+        <include
+            layout="@layout/snippet_topbar_extras"/>
 
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/relaTive1"
+        >
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@null"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
+            android:drawableLeft="@drawable/ic_search"
+            android:id="@+id/searchExtra"
+            android:focusableInTouchMode="true"
+            android:descendantFocusability="beforeDescendants"
+            />
+
+        <TextView
+            android:layout_below="@id/searchExtra"
+            android:id="@+id/patent_extra"
+            android:text="@string/patent_msg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="11sp"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:freezesText="true"
+            android:scrollHorizontally="true"
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginTop="10dp"
+            android:singleLine="true"
+
+            />
 
 
 
@@ -24,7 +66,7 @@
 
             android:layout_height="match_parent"
             android:layout_marginStart="25dp"
-            android:layout_marginTop="75dp"
+            android:layout_marginTop="90dp"
             android:layout_marginEnd="15dp"
             android:layout_marginBottom="70dp"
             android:fadingEdgeLength="100dp"

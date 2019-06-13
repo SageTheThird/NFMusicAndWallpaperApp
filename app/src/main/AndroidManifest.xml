@@ -10,11 +10,13 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
+    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
 
 
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
+        tools:replace="allowBackup"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -34,6 +36,8 @@
         </activity>
         <activity android:name=".Songs.playlist_Activity" />
         <activity android:name=".Extras.Extras" />
+        <activity android:name=".Contact" />
+        <activity android:name=".About" />
         <activity
             android:name=".Songs.PlayerActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />

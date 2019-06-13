@@ -52,6 +52,9 @@ import dmax.dialog.SpotsDialog;
 
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+    public static final int STORAGE_SONG_REFERENCE=1;
+    public static final int STORAGE_EXTRAS_REFERENCE=2;
 
     private DrawerLayout myDrawerMain;
     private Toolbar toolbar;
@@ -90,11 +93,18 @@ public class MainActivity extends AppCompatActivity {
 
 
         //will only run once per app install
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if(prefs.getBoolean("firstRun", true)) {
-            downloadFirstSongOnce();// <-- your function
-            prefs.edit().putBoolean("firstRun", false).commit();
+        if ((networkInfo == null || !networkInfo.isConnected())) {
+            showToast("Please Check Your Internet Connection & Restart the App");
+            return;
+        }else{
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            if(prefs.getBoolean("firstRun", true)) {
+                downloadPlaylistFirstSongOnce();// <-- your function
+                downloadExtrasFirstSongOnce();
+                prefs.edit().putBoolean("firstRun", false).commit();
+            }
         }
+
 
 
 
@@ -103,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void downloadFirstSongOnce(){
+    private void downloadPlaylistFirstSongOnce(){
 //        PlayerActivity.saveCurrentIndexPref(getString(R.string.shared_run_once),1,this);
 //
 //        if(PlayerActivity.getCurrentIndexPref(getString(R.string.shared_run_once),this)==1){
@@ -121,13 +131,43 @@ public class MainActivity extends AppCompatActivity {
                         .setCancelable(false)
                         .build();
                 //download file
-                download("Why.mp3", directory);
+                download("Why.mp3", directory,STORAGE_SONG_REFERENCE);
             }
 
 
          //   PlayerActivity.saveCurrentIndexPref(getString(R.string.shared_run_once),2,this);
 
        // }
+    }
+
+    private void downloadExtrasFirstSongOnce(){
+
+        String extraDirectory=Environment.getExternalStorageDirectory().getAbsolutePath() +
+                "/Android/data/" + this.getPackageName() + "/files/Extras/";
+
+        File directExtra = new File(extraDirectory);
+
+        if (!directExtra.exists()) {
+            File myDirectory = new File(Environment.getExternalStorageDirectory().
+                    getAbsolutePath() + "/Android/data/" + this.getPackageName() + "/files/Extras/");
+            myDirectory.mkdir();
+        }
+
+        if ((networkInfo == null || !networkInfo.isConnected())) {
+            showToast("Please Check Your Internet Connection!");
+            return;
+        } else {
+
+            //dialog for when downloading
+            dialog = new SpotsDialog.Builder()
+                    .setContext(MainActivity.this)
+                    .setTheme(R.style.ForMain)
+                    .setCancelable(false)
+                    .build();
+            //download file
+            download("Shahmen - Abacus.mp3", extraDirectory,STORAGE_EXTRAS_REFERENCE);
+        }
+
     }
     private void directorySetup() {
         //directory
@@ -164,6 +204,10 @@ public class MainActivity extends AppCompatActivity {
 
                 switch (menuItem.getItemId()) {
 
+                    case R.id.menu_home:
+                        myDrawerMain.closeDrawer(GravityCompat.START);
+                        break;
+
                     case R.id.menu_playlist:
 
                         checkUserPermission();
@@ -182,6 +226,31 @@ public class MainActivity extends AppCompatActivity {
                         checkUserPermission();
                         startActivity(new Intent(MainActivity.this, Extras.class));
                         Animatoo.animateZoom(mContext);
+
+                        break;
+
+                    case R.id.menu_about:
+
+                        Intent about_intent=new Intent(MainActivity.this,About.class);
+                        startActivity(about_intent);
+
+                        break;
+                    case R.id.menu_contact:
+                        Intent contact_intent=new Intent(MainActivity.this,Contact.class);
+                        startActivity(contact_intent);
+
+
+
+                        break;
+                    case R.id.menu_send:
+                        //opens app chooser to share the app
+                        Intent myIntent=new Intent(Intent.ACTION_SEND);
+                        myIntent.setType("text/plain");
+                        String shareSub="the Message Subject";
+                        String shareBody="the Message Body";
+                        myIntent.putExtra(Intent.EXTRA_SUBJECT,shareSub);
+                        myIntent.putExtra(Intent.EXTRA_TEXT,shareBody);
+                        startActivity(Intent.createChooser(myIntent,"Share App Link via "));
 
                         break;
 
@@ -248,8 +317,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (myDrawerMain.isDrawerOpen(GravityCompat.END)) {
-            myDrawerMain.closeDrawer(GravityCompat.END);
+        if (myDrawerMain.isDrawerOpen(GravityCompat.START)) {
+            myDrawerMain.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
@@ -301,9 +370,16 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    public void download(final String fileNameInto, final String downloadDirectory) {
+    public void download(final String fileNameInto, final String downloadDirectory, final int reference) {
+        if(reference == STORAGE_SONG_REFERENCE){
+            storageReference = FirebaseStorage.getInstance().getReference(getString(R.string.storage_song_db));
+        }
+        if(reference== STORAGE_EXTRAS_REFERENCE){
+            storageReference = FirebaseStorage.getInstance().getReference(getString(R.string.store_extras_db));
+        }
 
-        storageReference = FirebaseStorage.getInstance().getReference(getString(R.string.storage_song_db));
+
+
         storageReference = storageReference.child(fileNameInto);
         storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
@@ -320,7 +396,10 @@ public class MainActivity extends AppCompatActivity {
 
                 final long downloadid = downloadFiles.downloadingFiles(url);
 
-                initializeReciever(downloadid);
+                if(reference == STORAGE_EXTRAS_REFERENCE){
+                    initializeReciever(downloadid);
+                }
+
 
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -379,7 +458,7 @@ public class MainActivity extends AppCompatActivity {
                 request = new DownloadManager.Request(uri);
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN);
 
 
             }

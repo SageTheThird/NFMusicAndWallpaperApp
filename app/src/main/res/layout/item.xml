@@ -2,10 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="70dp"
+    android:layout_height="65dp"
     android:layout_marginBottom="10dp"
     android:orientation="horizontal"
     android:weightSum="100"
+
 
     >
 
@@ -21,12 +22,13 @@
             app:cardBackgroundColor="#14000000"
             app:cardCornerRadius="24dp"
             app:cardUseCompatPadding="true"
-            android:layout_marginStart="30dp"/>
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp"/>
 
         <com.mikhaellopez.circularimageview.CircularImageView
             android:id="@+id/playlist_thumbnail_pic"
-            android:layout_width="65dp"
-            android:layout_height="65dp"
+            android:layout_width="57dp"
+            android:layout_height="57dp"
             android:src="@drawable/songs_thumbnail"
             app:civ_border_width="2dp"
             android:layout_centerVertical="true"/>

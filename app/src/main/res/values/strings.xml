@@ -7,7 +7,7 @@
     <!--Db Collection Paths-->
     <string name="collection_wallpapers">wallpapers</string>
     <string name="storage_song_db">songs</string>
-    <string name="store_song_db">songs</string>
+    <string name="store_extras_db">extras</string>
 
     <!--Fragmeny Names-->
     <string name="LYRICS_FRAGMENT">LYRICS_FRAGMENT</string>
@@ -27,9 +27,8 @@
     <string name="downloadUrl">downloadUrl</string>
     <string name="LYRICSFILE">LYRICSFILE</string>
     <string name="GENIUSFILENAME">GENIUSFILENAME</string>
-    <string name="songname">songname</string>
-    <string name="position_song">position_song</string>
-    <string name="songslist">songslist</string>
+    <string name="all_songs_object_list">songname</string>
+    <string name="folder_songs_list">songslist</string>
 
 
     <!--Random String-->
@@ -49,6 +48,8 @@
     <string name="shared_server_songs_list">shared_server_songs_list</string>
     <string name="shared_run_once">shared_run_once</string>
     <string name="extras_songs_list">extras_songs_list</string>
+    <string name="child_count_extras">child_count_extras</string>
+    <string name="child_count_playlist">child_count_playlist</string>
 
 
     <!--Fragment Names-->
@@ -79,6 +80,7 @@
     <string name="coming_from_playlist_activity">PlayList Activity</string>
     <string name="coming_from_playlist_activity_int">coming_from_playlist</string>
     <string name="coming_from_playlist_activity_int_value">20</string>
+    <string name="patent_msg">I don\'t own any of the tracks used in the app. They all belong to the artists specified</string>
 
 
 </resources>

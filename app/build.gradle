@@ -46,6 +46,10 @@ dependencies {
     implementation 'com.github.mohammadatif:Animatoo:master'
     implementation 'com.zsoltsafrany:needle:1.0.0'
     implementation 'com.github.Yalantis:GuillotineMenu-Android:1.2'
+    implementation 'com.sdsmdg.harjot:rotatingtext:1.0.2'
+    implementation 'com.romainpiel.shimmer:library:1.4.0@aar'
+
+
 
 }
 apply plugin: 'com.google.gms.google-services'

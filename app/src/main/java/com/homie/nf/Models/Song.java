@@ -1,6 +1,9 @@
 package com.homie.nf.Models;
 
-public class Song {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Song implements Parcelable {
 
 
     private String id;
@@ -17,6 +20,25 @@ public class Song {
 
     public Song() {
     }
+
+    protected Song(Parcel in) {
+        id = in.readString();
+        song_name = in.readString();
+        download_url = in.readString();
+        genius_url = in.readString();
+    }
+
+    public static final Creator<Song> CREATOR = new Creator<Song>() {
+        @Override
+        public Song createFromParcel(Parcel in) {
+            return new Song(in);
+        }
+
+        @Override
+        public Song[] newArray(int size) {
+            return new Song[size];
+        }
+    };
 
     public String getId() {
         return id;
@@ -58,5 +80,18 @@ public class Song {
                 ", download_url='" + download_url + '\'' +
                 ", genius_url='" + genius_url + '\'' +
                 '}';
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(song_name);
+        dest.writeString(download_url);
+        dest.writeString(genius_url);
     }
 }

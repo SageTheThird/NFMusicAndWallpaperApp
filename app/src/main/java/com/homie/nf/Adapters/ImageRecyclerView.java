@@ -108,8 +108,4 @@ public class ImageRecyclerView extends RecyclerView.Adapter<ImageRecyclerView.Im
     }
 
 
-
-
-
-
 }

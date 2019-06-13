@@ -57,6 +57,7 @@ public class genius_fragment extends Fragment {
             }
         });
         geniusWebView.loadUrl(genius_url);
+        progressDialog.dismiss();
 
 
         return view;

@@ -9,11 +9,9 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.audiofx.AudioEffect;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -22,7 +20,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -38,10 +35,13 @@ import android.widget.Toast;
 import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.homie.nf.Models.Song;
 import com.homie.nf.R;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
+
 import me.tankery.lib.circularseekbar.CircularSeekBar;
 import static android.media.audiofx.AudioEffect.CONTENT_TYPE_MUSIC;
 import static android.media.audiofx.AudioEffect.EXTRA_AUDIO_SESSION;
@@ -51,20 +51,6 @@ import static android.media.audiofx.AudioEffect.EXTRA_CONTENT_TYPE;
 public class PlayerActivity extends AppCompatActivity{
 
     private static final String TAG = "PlayerActivity";
-    public static final int DEFAULT_INT_VALUE = 0;
-    private Context mContext = PlayerActivity.this;
-    public static MediaPlayer mediaPlayer;
-    private CircularSeekBar seekBar;
-    private Button mPause_btn, mGenius_btn, mLyrics_btn,mNext_btn, mPrev_btn;
-    private TextView mSongname_view, mTotal_duration_view, mCurrent_duration_view;
-    private String mLyric_file = "", mGenius_file = "";
-    private Intent intent;
-    private static ArrayList<String> mSongs_list;
-    private ImageView mBack_arrow,mEquilizer;
-
-    private Handler myHandler = new Handler();
-    //for song list
-    private static int mCurrentIndex;
 
     //Notification
     public static final int NOTIFICATION_ID = 1;
@@ -73,16 +59,7 @@ public class PlayerActivity extends AppCompatActivity{
     public static final String ACTION_STOP = "StopAction";
     public static final String ACTION_NEXT = "NextAction";
     public static final String ACTION_PREV = "PrevAction";
-    MediaSessionCompat mediaSessionCompat;
-
-
-    //action_intents
-    private Intent pauseIntent,playIntent,stopIntent,nextIntent,prevIntent;
-
-    //audio focus change
-    private static AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
-
-    //
+    public static final int DEFAULT_INT_VALUE = 0;
     // The volume we set the media player to when we lose audio focus, but are
     // allowed to reduce the volume instead of stopping playback.
     private static final float VOLUME_DUCK = 0.2f;
@@ -95,16 +72,48 @@ public class PlayerActivity extends AppCompatActivity{
     // we have full audio focus
     private static final int AUDIO_FOCUSED = 2;
     private static int mCurrentAudioFocusState = AUDIO_NO_FOCUS_NO_DUCK;
+    private static final int REQUEST_EQ = 0;
+
+    public static final int PLAYLIST_ACTIVITY_IDENTIFIER=20;
+    public static final int EXTRAS_ACTIVITY_IDENTIFIER=10;
+
+
+    private Context mContext = PlayerActivity.this;
+    public static MediaPlayer mediaPlayer;
+    private CircularSeekBar seekBar;
+    private Button mPause_btn, mGenius_btn, mLyrics_btn,mNext_btn, mPrev_btn,mRepeat,mShuffle;
+    private TextView mSongname_view, mTotal_duration_view, mCurrent_duration_view,subSongText;
+    private String mLyric_file = "", mGenius_file = "";
+    private Intent intent;
+    private static ArrayList<String> mSongs_list;
+    private ImageView mBack_arrow,mEquilizer;
+
+    private Handler myHandler = new Handler();
+    //for song list
+    private static int mCurrentIndex;
+
+
+    MediaSessionCompat mediaSessionCompat;
+
+
+    //action_intents
+    private Intent pauseIntent,playIntent,stopIntent,nextIntent,prevIntent;
+
+    //audio focus change
+    private static AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
+
+    //
+
     private static AudioManager mAudioManager;
 
 
     //equilizer
     public static NotificationCompat.Builder notificationBuilder;
     public static NotificationManagerCompat notificationManager;
+    public static int activityIdentifier;
+    private List<Song> list_of_objects_songs;
 
-    private static final int REQUEST_EQ = 0;
-
-    private int activityIdentifier;
+    private boolean isButtonClicked = false;
 
 
 
@@ -114,6 +123,8 @@ public class PlayerActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_player);
+
+
 
         mSongs_list = new ArrayList<>();
 
@@ -149,7 +160,11 @@ public class PlayerActivity extends AppCompatActivity{
         Log.d(TAG, "onCreate: Reciever Registered");
 
 
+        //listeners
         mEquilizer.setOnClickListener(OpenEqualizerListener);
+        mRepeat.setOnClickListener(RepeatClickListner);
+        mShuffle.setOnClickListener(ShuffleClickListener);
+
 
     }
 
@@ -163,7 +178,6 @@ public class PlayerActivity extends AppCompatActivity{
 
         if ((eqIntent.resolveActivity(getPackageManager()) != null)) {
             startActivityForResult(eqIntent, REQUEST_EQ);
-            //finish();
         } else {
             quickReturn();
         }
@@ -201,7 +215,7 @@ public class PlayerActivity extends AppCompatActivity{
         if (mCurrentAudioFocusState == AUDIO_NO_FOCUS_NO_DUCK) {
             // We don't have audio focus and can't duck, so we have to pause
             try {
-                mediaPlayer.stop();
+                mediaPlayer.pause();
             }catch (NullPointerException e){
 
                 Log.d(TAG, "onHandleIntent: NullPointerException");
@@ -232,7 +246,7 @@ public class PlayerActivity extends AppCompatActivity{
     }
     public static void audioFocusListener(){
 
-//…
+
         mOnAudioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
 
             @Override
@@ -301,7 +315,9 @@ public class PlayerActivity extends AppCompatActivity{
     private void getIncomingIntent() {
         intent = getIntent();
 
-        mLyric_file = intent.getStringExtra(getString(R.string.LYRICSFILE));
+
+
+        //mLyric_file = intent.getStringExtra(getString(R.string.songname))+".txt";
         mGenius_file = intent.getStringExtra(getString(R.string.GENIUSFILENAME));
 
         if(intent.hasExtra(getString(R.string.coming_from_extra_activity))){
@@ -310,13 +326,41 @@ public class PlayerActivity extends AppCompatActivity{
         if(intent.hasExtra(getString(R.string.coming_from_playlist_activity))){
             activityIdentifier=intent.getIntExtra(getString(R.string.coming_from_playlist_activity_int),2);
         }
-        mCurrentIndex = intent.getIntExtra(getString(R.string.position_song), DEFAULT_INT_VALUE);
-        mSongs_list = intent.getStringArrayListExtra(getString(R.string.songslist));
-        //saveArrayList(mSongs_list,getString(R.string.shared_array_list_key),mContext);
+
+        mCurrentIndex = intent.getIntExtra(getString(R.string.current_index), DEFAULT_INT_VALUE);
+        mSongs_list = intent.getStringArrayListExtra(getString(R.string.folder_songs_list));
+        list_of_objects_songs=intent.getParcelableArrayListExtra(getString(R.string.all_songs_object_list));
+
+        //saving
+        saveArrayList(mSongs_list,getString(R.string.shared_array_list_key),mContext);
         saveCurrentIndexPref(getString(R.string.shared_current_index),mCurrentIndex,mContext);
 
         //songTextView setup
         setSongName(mCurrentIndex);
+        //setup lyrics
+        setupLyrics(mCurrentIndex);
+        //setup Genius
+        setupGenius(mCurrentIndex);
+
+        ////////-------------------
+
+    }
+
+    private void setupGenius(int mCurrentIndex) {
+
+        String song_name=mSongs_list.get(mCurrentIndex).replace(".mp3","");
+        for(int i=0;i<list_of_objects_songs.size();i++){
+            if(list_of_objects_songs.get(i).getSong_name().equals(song_name)){
+                mGenius_file=list_of_objects_songs.get(i).getGenius_url();
+                Log.d(TAG, "setupGenius: mGeniusFile : "+mGenius_file);
+            }
+        }
+    }
+
+    private void setupLyrics(int mCurrentIndex) {
+
+        mLyric_file=mSongs_list.get(mCurrentIndex).replace(".mp3",".txt");
+        Log.d(TAG, "setupLyrics: mLyrics_file : "+mLyric_file);
 
     }
 
@@ -325,6 +369,8 @@ public class PlayerActivity extends AppCompatActivity{
 
         String songNameOnly = currentName.replace(getString(R.string.mp3_extenstion), "");
         mSongname_view.setText(songNameOnly);
+        mSongname_view.setHorizontallyScrolling(true);
+        mSongname_view.setSelected(true);
 
 
     }
@@ -341,9 +387,14 @@ public class PlayerActivity extends AppCompatActivity{
         mTotal_duration_view = findViewById(R.id.fullDurationView);
         mCurrent_duration_view = findViewById(R.id.currentDuration);
         mEquilizer = findViewById(R.id.equilizer);
+        subSongText = findViewById(R.id.songtextView2);
+        mRepeat = findViewById(R.id.repeat);
+        mShuffle=findViewById(R.id.shuffle);
 
 
     }
+
+
 
 
 
@@ -386,18 +437,20 @@ public class PlayerActivity extends AppCompatActivity{
             e.printStackTrace();
         }
         String FOLDER_PATH=null;
-        if(activityIdentifier==20){
+        if(activityIdentifier==PLAYLIST_ACTIVITY_IDENTIFIER){
             FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath()
                     + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/";
             Log.d(TAG, "playSong: Identifier : Playlist Path");
         }
-        if(activityIdentifier==10){
+        if(activityIdentifier==EXTRAS_ACTIVITY_IDENTIFIER){
             FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath()
                     + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Extras/";
             Log.d(TAG, "playSong: Identifier : Extras Path : "+FOLDER_PATH);
+            subSongText.setText("");
         }
         final String song_full = FOLDER_PATH + songName;
         if (mPause_btn.getBackground().equals(R.drawable.pause_button)) {
+
             mediaPlayer.stop();
             mediaPlayer.reset();
             mediaPlayer.release();
@@ -432,11 +485,21 @@ public class PlayerActivity extends AppCompatActivity{
                                 mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                     @Override
                                     public void onCompletion(MediaPlayer mp) {
-                                        mPause_btn.setBackgroundResource(R.drawable.play_button);
-                                        mCurrentIndex++;
-                                        mCurrentIndex %= mSongs_list.size();
-                                        setSongName(mCurrentIndex);
-                                        playSong(mCurrentIndex,activityIdentifier);
+
+                                        if(mRepeat.getBackground().getConstantState().equals(getResources()
+                                                .getDrawable(R.drawable.ic_repeat_one).getConstantState())){                                             setSongName(mCurrentIndex);
+                                            playSong(mCurrentIndex,activityIdentifier);
+                                            
+                                        }else if(mRepeat.getBackground().getConstantState().equals(getResources()
+                                                .getDrawable(R.drawable.ic_repeat_not).getConstantState())) {
+                                            mPause_btn.setBackgroundResource(R.drawable.play_button);
+                                            mCurrentIndex++;
+                                            mCurrentIndex %= mSongs_list.size();
+                                            setSongName(mCurrentIndex);
+                                            playSong(mCurrentIndex,activityIdentifier);
+                                        }
+
+
 
                                     }
                                 });
@@ -555,7 +618,32 @@ public class PlayerActivity extends AppCompatActivity{
             mCurrentIndex %= mSongs_list.size();
             setSongName(mCurrentIndex);
             playSong(mCurrentIndex,activityIdentifier);
+            //lyrics
+            setupLyrics(mCurrentIndex);
+            //genius
+            setupGenius(mCurrentIndex);
 
+
+        }
+    };
+    View.OnClickListener ShuffleClickListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Log.d(TAG, "onClick: Shuffle");
+            if (v.getId() == R.id.shuffle) {
+                isButtonClicked = !isButtonClicked; // toggle the boolean flag
+                v.setBackgroundResource(isButtonClicked ? R.drawable.ic_shuffle_pressed : R.drawable.ic_shuffle);
+            }
+        }
+    };
+    View.OnClickListener RepeatClickListner=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Log.d(TAG, "onClick: Repeat");
+            if (v.getId() == R.id.repeat) {
+                isButtonClicked = !isButtonClicked; // toggle the boolean flag
+                v.setBackgroundResource(isButtonClicked ? R.drawable.ic_repeat_one : R.drawable.ic_repeat_not);
+            }
         }
     };
     View.OnClickListener PrevClickListener = new View.OnClickListener() {
@@ -566,6 +654,8 @@ public class PlayerActivity extends AppCompatActivity{
             mCurrentIndex = mCurrentIndex > 0 ? mCurrentIndex - 1 : mSongs_list.size() - 1;
             setSongName(mCurrentIndex);
             playSong(mCurrentIndex,activityIdentifier);
+            setupLyrics(mCurrentIndex);
+            setupGenius(mCurrentIndex);
         }
     };
     CircularSeekBar.OnCircularSeekBarChangeListener SeekBarChangeListener = new CircularSeekBar.OnCircularSeekBarChangeListener() {
@@ -590,6 +680,8 @@ public class PlayerActivity extends AppCompatActivity{
 
         }
     };
+
+
     View.OnClickListener GeniusClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -606,8 +698,7 @@ public class PlayerActivity extends AppCompatActivity{
     View.OnClickListener BackClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            startActivity(new Intent(PlayerActivity.this, playlist_Activity.class)
-            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            finish();
         }
     };
     View.OnClickListener PauseClickListener = new View.OnClickListener() {
@@ -727,7 +818,7 @@ public class PlayerActivity extends AppCompatActivity{
                         .setContentTitle(songNameNotification
                                 (getCurrentIndexPref(getString(R.string.shared_current_index),this),this))
                         .setLargeIcon(artwork)
-                        .setContentText("NF")
+                        .setContentText("Playing")
 
 
                         .addAction(new NotificationCompat.Action(R.drawable.ic_prev,
@@ -748,13 +839,14 @@ public class PlayerActivity extends AppCompatActivity{
                         .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
                                 .setShowActionsInCompactView(0,2,3,4)
                                 .setMediaSession(mediaSessionCompat.getSessionToken()))
-                        .setSubText("Playing")
+                        //.setSubText("Playing")
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 ;
 
 
         notificationManager = NotificationManagerCompat.from(context);
+
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
 
 
@@ -799,6 +891,7 @@ public class PlayerActivity extends AppCompatActivity{
         }
 
         public void playSongNotification(int index){
+            Log.d(TAG, "playSongNotification: IntentService index : "+index);
 
             String songName=null;
             try {
@@ -811,8 +904,17 @@ public class PlayerActivity extends AppCompatActivity{
 
             }
 
-            String FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath()
-                    + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/";
+            String FOLDER_PATH=null;
+            if(PlayerActivity.activityIdentifier==PLAYLIST_ACTIVITY_IDENTIFIER){
+                FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath()
+                        + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/";
+                Log.d(TAG, "playSong: Identifier : Playlist Path");
+            }
+            if(PlayerActivity.activityIdentifier==EXTRAS_ACTIVITY_IDENTIFIER){
+                FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath()
+                        + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Extras/";
+                Log.d(TAG, "playSong: Identifier : Extras Path : "+FOLDER_PATH);
+            }
 
             final String song_full = FOLDER_PATH + songName;
 
@@ -907,8 +1009,6 @@ public class PlayerActivity extends AppCompatActivity{
                             //Toast.makeText(getApplicationContext(), "Pause Pressed", Toast.LENGTH_SHORT).show();
                             if(mediaPlayer!=null){
                                 mediaPlayer.pause();
-                            }else if(mediaPlayer.isPlaying()){
-                                mediaPlayer.pause();
                             }else if(mediaPlayer==null){
                                 Toast.makeText(NotificationActionService.this, "No Track Playing", Toast.LENGTH_LONG).show();
                             }else {
@@ -982,6 +1082,7 @@ public class PlayerActivity extends AppCompatActivity{
                             else {
                                 NotificationManagerCompat.from(NotificationActionService.this).cancel(NOTIFICATION_ID);
                                 stopSelf();
+                                unregisterReceiver(mNoisyReceiver);
                             }
                         }
                     });
@@ -1081,10 +1182,11 @@ public class PlayerActivity extends AppCompatActivity{
     ////////------------------------------------INTENT SERVICE-------------------////////////
 
 
-    private BroadcastReceiver mNoisyReceiver = new BroadcastReceiver() {
+    private static BroadcastReceiver mNoisyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if( mediaPlayer != null && mediaPlayer.isPlaying() ) {
+            if(mediaPlayer != null) {
+                Log.d(TAG, "onReceive: mNoisyReciever");
                 mediaPlayer.pause();
             }
         }

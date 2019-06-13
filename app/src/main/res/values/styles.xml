@@ -31,4 +31,8 @@
         <item name="DialogSpotCount">5</item>
     </style>
 
+    <style name="MyAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">#FFAB00</item>
+    </style>
+
 </resources>
