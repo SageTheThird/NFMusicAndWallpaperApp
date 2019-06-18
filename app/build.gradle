@@ -33,6 +33,7 @@ dependencies {
     implementation 'com.getbase:floatingactionbutton:1.10.1'
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.google.firebase:firebase-messaging:17.3.2'
+    implementation 'com.google.firebase:firebase-ads:17.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
@@ -48,6 +49,8 @@ dependencies {
     implementation 'com.github.Yalantis:GuillotineMenu-Android:1.2'
     implementation 'com.sdsmdg.harjot:rotatingtext:1.0.2'
     implementation 'com.romainpiel.shimmer:library:1.4.0@aar'
+    implementation 'com.android.support:support-media-compat:28.0.0'
+    implementation 'com.github.hotchemi:android-rate:1.0.1'
 
 
 

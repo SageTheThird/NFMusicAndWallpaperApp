@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NF</string>
+    <string name="app_name">Real Music</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
 
@@ -50,6 +50,8 @@
     <string name="extras_songs_list">extras_songs_list</string>
     <string name="child_count_extras">child_count_extras</string>
     <string name="child_count_playlist">child_count_playlist</string>
+    <string name="repeat_state">repeat_state</string>
+    <string name="current_song_name">current_song_name</string>
 
 
     <!--Fragment Names-->
@@ -82,5 +84,31 @@
     <string name="coming_from_playlist_activity_int_value">20</string>
     <string name="patent_msg">I don\'t own any of the tracks used in the app. They all belong to the artists specified</string>
 
+    <!--Ads-->
+    <string name="banner_ad_test_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="interstitial_ad_test_unit_id">ca-app-pub-3940256099942544/1033173712</string>
+
+    <!--Rate Me Dialog-->
+    <!--Rate Me Dialog-->
+
+    <string name="rate_dialog_title">Rate this app</string>
+    <string name="rate_dialog_message">If you enjoy playing this app, would you mind taking a
+            moment to rate it? It won\'t take more than a minute. Thanks for your support!</string>
+    <string name="rate_dialog_ok">Rate It Now</string>
+    <string name="rate_dialog_cancel">Remind Me Later</string>
+    <string name="rate_dialog_no">No, Thanks</string>
+
+    <!--About String-->
+    <string name="about_desc">Version 1.0\n\nHi, I am the developer of the app and also an intransigent fan of NF.
+        \nAs NF has a unique fan base i figured it would be convenient for the fans to access the Tracks,
+        Wallpapers, Lyrics to every track and Genius articles at one place and also listen to or discover some
+        similar artists that put out the same quality music plus some random tracks from my own playlist.\n
+        So feel free to contact me or leave a review about Suggestions, Issues, or even just your Experience
+        with app. Your feedback is highly appreciated.
+     </string>
+
+    <string name="about_email"> Email Address:\nskurtz00420@gmail.com</string>
+    <string name="about_ps">P.S. The ads just helps in support and growth of the app.
+</string>
 
 </resources>

@@ -6,17 +6,59 @@
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
         app:cardCornerRadius="12dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
         >
 
-        <TextView
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="About Info Goes Here"/>
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:padding="25dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/about_desc"
+                android:id="@+id/about_tv"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/allerta"
+                android:lineHeight="21dp"/>
+
+            <TextView
+
+                android:padding="25dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/about_email"
+                android:id="@+id/email"
+                android:textSize="15sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/allerta"
+                android:lineHeight="21dp"
+                android:layout_below="@id/about_tv"
+
+                />
+            <TextView
+
+                android:padding="25dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/about_ps"
+                android:id="@+id/about"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/allerta"
+                android:lineHeight="21dp"
+                android:layout_below="@id/email"
+
+                />
+
+        </RelativeLayout>
+
 
     </android.support.v7.widget.CardView>
 

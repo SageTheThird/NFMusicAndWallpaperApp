@@ -8,6 +8,43 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:258800438992:android:36b1bce52d3a35cb",
+        "android_client_info": {
+          "package_name": "com.homie.admin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "258800438992-dji3ute5has02a8i3g6dmghge6bneqg5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.homie.admin",
+            "certificate_hash": "cfba0d9fcb0877dd1c94f8523e77dec259108600"
+          }
+        },
+        {
+          "client_id": "258800438992-n4tcrafrot2pt7d4idk33ilhd1cet5c9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQYKlQQbkeRafw2uXMLFcvMfdNwSZ32ns"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "258800438992-n4tcrafrot2pt7d4idk33ilhd1cet5c9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:258800438992:android:524227182a22a1ce",
         "android_client_info": {
           "package_name": "com.homie.customadapter"

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.homie.nf">
+    package="com.obcomdeveloper.realmusic">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -23,10 +23,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         >
-        <activity android:name=".Wallpapers.WallpaperMain"></activity>
-        <activity android:name=".Wallpapers.Book_Activity"></activity>
+        <receiver android:name=".Utils.HeadphonesReciever">
+            <intent-filter>
+                <action android:name="android.intent.action.HEADSET_PLUG" />
+            </intent-filter>
+        </receiver>
+        <activity android:name="com.obcomdeveloper.realmusic.Wallpapers.WallpaperMain"></activity>
+        <activity android:name="com.obcomdeveloper.realmusic.Wallpapers.Book_Activity"></activity>
         <activity
-            android:name=".SplashScreen"
+            android:name="com.obcomdeveloper.realmusic.SplashScreen"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,15 +39,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Songs.playlist_Activity" />
-        <activity android:name=".Extras.Extras" />
-        <activity android:name=".Contact" />
-        <activity android:name=".About" />
+        <activity android:name="com.obcomdeveloper.realmusic.Songs.playlist_Activity" />
+        <activity android:name="com.obcomdeveloper.realmusic.Extras.Extras" />
+        <activity android:name="com.obcomdeveloper.realmusic.Contact" />
+        <activity android:name="com.obcomdeveloper.realmusic.About" />
         <activity
-            android:name=".Songs.PlayerActivity"
+            android:name="com.obcomdeveloper.realmusic.Songs.PlayerActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
-            android:name=".MainActivity"
+            android:name="com.obcomdeveloper.realmusic.MainActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -54,9 +59,12 @@
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
 
 
-        <service android:name=".Songs.PlayerActivity$NotificationActionService" />
+        <service android:name="com.obcomdeveloper.realmusic.Songs.PlayerActivity$NotificationActionService" />
 
 
     </application>

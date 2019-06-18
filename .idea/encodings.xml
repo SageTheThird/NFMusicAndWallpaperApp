@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding" addBOMForNewFiles="with NO BOM">
-    <file url="file://$PROJECT_DIR$/app/src/main/assets/No name.txt" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/app/src/main/assets/All I Do.txt" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/app/src/main/assets/Green Lights.txt" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/app/src/main/assets/Grindin.txt" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/app/src/main/assets/How Could You.txt" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/app/src/main/assets/Know.txt" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/app/src/main/assets/Lie.txt" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/app/src/main/assets/No Name.txt" charset="windows-1252" />
     <file url="file://$PROJECT_DIR$/app/src/main/assets/The Search.txt" charset="windows-1252" />
     <file url="file://$PROJECT_DIR$/app/src/main/assets/Why.txt" charset="windows-1252" />
+    <file url="PROJECT" charset="windows-1252" />
   </component>
 </project>

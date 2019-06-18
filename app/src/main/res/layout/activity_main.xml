@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
 
     android:id="@+id/relativeLayout"
-    tools:context="com.homie.nf.MainActivity"
+    tools:context="com.obcomdeveloper.realmusic.MainActivity"
     >
 
     <ImageView
