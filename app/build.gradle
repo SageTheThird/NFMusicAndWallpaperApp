@@ -17,6 +17,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    buildToolsVersion = '29.0.0 rc3'
 }
 
 dependencies {
@@ -51,6 +52,18 @@ dependencies {
     implementation 'com.romainpiel.shimmer:library:1.4.0@aar'
     implementation 'com.android.support:support-media-compat:28.0.0'
     implementation 'com.github.hotchemi:android-rate:1.0.1'
+    implementation 'com.github.mreram:showcaseview:1.1'
+
+
+
+
+
+
+
+
+
+
+
 
 
 

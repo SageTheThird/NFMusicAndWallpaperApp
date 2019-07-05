@@ -1,6 +1,7 @@
 package com.obcomdeveloper.realmusic.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
@@ -9,11 +10,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 
+import com.obcomdeveloper.realmusic.Models.Wallpaper;
 import com.obcomdeveloper.realmusic.R;
 import com.obcomdeveloper.realmusic.Utils.UniversalImageLoader;
+import com.obcomdeveloper.realmusic.Wallpapers.ImageClickActivity;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class UltraPagerAdapter extends PagerAdapter {
     private static final String TAG = "UltraPagerAdapter";
@@ -22,14 +28,17 @@ public class UltraPagerAdapter extends PagerAdapter {
     private boolean isMultiScr;
     private ArrayList<String> mImagesUrls;
     private int mUrlPosition;
+    private List<Wallpaper> small_walls_list;
 
 
-    public UltraPagerAdapter(boolean isMultiScr, ArrayList<String> mImagesUrls, Context context,int urlPosition) {
+    public UltraPagerAdapter(boolean isMultiScr, ArrayList<String> mImagesUrls, Context context,int urlPosition,
+                             List<Wallpaper> small_walls_list) {
 
         this.context=context;
         this.isMultiScr = isMultiScr;
         this.mImagesUrls = mImagesUrls;
         this.mUrlPosition =urlPosition;
+        this.small_walls_list=small_walls_list;
 
     }
 
@@ -53,7 +62,7 @@ public class UltraPagerAdapter extends PagerAdapter {
         View item_view = mInflater.inflate(R.layout.fullscreen_image, container, false);
 
         final ImageView imageView = item_view.findViewById(R.id.fullscreen_imageView);
-        //final ProgressBar progressBar = item_view.findViewById(R.id.wallpaper_progressBar);
+        final ProgressBar progressBar = item_view.findViewById(R.id.full_wall_progress_bar);
 
 
 
@@ -62,7 +71,17 @@ public class UltraPagerAdapter extends PagerAdapter {
         Log.d(TAG, "mUrlPosition: "+mUrlPosition);
 
 
-        UniversalImageLoader.setImage(mImagesUrls.get(position),imageView,null,"");
+        UniversalImageLoader.setImage(mImagesUrls.get(position),imageView,progressBar,"");
+
+        item_view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(context, ImageClickActivity.class);
+                intent.putExtra("clickedurl",mImagesUrls.get(position));
+                intent.putExtra("smallclickedurl",small_walls_list.get(position).getDownload_url());
+                context.startActivity(intent);
+            }
+        });
         /*Picasso
                 .with(context)
                 .load(mImagesUrls.get(position))
@@ -96,7 +115,7 @@ public class UltraPagerAdapter extends PagerAdapter {
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        container.removeView((LinearLayout) object);
+        container.removeView((RelativeLayout) object);
 
     }
 

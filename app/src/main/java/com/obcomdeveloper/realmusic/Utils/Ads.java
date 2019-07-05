@@ -22,7 +22,7 @@ public class Ads {
     public void setupBanner(final AdView adView){
 
 
-        AdRequest adRequest = new AdRequest.Builder().build();
+        AdRequest adRequest = new AdRequest.Builder().addTestDevice("10574CA0F8E8A8DDD032CEE29004215B").build();
 
         adView.loadAd(adRequest);
 
@@ -35,6 +35,7 @@ public class Ads {
             @Override
             public void onAdFailedToLoad(int errorCode) {
                 // Code to be executed when an ad request fails.
+                adView.loadAd(new AdRequest.Builder().build());
             }
 
             @Override
@@ -69,7 +70,7 @@ public class Ads {
         //interstitial
         mInterstitialAd.setAdUnitId(unit_ID);
         //load it
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        mInterstitialAd.loadAd(new AdRequest.Builder().addTestDevice("10574CA0F8E8A8DDD032CEE29004215B").build());
 
         mInterstitialAd.setAdListener(new AdListener() {
             @Override
@@ -82,6 +83,7 @@ public class Ads {
             public void onAdFailedToLoad(int errorCode) {
                 // Code to be executed when an ad request fails.
                 Log.d(TAG, "onAdFailedToLoad: called");
+                mInterstitialAd.loadAd(new AdRequest.Builder().build());
             }
 
             @Override

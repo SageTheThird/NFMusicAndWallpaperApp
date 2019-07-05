@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinatorLayout"
@@ -7,23 +8,41 @@
     android:layout_height="match_parent"
     tools:context=".Wallpapers.Book_Activity">
 
-    <RelativeLayout
+    <ImageView
+        android:id="@+id/blurImageView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
 
-        <android.support.v4.view.ViewPager
-            android:id="@+id/ultraViewPager"
+        />
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="70dp">
+
+        <android.support.v7.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#161414">
+            app:cardCornerRadius="10dp">
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/ultraViewPager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
 
 
-        </android.support.v4.view.ViewPager>
+            </android.support.v4.view.ViewPager>
 
+        </android.support.v7.widget.CardView>
 
 
     </RelativeLayout>
-
 
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu
@@ -33,8 +52,8 @@
         app:fab_addButtonColorPressed="#051D2E"
         app:fab_addButtonPlusIconColor="#FFF"
         app:fab_labelStyle="@style/cutomFloat"
-        app:layout_anchor="@+id/ultraViewPager"
-        app:layout_anchorGravity="right|bottom">
+        app:layout_anchor="@+id/blurImageView"
+        app:layout_anchorGravity="end|center">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/actionBtn1"
@@ -58,5 +77,15 @@
             app:fab_title="Set As Wallpaper" />
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
+
+    <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        ads:adSize="SMART_BANNER"
+        ads:adUnitId="ca-app-pub-3940256099942544/6300978111"
+        ads:layout_anchor="@+id/blurImageView"
+        ads:layout_anchorGravity="bottom|center"></com.google.android.gms.ads.AdView>
 
 </android.support.design.widget.CoordinatorLayout>

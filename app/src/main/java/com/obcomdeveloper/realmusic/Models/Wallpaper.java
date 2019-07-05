@@ -1,6 +1,9 @@
 package com.obcomdeveloper.realmusic.Models;
 
-public class Wallpaper {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Wallpaper implements Parcelable {
 
     private String download_url;
     private String id;
@@ -8,6 +11,23 @@ public class Wallpaper {
     public Wallpaper() {
 
     }
+
+    protected Wallpaper(Parcel in) {
+        download_url = in.readString();
+        id = in.readString();
+    }
+
+    public static final Creator<Wallpaper> CREATOR = new Creator<Wallpaper>() {
+        @Override
+        public Wallpaper createFromParcel(Parcel in) {
+            return new Wallpaper(in);
+        }
+
+        @Override
+        public Wallpaper[] newArray(int size) {
+            return new Wallpaper[size];
+        }
+    };
 
     @Override
     public String toString() {
@@ -36,5 +56,16 @@ public class Wallpaper {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(download_url);
+        dest.writeString(id);
     }
 }

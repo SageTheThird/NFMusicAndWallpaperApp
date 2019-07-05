@@ -32,8 +32,8 @@ public class SplashScreen extends AppCompatActivity {
 
         Picasso
                 .with(this)
-                .load(R.drawable.splash_background)
-                .resize(342,444)
+                .load(R.drawable.splash_background_four)
+                .resize(480,853)
                 .into(imageView_background);
         Picasso
                 .with(this)

@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -57,6 +58,9 @@ import static com.obcomdeveloper.realmusic.Songs.playlist_Activity.dialog;
 
 public class playlist_Activity extends AppCompatActivity {
     private static final String TAG = "playlist_Activity";
+
+    public static final int AD_TIME_INTERVAL=90*1000;
+
     public static final int PLAYLIST_IDENTIFIER=20;
     public static ListView listView;
     static AlertDialog dialog;
@@ -87,6 +91,7 @@ public class playlist_Activity extends AppCompatActivity {
 
 
 
+    private Handler mHandler=new Handler();
 
 
     @Override
@@ -127,7 +132,22 @@ public class playlist_Activity extends AppCompatActivity {
         ads.setupInterstitial(this,getString(R.string.interstitial_ad_test_unit_id),interstitialAd);
 
 
+        mAdRunnable.run();
     }
+
+    private Runnable mAdRunnable=new Runnable() {
+        @Override
+        public void run() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ads.loadinterstitial(interstitialAd);
+                }
+            });
+
+            mHandler.postDelayed(this,AD_TIME_INTERVAL);
+        }
+    };
 
     private void searchSetup() {
         searchView.addTextChangedListener(new TextWatcher() {
@@ -160,12 +180,6 @@ public class playlist_Activity extends AppCompatActivity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ads.loadinterstitial(interstitialAd);
-                }
-            });
 
 
             String download_url=songs_list.get(position).getDownload_url();
@@ -210,6 +224,15 @@ public class playlist_Activity extends AppCompatActivity {
                             .setTheme(R.style.Custom)
                             .setCancelable(false)
                             .build();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ads.loadinterstitial(interstitialAd);
+                        }
+                    });
+
+
                     //download file
                     download(song_name, directory,download_url);
                 }

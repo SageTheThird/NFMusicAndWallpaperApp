@@ -5,9 +5,10 @@
 
 
     <!--Db Collection Paths-->
-    <string name="collection_wallpapers">wallpapers</string>
+    <string name="db_wallpapers">wallpapers</string>
     <string name="storage_song_db">songs</string>
     <string name="store_extras_db">extras</string>
+    <string name="db_resized_wallpapers">resized_wallpapers</string>
 
     <!--Fragmeny Names-->
     <string name="LYRICS_FRAGMENT">LYRICS_FRAGMENT</string>

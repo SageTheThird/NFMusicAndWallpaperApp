@@ -1,6 +1,8 @@
 package com.obcomdeveloper.realmusic.Adapters;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -21,7 +23,6 @@ import java.util.Locale;
 
 public class ExtraListAdapter extends ArrayAdapter<Song> {
 
-    private static final String TAG = "UserListAdapter";
 
     private LayoutInflater mInflater;
     private int layoutResource;
@@ -31,6 +32,7 @@ public class ExtraListAdapter extends ArrayAdapter<Song> {
     private ArrayList<String> saved_songs_list;
     private int mPlayingSong;
     private String isPlaying;
+
 
     public ExtraListAdapter(Context context, int resource, List<Song> objects) {
         super(context, resource, objects);
@@ -42,6 +44,7 @@ public class ExtraListAdapter extends ArrayAdapter<Song> {
 
         this.temp_array = new ArrayList<Song>();
         this.temp_array.addAll(songs_list);
+
     }
 
 

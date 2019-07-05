@@ -29,7 +29,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -46,9 +48,13 @@ import com.obcomdeveloper.realmusic.Utils.UniversalImageLoader;
 import com.obcomdeveloper.realmusic.Wallpapers.WallpaperMain;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
+
+
 import java.io.File;
 import dmax.dialog.SpotsDialog;
 import hotchemi.android.rate.AppRate;
+import smartdevelop.ir.eram.showcaseviewlib.GuideView;
+import smartdevelop.ir.eram.showcaseviewlib.config.DismissType;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -60,8 +66,9 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private ActionBarDrawerToggle myToggle;
     private NavigationView navView;
-    private ImageView mBackground_image;
     private Context mContext = MainActivity.this;
+    private ImageView mBackground_image;
+
 
     private StorageReference storageReference;
     static AlertDialog dialog;
@@ -73,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
     private String directory;
 
+    private TextView toolbar_tv;
+
 
 
     @Override
@@ -80,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
+        toolbar_tv=findViewById(R.id.main_toolbar_tv);
 
 
         directorySetup();
@@ -112,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
                 .setInstallDays(1)
                 .setLaunchTimes(3)
                 .setRemindInterval(2)
-
                 .monitor();
 
         AppRate.showRateDialogIfMeetsConditions(this);
@@ -291,6 +300,15 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+    @Override
+    public void onBackPressed() {
+        if (myDrawerMain.isDrawerOpen(GravityCompat.START)) {
+            myDrawerMain.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
 
     private void imageLoading() {
         Picasso
@@ -329,14 +347,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onBackPressed() {
-        if (myDrawerMain.isDrawerOpen(GravityCompat.START)) {
-            myDrawerMain.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
 
     private void checkUserPermission() {
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&

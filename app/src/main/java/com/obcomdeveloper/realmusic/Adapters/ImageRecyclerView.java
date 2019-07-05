@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,8 +20,9 @@ import java.util.List;
 
 public class ImageRecyclerView extends RecyclerView.Adapter<ImageRecyclerView.ImageHolder> {
 
+    private static final String TAG = "ImageRecyclerView";
     private  onItemClickListener listener;
-    Context context;
+    private Context context;
     private int previousPosition;
     private List<Wallpaper> walls_list;
 
@@ -33,6 +35,11 @@ public class ImageRecyclerView extends RecyclerView.Adapter<ImageRecyclerView.Im
     @Override
     public void onBindViewHolder(@NonNull final ImageHolder holder, final int position) {
 
+
+        int width=context.getResources().getDisplayMetrics().widthPixels;
+        int cardWidth=width/2;
+        Log.d(TAG, "onBindViewHolder: Card Width : "+cardWidth);
+        holder.cardView.setLayoutParams(new CardView.LayoutParams(cardWidth,900));
 
 
         //holder.imageViewWall.setText(model.getDownloadUrl());
@@ -48,9 +55,7 @@ public class ImageRecyclerView extends RecyclerView.Adapter<ImageRecyclerView.Im
 
         UniversalImageLoader.setImage(walls_list.get(position).getDownload_url(),holder.imageViewWall,holder.progressBar,"");
 
-        int width=context.getResources().getDisplayMetrics().widthPixels;
-        int cardWidth=width/3;
-        holder.cardView.setLayoutParams(new CardView.LayoutParams(cardWidth,900));
+
 
     }
 

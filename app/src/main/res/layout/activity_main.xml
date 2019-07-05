@@ -19,19 +19,10 @@
 
 
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/relaTive1">
 
-        <include
-            layout="@layout/snippet_topbar_main"/>
-
-    </RelativeLayout>
 
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/myDrawer"
-        android:layout_below="@id/relaTive1"
         android:layout_width="match_parent"
 
         android:layout_height="match_parent"
@@ -40,6 +31,15 @@
         tools:layout_editor_absoluteY="0dp"
         >
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/relaTive1">
+
+            <include
+                layout="@layout/snippet_topbar_main"/>
+
+        </RelativeLayout>
 
 
         <android.support.design.widget.NavigationView

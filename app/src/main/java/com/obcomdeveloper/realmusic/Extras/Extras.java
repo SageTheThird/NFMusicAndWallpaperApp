@@ -372,12 +372,6 @@ public class Extras extends AppCompatActivity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ads.loadinterstitial(interstitialAd);
-                }
-            });
 
 
             String download_url=songs_list.get(position).getDownload_url();
@@ -418,12 +412,21 @@ public class Extras extends AppCompatActivity {
                             .setTheme(R.style.Custom)
                             .setCancelable(false)
                             .build();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ads.loadinterstitial(interstitialAd);
+                        }
+                    });
+
                     //download file
                     download(song_name, directory,download_url);
                 }
             }
         }
     };
+
 
     //////-------------------------------LISTENERS------------------------/////////////
 
