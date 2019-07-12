@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    >
+    xmlns:tools="http://schemas.android.com/tools"
+>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -14,7 +15,7 @@
             android:id="@+id/songtextView"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:fontFamily="@font/francois_one"
+            android:fontFamily="@font/allerta"
             android:gravity="center"
             android:ellipsize="marquee"
             android:focusable="true"
@@ -24,7 +25,7 @@
             android:scrollHorizontally="true"
             android:text="@string/nf_remember_this"
             android:textColor="@color/white"
-            android:textSize="22sp"
+            android:textSize="19sp"
             android:textStyle="bold"
              />
 
@@ -34,15 +35,16 @@
             android:layout_height="28dp"
             android:layout_below="@+id/songtextView"
             android:ellipsize="marquee"
-            android:fontFamily="@font/francois_one"
+            android:fontFamily="@font/allerta"
             android:gravity="center"
             android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
             android:singleLine="true"
             android:text="@string/nf"
             android:textColor="@color/white"
-            android:textSize="18sp"
+            android:textSize="16sp"
              />
+
 
     </RelativeLayout>
 
@@ -50,62 +52,114 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/relatLay1"
-        android:padding="20dp"
         android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+
+        android:id="@+id/seek_relative"
         >
 
+        <TextView
+            android:layout_marginStart="15dp"
+            android:layout_alignParentLeft="true"
+            android:id="@+id/currentDuration"
+            android:layout_width="34dp"
+            android:layout_height="20dp"
+            android:layout_centerVertical="true"
+            android:fontFamily="@font/francois_one"
+            android:gravity="center"
+            android:text="00:00"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
 
+        <SeekBar
+            android:layout_width="250dp"
+            android:layout_height="30dp"
+            android:layout_toRightOf="@id/currentDuration"
+            android:id="@+id/horizantal_seekbar"
+            android:progressTint="@color/white"
+
+            />
+
+        <TextView
+            android:id="@+id/fullDurationView"
+            android:layout_width="34dp"
+            android:layout_height="20dp"
+            android:fontFamily="@font/francois_one"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@id/horizantal_seekbar"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:layout_centerVertical="true"
+            android:text="00:00"
+            android:layout_marginEnd="15dp"
+            />
+
+
+
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/seek_relative"
+        android:padding="10dp"
+        android:gravity="center"
+        >
+
+        <Button
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:background="@drawable/ic_repeat_not"
+            android:id="@+id/repeat"
+            android:stateListAnimator="@null"
+            android:layout_marginEnd="10dp"
+
+            />
+
+
+
+
+
+        <Button
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:background="@drawable/ic_prev"
+            android:id="@+id/prevBtn"
+            android:layout_marginEnd="10dp"
+            android:stateListAnimator="@null"
+            />
 
         <Button
             android:id="@+id/pause"
-            android:layout_width="68dp"
-            android:layout_height="68dp"
-            android:layout_centerHorizontal="true"
-            android:background="@drawable/play_button"
+            android:layout_width="47dp"
+            android:layout_height="47dp"
+            android:background="@drawable/ic_play"
             android:stateListAnimator="@null"
-             />
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            />
         <Button
             android:id="@+id/nextBtn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
             android:background="@drawable/ic_next"
             android:stateListAnimator="@null"
-            android:layout_toRightOf="@id/pause"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="20dp"
-
+            android:layout_marginStart="10dp"
             />
 
-        <Button
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/ic_prev"
-            android:id="@+id/prevBtn"
-            android:layout_toLeftOf="@id/pause"
-            android:layout_marginEnd="20dp"
-            android:layout_centerVertical="true"
-            android:stateListAnimator="@null"
-            />
 
         <Button
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@drawable/ic_repeat_not"
-            android:id="@+id/repeat"
-            android:layout_toLeftOf="@id/prevBtn"
-            android:layout_centerVertical="true"
-            android:stateListAnimator="@null"
-            />
-        <Button
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="27dp"
+            android:layout_height="27dp"
             android:background="@drawable/ic_shuffle"
             android:id="@+id/shuffle"
-            android:layout_toRightOf="@id/nextBtn"
-            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+
             android:stateListAnimator="@null"
+
             />
 
-    </RelativeLayout>
+    </LinearLayout>
 
 </RelativeLayout>

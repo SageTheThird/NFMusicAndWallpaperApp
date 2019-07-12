@@ -1,11 +1,8 @@
 package com.obcomdeveloper.realmusic.Adapters;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,7 +74,7 @@ public class ExtraListAdapter extends ArrayAdapter<Song> {
         holder.song_name.setText(getItem(position).getSong_name());
 
         saved_songs_list = PlayerActivity.getArrayList(mContext.getString(R.string.shared_array_list_key),mContext);
-        mPlayingSong=PlayerActivity.getCurrentIndexPref(mContext.getString(R.string.shared_current_index),mContext);
+        mPlayingSong=PlayerActivity.getIntPref(mContext.getString(R.string.shared_current_index),mContext);
 
         if(mPlayingSong != -1 && saved_songs_list.size()>mPlayingSong){
             isPlaying=saved_songs_list.get(mPlayingSong).replace(".mp3","");
@@ -89,12 +86,12 @@ public class ExtraListAdapter extends ArrayAdapter<Song> {
             holder.playing.setVisibility(View.INVISIBLE);
         }
 
+        //indicates the song exist in folder and ready to play
         String name=getItem(position).getSong_name() + ".mp3";
         if(saved_songs_list.contains(name)){
-            Log.d("TAG", "onBindViewHolder: "+saved_songs_list.size());
-            holder.tick.setVisibility(View.VISIBLE);
+            holder.tick.setBackgroundResource(R.drawable.ic_tick);
         }else {
-            holder.tick.setVisibility(View.INVISIBLE);
+            holder.tick.setBackgroundResource(R.drawable.ic_ad);
         }
 
 

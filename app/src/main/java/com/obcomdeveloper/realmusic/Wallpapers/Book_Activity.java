@@ -176,7 +176,7 @@ public class Book_Activity extends AppCompatActivity {
 
 
         UniversalImageLoader.setBlurredImage(small_walls_list.get(urlPosition).getDownload_url(),blurred_iv,
-                null,"",mContext);
+                null,"",null,null,null);
 
 
 
@@ -202,7 +202,7 @@ public class Book_Activity extends AppCompatActivity {
                 }
 
                 UniversalImageLoader.setBlurredImage(small_walls_list.get(i).getDownload_url(),blurred_iv,
-                        null,"",mContext);
+                        null,"",null,null,null);
 
                 Log.d(TAG, "onPageSelected: called");
             }

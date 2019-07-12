@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -44,6 +45,7 @@ import com.obcomdeveloper.realmusic.Models.RowItem;
 import com.obcomdeveloper.realmusic.Models.Song;
 import com.obcomdeveloper.realmusic.R;
 import com.obcomdeveloper.realmusic.Utils.Ads;
+import com.obcomdeveloper.realmusic.Utils.Quotes;
 import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.util.ArrayList;
@@ -51,8 +53,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import javax.annotation.Nullable;
 import dmax.dialog.SpotsDialog;
+
 import static com.obcomdeveloper.realmusic.Songs.playlist_Activity.dialog;
 
 
@@ -60,6 +62,7 @@ public class playlist_Activity extends AppCompatActivity {
     private static final String TAG = "playlist_Activity";
 
     public static final int AD_TIME_INTERVAL=90*1000;
+    public static final int RANDOM_QUOTE_INTERVAL=10*1000;
 
     public static final int PLAYLIST_IDENTIFIER=20;
     public static ListView listView;
@@ -82,7 +85,7 @@ public class playlist_Activity extends AppCompatActivity {
 
     private EditText searchView;
 
-    private TextView patentTextView;
+    private TextView patentTextView,random_quotes;
 
     //ads
     private AdView adView;
@@ -93,6 +96,15 @@ public class playlist_Activity extends AppCompatActivity {
 
     private Handler mHandler=new Handler();
 
+    //
+    private List<String> temp_list;
+    private List<Song> existing_songs_models_list;
+
+    //random_quotes for textview
+    private DatabaseReference quotes_Ref;
+
+    int count_quotes;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,10 +112,12 @@ public class playlist_Activity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.activity_playlist_);
+        quotes_Ref=FirebaseDatabase.getInstance().getReference().child(getString(R.string.db_random_quotes)).child("array");
 
         searchView=findViewById(R.id.searchEdit);
         listView = findViewById(R.id.listViewPlaylist);
         patentTextView =findViewById(R.id.patent_playlist);
+        random_quotes =findViewById(R.id.random_quotes_playlist);
         adView =findViewById(R.id.adView);
         interstitialAd=new InterstitialAd(this);
         songs_list=new ArrayList<>();
@@ -111,6 +125,9 @@ public class playlist_Activity extends AppCompatActivity {
 
         patentTextView.setHorizontallyScrolling(true);
         patentTextView.setSelected(true);
+
+        random_quotes.setHorizontallyScrolling(true);
+        random_quotes.setSelected(true);
 
         //methods
         directorySetup();
@@ -132,7 +149,49 @@ public class playlist_Activity extends AppCompatActivity {
         ads.setupInterstitial(this,getString(R.string.interstitial_ad_test_unit_id),interstitialAd);
 
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if(prefs.getBoolean("setCountToZero", true)) {
+            Log.d(TAG, "onCreate: count _ pref : called");
+            count_quotes=0;
+            PlayerActivity.saveIntPref(getString(R.string.count_random_quotes),count_quotes,this);
+            prefs.edit().putBoolean("setCountToZero", false).commit();
+        }
+
+
+        quotes_Ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+
+                String quotes=dataSnapshot.getValue().toString();
+                String modified_string=quotes.substring(1);
+
+
+                String[] quotes_array=modified_string.split("-");
+                Quotes.setRandom_lyrics_array(quotes_array);
+
+//                for(int i=0;i<quotes_array.length;i++) {
+//                    Log.d(TAG, "onDataChange: Quotes_Array[" + i + "] : " + quotes_array[i]);
+//                }
+
+                random_quote.run();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        Log.d(TAG, "onCreate: after Set Array Size : "+Quotes.getRandom_lyrics_array().length);
+
+
+
+
         mAdRunnable.run();
+        //
+
     }
 
     private Runnable mAdRunnable=new Runnable() {
@@ -146,6 +205,38 @@ public class playlist_Activity extends AppCompatActivity {
             });
 
             mHandler.postDelayed(this,AD_TIME_INTERVAL);
+        }
+    };
+
+    private Runnable random_quote=new Runnable() {
+
+
+
+        @Override
+        public void run() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+
+                        count_quotes=PlayerActivity.getIntPref(getString(R.string.count_random_quotes),mContext);
+                        Log.d(TAG, "run: count _ : "+count_quotes);
+                        random_quotes.setText(Quotes.getRandom_lyrics_array()[count_quotes]);
+                        if(count_quotes >= Quotes.getRandom_lyrics_array().length){
+                            count_quotes=0;
+                            PlayerActivity.saveIntPref(getString(R.string.count_random_quotes),count_quotes,mContext);
+                        }
+                        count_quotes++;
+                        PlayerActivity.saveIntPref(getString(R.string.count_random_quotes),count_quotes,mContext);
+
+                    }catch (NullPointerException e){
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+            mHandler.postDelayed(this,RANDOM_QUOTE_INTERVAL);
         }
     };
 
@@ -175,12 +266,25 @@ public class playlist_Activity extends AppCompatActivity {
         });
     }
 
+    private void setup_existing_ojects_list(){
+        for(int j=0;j<temp_list.size();j++){
+            String temp_name=temp_list.get(j);
+            for(int k=0;k<songs_list.size();k++){
+                if(songs_list.get(k).getSong_name().equals(temp_name)){
+                    existing_songs_models_list.add(songs_list.get(k));
+                }
+            }
+        }
+
+    }
+
     AdapterView.OnItemClickListener SongClickListener=new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
 
 
+            setup_existing_ojects_list();
 
             String download_url=songs_list.get(position).getDownload_url();
             String song_name = songs_list.get(position).getSong_name();
@@ -199,6 +303,7 @@ public class playlist_Activity extends AppCompatActivity {
                         .putExtra(getString(R.string.current_index), index)
                         .putStringArrayListExtra(getString(R.string.folder_songs_list), filesNameList)
                         .putParcelableArrayListExtra(getString(R.string.all_songs_object_list), (ArrayList<? extends Parcelable>) songs_list)
+                        .putParcelableArrayListExtra(getString(R.string.existing_songs_object_list), (ArrayList<? extends Parcelable>) existing_songs_models_list)
                         .putExtra(getString(R.string.coming_from_playlist_activity)
                                 , getString(R.string.coming_from_playlist_activity))
                         .putExtra(getString(R.string.coming_from_playlist_activity_int)
@@ -242,6 +347,8 @@ public class playlist_Activity extends AppCompatActivity {
 
 
     private void getFilesListFromFolder(){
+        temp_list=new ArrayList<>();
+        existing_songs_models_list=new ArrayList<>();
         int filesIndex=0;
         //String path = directory;
         Log.d("Folder Files", "Path: " + directory);
@@ -262,8 +369,19 @@ public class playlist_Activity extends AppCompatActivity {
             }
             PlayerActivity.saveArrayList(filesNameList,getString(R.string.shared_array_list_key),mContext);
         }
+
+        folder_files_to_temp_list();
+
+
     }
 
+    private void folder_files_to_temp_list(){
+        for(int i=0;i<filesNameList.size();i++){
+            String name= filesNameList.get(i).replace(".mp3","");
+            Log.d(TAG, "getFilesListFromFolder: temp_name : "+name+ "songs_list_size : "+songs_list.size());
+            temp_list.add(name);
+        }
+    }
 
     private void directorySetup(){
         //directory
@@ -353,12 +471,12 @@ public class playlist_Activity extends AppCompatActivity {
         return myIntValue;
     }
     public  void setupListView() {
-        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("songs");
+        final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("songs");
         final ProgressDialog dialog=new ProgressDialog(this,R.style.MyAlertDialogStyle);
         dialog.setTitle("Loading..");
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();
-
+        //myRef.addValueEventListener(myRef_ValueEventListener);
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -371,8 +489,8 @@ public class playlist_Activity extends AppCompatActivity {
 
             }
         });
-
         myRef.keepSynced(true);
+        //myRef.addChildEventListener(myRef_ChildEventListener);
         myRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
@@ -395,7 +513,7 @@ public class playlist_Activity extends AppCompatActivity {
             }
 
             @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @android.support.annotation.Nullable String s) {
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
             }
 
@@ -405,7 +523,7 @@ public class playlist_Activity extends AppCompatActivity {
             }
 
             @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @android.support.annotation.Nullable String s) {
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
             }
 
@@ -415,8 +533,14 @@ public class playlist_Activity extends AppCompatActivity {
             }
         });
 
+        //remove listeners
+        //myRef.removeEventListener(myRef_ChildEventListener);
+        //myRef.removeEventListener(myRef_ValueEventListener);
+
 
     }
+
+
 
     @Override
     protected void onStart() {
@@ -448,8 +572,17 @@ public class playlist_Activity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(onDownloadComplete != null){
-            unregisterReceiver(onDownloadComplete);
+        if (onDownloadComplete != null) {
+            try{
+                unregisterReceiver(onDownloadComplete);
+            }catch (NullPointerException e){
+                Log.d(TAG, "onDestroy: NullPointerException " +e.getMessage());
+            }catch (IllegalArgumentException e){
+                Log.d(TAG, "onDestroy: IllegalArgumentException " +e.getMessage());
+            }catch (IllegalStateException e){
+                Log.d(TAG, "onDestroy: IllegalStateException " +e.getMessage());
+            }
+
         }
 
 

@@ -53,6 +53,8 @@ import java.util.List;
 import java.util.Locale;
 
 import dmax.dialog.SpotsDialog;
+import needle.Needle;
+
 import static com.obcomdeveloper.realmusic.Extras.Extras.dialog;
 
 
@@ -83,6 +85,10 @@ public class Extras extends AppCompatActivity {
     private AdView adView;
     private Ads ads;
     private InterstitialAd interstitialAd;
+
+    //
+    private List<String> temp_list;
+    private List<Song> existing_songs_models_list;
 
 
     @Override
@@ -199,6 +205,8 @@ public class Extras extends AppCompatActivity {
     }
 
     private void getFilesListFromFolder() {
+        temp_list=new ArrayList<>();
+        existing_songs_models_list=new ArrayList<>();
         int filesIndex = 0;
         //String path = directory;
         Log.d("Folder Files", "Path: " + directory);
@@ -216,8 +224,23 @@ public class Extras extends AppCompatActivity {
                 filesNameList.add(filesIndex, files[i].getName());
                 filesIndex++;
             }
+            Log.d(TAG, "getFilesListFromFolder: filesNameIndex : "+filesNameList.size());
             PlayerActivity.saveArrayList(filesNameList, getString(R.string.shared_array_list_key), mContext);
         }
+
+
+        folder_files_to_temp_list();
+
+
+    }
+
+    private void folder_files_to_temp_list(){
+        for(int i=0;i<filesNameList.size();i++){
+            String name= filesNameList.get(i).replace(".mp3","");
+            Log.d(TAG, "getFilesListFromFolder: temp_name : "+name+ "songs_list_size : "+songs_list.size());
+            temp_list.add(name);
+        }
+        Log.d(TAG, "getFilesListFromFolder: temp_list : "+temp_list.size());
     }
 
     private void internetConnectivity() {
@@ -286,7 +309,16 @@ public class Extras extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (onDownloadComplete != null) {
-            unregisterReceiver(onDownloadComplete);
+            try{
+                unregisterReceiver(onDownloadComplete);
+            }catch (NullPointerException e){
+                Log.d(TAG, "onDestroy: NullPointerException " +e.getMessage());
+            }catch (IllegalArgumentException e){
+                Log.d(TAG, "onDestroy: IllegalArgumentException " +e.getMessage());
+            }catch (IllegalStateException e){
+                Log.d(TAG, "onDestroy: IllegalStateException " +e.getMessage());
+            }
+
         }
 
 
@@ -310,24 +342,27 @@ public class Extras extends AppCompatActivity {
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();
 
+        //myRef.addValueEventListener(myRef_ValueEventListener);
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 final long count =dataSnapshot.getChildrenCount();
                 saveChildCountPref(getString(R.string.child_count_extras),count,mContext);
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
-        myRef.keepSynced(true);
 
         myRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 Song song = dataSnapshot.getValue(Song.class);
                 songs_list.add(song);
+
+
 
                 //when reaches the final child and List is complete it will reverse the list
                 if(songs_list.size() == getChildCountPref(getString(R.string.child_count_extras),mContext)){
@@ -337,7 +372,6 @@ public class Extras extends AppCompatActivity {
                 adapter = new ExtraListAdapter(mContext, R.layout.item_extra, songs_list);
                 listView.setAdapter(adapter);
                 dialog.dismiss();
-
             }
 
             @Override
@@ -360,11 +394,29 @@ public class Extras extends AppCompatActivity {
 
             }
         });
+        myRef.keepSynced(true);
 
+        //myRef.addChildEventListener(myRef_ChildEventListener);
+
+        //remove listeners
+        //myRef.removeEventListener(myRef_ValueEventListener);
+        //myRef.removeEventListener(myRef_ChildEventListener);
 
 
     }
 
+    private void setup_existing_ojects_list(){
+        for(int j=0;j<temp_list.size();j++){
+            String temp_name=temp_list.get(j);
+            for(int k=0;k<getChildCountPref(getString(R.string.child_count_extras),mContext);k++){
+                if(songs_list.get(k).getSong_name().equals(temp_name)){
+                    existing_songs_models_list.add(songs_list.get(k));
+                }
+            }
+        }
+
+        Log.d(TAG, "getFilesListFromFolder: existing_songs_models_list : "+existing_songs_models_list.size());
+    }
 
     //////-------------------------------LISTENERS------------------------/////////////
 
@@ -372,7 +424,7 @@ public class Extras extends AppCompatActivity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-
+            setup_existing_ojects_list();
 
             String download_url=songs_list.get(position).getDownload_url();
             String song_name = songs_list.get(position).getSong_name();
@@ -389,11 +441,13 @@ public class Extras extends AppCompatActivity {
                         .putExtra(getString(R.string.current_index), index)
                         .putStringArrayListExtra(getString(R.string.folder_songs_list), filesNameList)
                         .putParcelableArrayListExtra(getString(R.string.all_songs_object_list), (ArrayList<? extends Parcelable>) songs_list)
+                        .putParcelableArrayListExtra(getString(R.string.existing_songs_object_list), (ArrayList<? extends Parcelable>) existing_songs_models_list)
                         .putExtra(getString(R.string.coming_from_extra_activity)
                                 , getString(R.string.coming_from_extra_activity))
                         .putExtra(getString(R.string.coming_from_extra_activity_int)
                                 ,EXTRA_IDENTIFIER)
                 );
+                Log.d(TAG, "getFilesListFromFolder: existing_songs_models_list : "+existing_songs_models_list.size());
                 Animatoo.animateZoom(mContext);
 
 

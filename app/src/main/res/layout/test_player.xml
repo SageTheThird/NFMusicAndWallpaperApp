@@ -3,8 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/player_background_blurred2"
     tools:context="com.obcomdeveloper.realmusic.Songs.PlayerActivity">
+
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/backg_player"
+        android:scaleType="fitXY"/>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/blurred_iv_player"
+        android:scaleType="fitXY"/>
 
 
     <!--Top Bar-->
@@ -24,10 +36,11 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/relative1"
         android:id="@+id/relative2"
-        android:layout_marginTop="45dp">
+        android:layout_marginTop="45dp"
+        >
 
         <include
-            layout="@layout/layout_below_top_player"/>
+            layout="@layout/test_layout_below_top_player"/>
     </RelativeLayout>
 
     <!--Pause, Next, Prev Buttons-->
@@ -36,7 +49,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/relative2"
         android:id="@+id/relative3"
-        android:layout_marginTop="50dp">
+        android:layout_marginTop="20dp">
         <include
             layout="@layout/layout_below_cover_player"/>
 

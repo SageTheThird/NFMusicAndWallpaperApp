@@ -1,8 +1,8 @@
 package com.obcomdeveloper.realmusic.Songs;
 
+import android.animation.ValueAnimator;
 import android.app.IntentService;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -24,29 +24,41 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.view.PagerAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.obcomdeveloper.realmusic.Adapters.PlayerPagerAdapter;
+import com.obcomdeveloper.realmusic.Adapters.UltraPagerAdapter;
 import com.obcomdeveloper.realmusic.Extras.Extras;
 import com.obcomdeveloper.realmusic.Models.Song;
 import com.obcomdeveloper.realmusic.R;
 import com.obcomdeveloper.realmusic.Utils.Ads;
+import com.obcomdeveloper.realmusic.Utils.CustomViewPager;
 import com.obcomdeveloper.realmusic.Utils.HeadphonesReciever;
+import com.obcomdeveloper.realmusic.Utils.UniversalImageLoader;
+import com.obcomdeveloper.realmusic.Utils.ViewUtilities;
+import com.obcomdeveloper.realmusic.Utils.ZoomOutTransformation;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import me.tankery.lib.circularseekbar.CircularSeekBar;
+
+import smartdevelop.ir.eram.showcaseviewlib.GuideView;
+import smartdevelop.ir.eram.showcaseviewlib.config.DismissType;
+
 import static android.media.audiofx.AudioEffect.CONTENT_TYPE_MUSIC;
 import static android.media.audiofx.AudioEffect.EXTRA_AUDIO_SESSION;
 import static android.media.audiofx.AudioEffect.EXTRA_CONTENT_TYPE;
@@ -91,13 +103,13 @@ public class PlayerActivity extends AppCompatActivity{
 
     private Context mContext = PlayerActivity.this;
     public static MediaPlayer mediaPlayer;
-    private CircularSeekBar seekBar;
-    private Button mPause_btn, mGenius_btn, mLyrics_btn,mNext_btn, mPrev_btn,mRepeat,mShuffle;
+    private SeekBar seekBar;
+    private Button mPause_btn,mRepeat,mShuffle,mNext_btn,mPrev_btn;
     private TextView mSongname_view, mTotal_duration_view, mCurrent_duration_view,subSongText;
     private String mLyric_file = "", mGenius_file = "";
     private Intent intent;
     private static ArrayList<String> mSongs_list;
-    private ImageView mBack_arrow,mEquilizer;
+    private ImageView mBack_arrow,mEquilizer, mGenius_btn, mLyrics_btn,mBackground_iv;
 
     private Handler myHandler = new Handler();
     //for song list
@@ -137,13 +149,43 @@ public class PlayerActivity extends AppCompatActivity{
     private InterstitialAd interstitialAd;
 
 
+    //test
+    private ImageView blurred_iv;
+    private CustomViewPager viewPager;
+    private UltraPagerAdapter adapter;
+
+    private SharedPreferences prefs;
+
+
+    //viewpager animation
+    private int animFactor;
+    private ValueAnimator animator = new ValueAnimator();
+
+    private List<Song> existing_songs_ojects_list;
+
+    private boolean trigger_on_page;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_player);
+        setContentView(R.layout.test_player);
+
+
+
+        trigger_on_page=true;
+        saveBooleanPref(getString(R.string.trigger_on_page),trigger_on_page,mContext);
+
+
+
+
+
         interstitialAd=new InterstitialAd(this);
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
 
 
@@ -175,6 +217,14 @@ public class PlayerActivity extends AppCompatActivity{
         mNext_btn.setOnClickListener(NextClickListener);
         mPrev_btn.setOnClickListener(PrevClickListener);
 
+
+        if(prefs.getBoolean("firstGuideViewpager", true)) {
+
+            guideBuilder(this);
+
+            prefs.edit().putBoolean("firstGuideViewpager", false).commit();
+        }
+
         //notific
         mediaSessionCompat = new MediaSessionCompat(this, "someTag");
 
@@ -192,7 +242,7 @@ public class PlayerActivity extends AppCompatActivity{
         mShuffle.setOnClickListener(ShuffleClickListener);
 
 
-        if(getRepeatStatexPref(getString(R.string.repeat_state),this)){
+        if(getBooleanPref(getString(R.string.repeat_state),this)){
             mRepeat.setBackgroundResource(R.drawable.ic_repeat_one);
         }else {
             mRepeat.setBackgroundResource(R.drawable.ic_repeat_not);
@@ -201,11 +251,142 @@ public class PlayerActivity extends AppCompatActivity{
 
         registerReciever();
 
+
         //ads
         ads=new Ads();
         ads.initAdMob(this);
         ads.setupInterstitial(this,getString(R.string.interstitial_ad_test_unit_id),interstitialAd);
 
+
+
+
+        //viewpager
+
+        String thumbnail=existing_songs_ojects_list.get(mCurrentIndex).getThumbnail();
+        UniversalImageLoader.setBlurredImage(thumbnail,
+                blurred_iv,null,"",seekBar,mLyrics_btn,mGenius_btn);
+        PagerAdapter adapter = new PlayerPagerAdapter(existing_songs_ojects_list,
+                PlayerActivity.this);
+
+        viewPager.setAdapter(adapter);
+        viewPager.setCurrentItem(mCurrentIndex);
+        ZoomOutTransformation zoomOutTransformation=new ZoomOutTransformation();
+        //viewPager.setPageTransformer(true,zoomOutTransformation);
+
+        viewPager.setOnPageChangeListener(new CustomViewPager.OnPageChangeListener() {
+
+            int previousPosition=viewPager.getCurrentItem();
+
+
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int i) {
+
+                if(getBooleanPref(getString(R.string.trigger_on_page),mContext)){
+
+                    if(i > previousPosition){
+                        Log.d(TAG, "onPageSelected: Next Swipe");
+                        nextTrack();
+                        getThumbnailofPlayingIndex();
+                        previousPosition=i;
+
+                    }else{
+                        Log.d(TAG, "onPageSelected: Previous Swipe");
+                        previousTrack();
+                        getThumbnailofPlayingIndex();
+                        previousPosition=i;
+
+                    }
+                }else {
+                    trigger_on_page=true;
+                    saveBooleanPref(getString(R.string.trigger_on_page),trigger_on_page,mContext);
+                }
+
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+
+    }
+
+    private void guideBuilder(Context context){
+
+            new GuideView.Builder(context)
+                    .setTitle("Swipe")
+                    .setContentText("For Next or Previous Track")
+                    .setTargetView(viewPager)
+                    .setIndicatorHeight(100f)
+                    .setContentTextSize(15)
+                    .setTitleTextSize(17)
+
+                    //.setContentTypeFace(Typeface)//optional
+                    //.setTitleTypeFace()//optional
+                    .setDismissType(DismissType.anywhere) //optional - default dismissible by TargetView
+                    .build()
+                    .show();
+
+    }
+
+    private void getThumbnailofPlayingIndex(){
+
+
+        String thumbnail=existing_songs_ojects_list.get(mCurrentIndex).getThumbnail();
+        UniversalImageLoader.setBlurredImage(thumbnail,
+                blurred_iv,null,"",seekBar,mLyrics_btn,mGenius_btn);
+
+//        String song_name=mSongs_list.get(mCurrentIndex).replace(".mp3","");
+//        for(int i1=0;i1<list_of_objects_songs.size();i1++){
+//            if(list_of_objects_songs.get(i1).getSong_name().equals(song_name)){
+//                String thumbnail=list_of_objects_songs.get(i1).getThumbnail();
+//                UniversalImageLoader.setBlurredImage(thumbnail,
+//                        blurred_iv,null,"",seekBar,mLyrics_btn,mGenius_btn);
+//
+//
+//            }
+//        }
+
+
+    }
+    private void nextTrack(){
+        mCurrentIndex++;
+        mCurrentIndex %= mSongs_list.size();
+        setSongName(mCurrentIndex);
+        playSong(mCurrentIndex,activityIdentifier);
+        //lyrics
+        setupLyrics(mCurrentIndex);
+        //genius
+        setupGenius(mCurrentIndex);
+        saveIntPref(getString(R.string.shared_current_index),mCurrentIndex,mContext);
+        if(activityIdentifier==PLAYLIST_ACTIVITY_IDENTIFIER){
+            playlist_Activity.playlist_adapter.notifyDataSetChanged();
+        }else {
+            Extras.adapter.notifyDataSetChanged();
+        }
+        updateNotificationTitle();
+
+    }
+    private void previousTrack(){
+        mCurrentIndex = mCurrentIndex > 0 ? mCurrentIndex - 1 : mSongs_list.size() - 1;
+        setSongName(mCurrentIndex);
+        playSong(mCurrentIndex,activityIdentifier);
+        setupLyrics(mCurrentIndex);
+        setupGenius(mCurrentIndex);
+        saveIntPref(getString(R.string.shared_current_index),mCurrentIndex,mContext);
+        if(activityIdentifier==PLAYLIST_ACTIVITY_IDENTIFIER){
+            playlist_Activity.playlist_adapter.notifyDataSetChanged();
+        }else {
+            Extras.adapter.notifyDataSetChanged();
+        }
+        updateNotificationTitle();
     }
 
     private void registerReciever() {
@@ -347,24 +528,24 @@ public class PlayerActivity extends AppCompatActivity{
         String myStringValue = prefs.getString(key,"defaultValue");
         return myStringValue;
     }
-    public static void saveRepeatStatePref(String key,boolean state,Context context){
+    public static void saveBooleanPref(String key, boolean state, Context context){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(key, state);
         editor.commit();
     }
-    public static boolean getRepeatStatexPref(String key,Context context){
+    public static boolean getBooleanPref(String key, Context context){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean myBolValue = prefs.getBoolean(key,false);
         return myBolValue;
     }
-    public static void saveCurrentIndexPref(String key,int index,Context context){
+    public static void saveIntPref(String key, int index, Context context){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putInt(key, index);
         editor.commit();
     }
-    public static int getCurrentIndexPref(String key,Context context){
+    public static int getIntPref(String key, Context context){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         int myIntValue = prefs.getInt(key, -1);
         return myIntValue;
@@ -388,12 +569,10 @@ public class PlayerActivity extends AppCompatActivity{
     }
 
     private void getIncomingIntent() {
+        existing_songs_ojects_list=new ArrayList<>();
         intent = getIntent();
 
 
-
-        //mLyric_file = intent.getStringExtra(getString(R.string.songname))+".txt";
-        mGenius_file = intent.getStringExtra(getString(R.string.GENIUSFILENAME));
 
         mSongs_list = intent.getStringArrayListExtra(getString(R.string.folder_songs_list));
 
@@ -409,7 +588,7 @@ public class PlayerActivity extends AppCompatActivity{
 
         String current_song_tapped=mSongs_list.get(mCurrentIndex);
 
-        if(mCurrentIndex == getCurrentIndexPref(getString(R.string.shared_current_index),mContext)
+        if(mCurrentIndex == getIntPref(getString(R.string.shared_current_index),mContext)
         && current_song_tapped.equals(getStringPref(getString(R.string.current_song_name),this))){
             Log.d(TAG, "getIncomingIntent: Same Song");
             resumeSong=true;
@@ -419,10 +598,13 @@ public class PlayerActivity extends AppCompatActivity{
 
 
         }else {
-            saveCurrentIndexPref(getString(R.string.shared_current_index),mCurrentIndex,mContext);
+            saveIntPref(getString(R.string.shared_current_index),mCurrentIndex,mContext);
             saveStringPref(getString(R.string.current_song_name),current_song_tapped,this);
         }
 
+
+        existing_songs_ojects_list=intent.getParcelableArrayListExtra(getString(R.string.existing_songs_object_list));
+        Log.d(TAG, "getIncomingIntent: existing_songs_ojects_list : "+existing_songs_ojects_list.size());
 
 
         list_of_objects_songs=intent.getParcelableArrayListExtra(getString(R.string.all_songs_object_list));
@@ -443,27 +625,20 @@ public class PlayerActivity extends AppCompatActivity{
 
     private void setupGenius(int mCurrentIndex) {
 
-        String song_name=mSongs_list.get(mCurrentIndex).replace(".mp3","");
-        for(int i=0;i<list_of_objects_songs.size();i++){
-            if(list_of_objects_songs.get(i).getSong_name().equals(song_name)){
-                mGenius_file=list_of_objects_songs.get(i).getGenius_url();
-                Log.d(TAG, "setupGenius: mGeniusFile : "+mGenius_file);
-            }
-        }
+        mGenius_file=existing_songs_ojects_list.get(mCurrentIndex).getGenius_url();
+
     }
 
     private void setupLyrics(int mCurrentIndex) {
 
-        mLyric_file=mSongs_list.get(mCurrentIndex).replace(".mp3",".txt");
+        mLyric_file=existing_songs_ojects_list.get(mCurrentIndex).getSong_name()+".txt";
         Log.d(TAG, "setupLyrics: mLyrics_file : "+mLyric_file);
 
     }
 
     public void setSongName(int index) {
-        String currentName = mSongs_list.get(index);
-
-        String songNameOnly = currentName.replace(getString(R.string.mp3_extenstion), "");
-        mSongname_view.setText(songNameOnly);
+        String currentName = existing_songs_ojects_list.get(index).getSong_name();
+        mSongname_view.setText(currentName);
         mSongname_view.setHorizontallyScrolling(true);
         mSongname_view.setSelected(true);
 
@@ -473,7 +648,7 @@ public class PlayerActivity extends AppCompatActivity{
     private void initWidgets() {
         mPause_btn = findViewById(R.id.pause);
         mSongname_view = findViewById(R.id.songtextView);
-        seekBar = findViewById(R.id.circularSeekBar);
+        seekBar = findViewById(R.id.horizantal_seekbar);
         mBack_arrow = findViewById(R.id.back_button);
         mGenius_btn = findViewById(R.id.geniusbutton);
         mLyrics_btn = findViewById(R.id.lyrics_button);
@@ -486,6 +661,16 @@ public class PlayerActivity extends AppCompatActivity{
         mRepeat = findViewById(R.id.repeat);
         mShuffle=findViewById(R.id.shuffle);
 
+        //
+        viewPager=findViewById(R.id.player_viewpager);
+        blurred_iv=findViewById(R.id.blurred_iv_player);
+        mBackground_iv=findViewById(R.id.backg_player);
+
+        Picasso
+                .with(this)
+                .load(R.drawable.test_background_blurred)
+                .resize(800, 800)
+                .into(mBackground_iv);
 
     }
 
@@ -526,7 +711,7 @@ public class PlayerActivity extends AppCompatActivity{
         Log.d(TAG, "playSong: Identifier : "+activityIdentifier);
         String songName = null;
         try {
-            songName = mSongs_list.get(index);
+            songName = existing_songs_ojects_list.get(index).getSong_name()+".mp3";
         } catch (IndexOutOfBoundsException e) {
             showToast("No offline files in directory");
             e.printStackTrace();
@@ -560,7 +745,7 @@ public class PlayerActivity extends AppCompatActivity{
                                     seekBar.setMax(mediaPlayer.getDuration());
                                     seekBar.setProgress(mediaPlayer.getCurrentPosition());
                                     setDuration(mediaPlayer.getDuration(), mTotal_duration_view);
-                                    mPause_btn.setBackgroundResource(R.drawable.pause_button);
+                                    mPause_btn.setBackgroundResource(R.drawable.ic_pause);
                                     mediaPlayer.start();
                                     resumeSong=false;
 
@@ -575,7 +760,7 @@ public class PlayerActivity extends AppCompatActivity{
                                 mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                                     @Override
                                     public void onPrepared(MediaPlayer mp) {
-                                        mPause_btn.setBackgroundResource(R.drawable.pause_button);
+                                        mPause_btn.setBackgroundResource(R.drawable.ic_pause);
                                         mp.start();
                                         seekBar.setProgress(0);
                                         //set max duration to seek_bar
@@ -586,18 +771,33 @@ public class PlayerActivity extends AppCompatActivity{
                                             @Override
                                             public void onCompletion(MediaPlayer mp) {
 
-                                                if(mRepeat.getBackground().getConstantState().equals(getResources()
-                                                        .getDrawable(R.drawable.ic_repeat_one).getConstantState())){                                             setSongName(mCurrentIndex);
-                                                    playSong(mCurrentIndex,activityIdentifier);
+                                                Log.d(TAG, "onCompletion: upper On Completion");
 
-                                                }else if(mRepeat.getBackground().getConstantState().equals(getResources()
-                                                        .getDrawable(R.drawable.ic_repeat_not).getConstantState())) {
-                                                    mPause_btn.setBackgroundResource(R.drawable.play_button);
-                                                    mCurrentIndex++;
-                                                    mCurrentIndex %= mSongs_list.size();
+                                                if(mRepeat.getBackground().getConstantState().equals(getResources()
+                                                        .getDrawable(R.drawable.ic_repeat_one).getConstantState())) {
+                                                    repeatOn = true;
+                                                    saveBooleanPref(getString(R.string.repeat_state), repeatOn, mContext);
+                                                }else {
+                                                    repeatOn = false;
+                                                    saveBooleanPref(getString(R.string.repeat_state), repeatOn, mContext);
+                                                }
+
+                                                if(getBooleanPref(getString(R.string.repeat_state),mContext)){
+                                                    //mRepeat.setBackgroundResource(R.drawable.ic_repeat_one);
                                                     setSongName(mCurrentIndex);
                                                     playSong(mCurrentIndex,activityIdentifier);
-                                                }
+                                                }else{
+
+                                                    if(mSongs_list.size() > 1){
+
+
+                                                        nextTrack();
+                                                        getThumbnailofPlayingIndex();
+                                                        updateViewPager();
+
+                                                    }
+                                                    }
+
 
 
 
@@ -616,7 +816,7 @@ public class PlayerActivity extends AppCompatActivity{
                             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                                 @Override
                                 public void onPrepared(MediaPlayer mp) {
-                                    mPause_btn.setBackgroundResource(R.drawable.pause_button);
+                                    mPause_btn.setBackgroundResource(R.drawable.ic_pause);
                                     mp.start();
 
                                     seekBar.setProgress(0);
@@ -628,16 +828,30 @@ public class PlayerActivity extends AppCompatActivity{
                                         @Override
                                         public void onCompletion(MediaPlayer mp) {
 
-                                            if(getRepeatStatexPref(getString(R.string.repeat_state),mContext)){
+                                            Log.d(TAG, "onCompletion: downward On Completion");
+
+                                            if(mRepeat.getBackground().getConstantState().equals(getResources()
+                                                    .getDrawable(R.drawable.ic_repeat_one).getConstantState())) {
+                                                repeatOn = true;
+                                                saveBooleanPref(getString(R.string.repeat_state), repeatOn, mContext);
+                                            }else {
+                                                repeatOn = false;
+                                                saveBooleanPref(getString(R.string.repeat_state), repeatOn, mContext);
+                                            }
+
+                                            if(getBooleanPref(getString(R.string.repeat_state),mContext)){
                                                 //mRepeat.setBackgroundResource(R.drawable.ic_repeat_one);
                                                 setSongName(mCurrentIndex);
                                                 playSong(mCurrentIndex,activityIdentifier);
                                             }else{
-                                                //mRepeat.setBackgroundResource(R.drawable.ic_repeat_not);
-                                                mCurrentIndex++;
-                                                mCurrentIndex %= mSongs_list.size();
-                                                setSongName(mCurrentIndex);
-                                                playSong(mCurrentIndex,activityIdentifier);
+
+                                                if(mSongs_list.size() >1){
+                                                    nextTrack();
+                                                    getThumbnailofPlayingIndex();
+                                                    updateViewPager();
+
+                                                }
+
                                             }
                                         }
                                     });
@@ -664,6 +878,30 @@ public class PlayerActivity extends AppCompatActivity{
 
 
 
+
+    }
+
+    private void updateViewPager(){
+        trigger_on_page=false;
+        saveBooleanPref(getString(R.string.trigger_on_page),trigger_on_page,mContext);
+        ViewUtilities.waitForLayout(viewPager, new Runnable() {
+            @Override
+            public void run() {
+                viewPager.setCurrentItem(mCurrentIndex);
+            }
+        });
+    }
+
+    private void updateNotificationTitle(){
+        try {
+            if(notificationBuilder != null){
+                Log.d(TAG, "onCompletion: updating notification name");
+                notificationBuilder.setContentTitle(songNameNotification(mCurrentIndex,mContext));
+                notificationManager.notify(NOTIFICATION_ID,notificationBuilder.build());
+            }
+        }catch (Exception e){
+            Log.d(TAG, "updateNotificationTitle: Exception " +e.getMessage());
+        }
 
     }
 
@@ -750,20 +988,13 @@ public class PlayerActivity extends AppCompatActivity{
         public void onClick(View v) {
             Log.d(TAG, "onClick: next");
 
-            mCurrentIndex++;
-            mCurrentIndex %= mSongs_list.size();
-            setSongName(mCurrentIndex);
-            playSong(mCurrentIndex,activityIdentifier);
-            //lyrics
-            setupLyrics(mCurrentIndex);
-            //genius
-            setupGenius(mCurrentIndex);
-            saveCurrentIndexPref(getString(R.string.shared_current_index),mCurrentIndex,mContext);
-            if(activityIdentifier==PLAYLIST_ACTIVITY_IDENTIFIER){
-                playlist_Activity.playlist_adapter.notifyDataSetChanged();
-            }else {
-                Extras.adapter.notifyDataSetChanged();
-            }
+            nextTrack();
+            getThumbnailofPlayingIndex();
+            updateViewPager();
+            //viewPager.setCurrentItem(mCurrentIndex,true);
+            //viewPager.arrowScroll(View.FOCUS_RIGHT);
+            //viewPager.arrowScroll(View.FOCUS_RIGHT);
+
 
 
 
@@ -784,14 +1015,18 @@ public class PlayerActivity extends AppCompatActivity{
         public void onClick(View v) {
             if(mRepeat.getBackground().getConstantState().equals(getResources()
                     .getDrawable(R.drawable.ic_repeat_one).getConstantState())){
+
                 mRepeat.setBackgroundResource(R.drawable.ic_repeat_not);
                 repeatOn=false;
-                saveRepeatStatePref(getString(R.string.repeat_state),repeatOn,mContext);
+                saveBooleanPref(getString(R.string.repeat_state),repeatOn,mContext);
 
             }else{
-                mRepeat.setBackgroundResource(R.drawable.ic_repeat_one);
-                repeatOn=true;
-                saveRepeatStatePref(getString(R.string.repeat_state),repeatOn,mContext);
+                if(mSongs_list.size() > 1){
+                    mRepeat.setBackgroundResource(R.drawable.ic_repeat_one);
+                    repeatOn=true;
+                    saveBooleanPref(getString(R.string.repeat_state),repeatOn,mContext);
+                }
+
             }
             Log.d(TAG, "onClick: Repeat");
 //            if (v.getId() == R.id.repeat) {
@@ -805,42 +1040,36 @@ public class PlayerActivity extends AppCompatActivity{
         public void onClick(View v) {
 
             Log.d(TAG, "onClick: next button");
-            mCurrentIndex = mCurrentIndex > 0 ? mCurrentIndex - 1 : mSongs_list.size() - 1;
-            setSongName(mCurrentIndex);
-            playSong(mCurrentIndex,activityIdentifier);
-            setupLyrics(mCurrentIndex);
-            setupGenius(mCurrentIndex);
-            saveCurrentIndexPref(getString(R.string.shared_current_index),mCurrentIndex,mContext);
-            if(activityIdentifier==PLAYLIST_ACTIVITY_IDENTIFIER){
-                playlist_Activity.playlist_adapter.notifyDataSetChanged();
-            }else {
-                Extras.adapter.notifyDataSetChanged();
-            }
+            previousTrack();
+            getThumbnailofPlayingIndex();
+            updateViewPager();
+            //viewPager.setCurrentItem(mCurrentIndex,true);
 
         }
     };
-    CircularSeekBar.OnCircularSeekBarChangeListener SeekBarChangeListener = new CircularSeekBar.OnCircularSeekBarChangeListener() {
+
+    SeekBar.OnSeekBarChangeListener SeekBarChangeListener= new SeekBar.OnSeekBarChangeListener() {
         @Override
-        public void onProgressChanged(CircularSeekBar circularSeekBar, float progress, boolean fromUser) {
-            int h = Math.round(progress);
-            //In the above line we are converting the float value into int because
-            // media player required int value and seekbar library gives progress in float
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            //int h = Math.round(progress);
+
             if (mediaPlayer != null && fromUser) {
-                mediaPlayer.seekTo(h);
+                mediaPlayer.seekTo(progress);
             }
         }
 
         @Override
-        public void onStopTrackingTouch(CircularSeekBar seekBar) {
-            mediaPlayer.seekTo((int) seekBar.getProgress());
+        public void onStartTrackingTouch(SeekBar seekBar) {
 
+            mediaPlayer.seekTo(seekBar.getProgress());
         }
 
         @Override
-        public void onStartTrackingTouch(CircularSeekBar seekBar) {
+        public void onStopTrackingTouch(SeekBar seekBar) {
 
         }
     };
+
 
 
     View.OnClickListener GeniusClickListener = new View.OnClickListener() {
@@ -878,10 +1107,10 @@ public class PlayerActivity extends AppCompatActivity{
 
                 if (mediaPlayer.isPlaying()) {
 
-                    mPause_btn.setBackgroundResource(R.drawable.play_button);
+                    mPause_btn.setBackgroundResource(R.drawable.ic_play);
                     mediaPlayer.pause();
                 } else if (!mediaPlayer.isPlaying()) {
-                    mPause_btn.setBackgroundResource(R.drawable.pause_button);
+                    mPause_btn.setBackgroundResource(R.drawable.ic_pause);
                     mediaPlayer.start();
                 }
             }catch (NullPointerException e){
@@ -948,7 +1177,7 @@ public class PlayerActivity extends AppCompatActivity{
 
 
         ArrayList<String> songs=getArrayList(context.getString(R.string.shared_array_list_key),context);
-        //int index=getCurrentIndexPref(getString(R.string.current_index),this);
+        //int index=getIntPref(getString(R.string.current_index),this);
         String songname=songs.get(index);
         String songnameminusMP3=songname.replace(".mp3","");
         return songnameminusMP3;
@@ -1000,7 +1229,7 @@ public class PlayerActivity extends AppCompatActivity{
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_play)
                         .setContentTitle(songNameNotification
-                                (getCurrentIndexPref(getString(R.string.shared_current_index),this),this))
+                                (getIntPref(getString(R.string.shared_current_index),this),this))
                         .setLargeIcon(artwork)
                         .setContentText("Playing")
                         .setContentIntent(clickPendingIntent)
@@ -1123,6 +1352,59 @@ public class PlayerActivity extends AppCompatActivity{
                         Log.d(TAG, "onPrepared: prepared");
                         mp.start();
 
+
+                        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mp) {
+
+                                if(getBooleanPref(getString(R.string.repeat_state),NotificationActionService.this)){
+                                    //mRepeat.setBackgroundResource(R.drawable.ic_repeat_one);
+                                    int index =getIndex_current();
+                                    //updateNotificationName(index);
+                                    playSongNotification(index);
+                                    Log.d(TAG, "onCompletion: Repeats On - Moving On");
+                                }else{
+
+                                    Log.d(TAG, "onCompletion: Repeats Off - Moving On");
+                                    //mRepeat.setBackgroundResource(R.drawable.ic_repeat_not);
+                                    setIndex_current(getIntPref(getString(R.string.shared_current_index),
+                                            NotificationActionService.this));
+                                    setSongs_list(getArrayList(getString(R.string.shared_array_list_key),
+                                            NotificationActionService.this));
+                                    int index=getIndex_current();
+                                    index++;
+                                    index %= getSongs_list().size();
+                                    // playerActivity.setSongName(mCurrentIndex);
+                                    updateNotificationName(index);
+                                    playSongNotification(index);
+
+                                    Log.d(TAG, "ACTION_NEXT: incremented index : "+index);
+                                    saveIntPref(getString(R.string.shared_current_index),index,
+                                            NotificationActionService.this);
+
+
+
+                                    try{
+                                        if(playlist_Activity.playlist_adapter != null || Extras.adapter != null){
+                                            if(activityIdentifier==PLAYLIST_ACTIVITY_IDENTIFIER){
+                                                playlist_Activity.playlist_adapter.notifyDataSetChanged();
+                                            }else {
+                                                Extras.adapter.notifyDataSetChanged();
+                                            }
+                                        }
+                                    }catch (NullPointerException e){
+                                        Log.d(TAG, "onCompletion: NullPointerException " +e.getMessage());
+                                    }catch (IllegalArgumentException e){
+                                        Log.d(TAG, "onCompletion: IllegalArgumentException " +e.getMessage());
+                                    }catch (Exception e){
+                                        Log.d(TAG, "onCompletion: Exception " +e.getMessage());
+                                    }
+
+
+                                }
+                            }
+                        });
+
                     }
                 });
 
@@ -1138,6 +1420,22 @@ public class PlayerActivity extends AppCompatActivity{
             notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
         }
 
+        public void stopNotification(){
+            NotificationManagerCompat.from(NotificationActionService.this).cancel(NOTIFICATION_ID);
+            stopSelf();
+            try{
+                if(mNoisyRecieverOn){
+                    unregisterReceiver(receiver);
+                    Log.d(TAG, "run: Noisy Reciever Unregistered");
+                }
+            }catch (IllegalArgumentException e){
+                Log.d(TAG, "run: IllegalArgumentException"+e.getMessage());
+            }catch (NullPointerException e){
+                Log.d(TAG, "run: IllegalArgumentException"+e.getMessage());
+
+            }
+        }
+
 
         @Override
         public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
@@ -1148,18 +1446,18 @@ public class PlayerActivity extends AppCompatActivity{
 
             if(intent.getAction()==ACTION_NEXT){
 
-                setIndex_current(getCurrentIndexPref(getString(R.string.shared_current_index),this));
+                setIndex_current(getIntPref(getString(R.string.shared_current_index),this));
                 setSongs_list(getArrayList(getString(R.string.shared_array_list_key),this));
                 Log.d(TAG, "onStartCommand: NEXT");
             }
             if(intent.getAction()==ACTION_PREV){
                 Log.d(TAG, "onStartCommand: PAUSE");
-                setIndex_current(getCurrentIndexPref(getString(R.string.shared_current_index),this));
+                setIndex_current(getIntPref(getString(R.string.shared_current_index),this));
                 setSongs_list(getArrayList(getString(R.string.shared_array_list_key),this));
             }
             if(intent.getAction()==ACTION_PLAY){
                 Log.d(TAG, "onStartCommand: PLAY");
-                setIndex_current(getCurrentIndexPref(getString(R.string.shared_current_index),this));
+                setIndex_current(getIntPref(getString(R.string.shared_current_index),this));
                 setSongs_list(getArrayList(getString(R.string.shared_array_list_key),this));
             }
 
@@ -1202,6 +1500,7 @@ public class PlayerActivity extends AppCompatActivity{
                                 Toast.makeText(NotificationActionService.this, "No Track Playing", Toast.LENGTH_LONG).show();
                             }else {
                                 Toast.makeText(NotificationActionService.this, "App is Terminated", Toast.LENGTH_LONG).show();
+                                stopNotification();
                                 return;
                             }
                         }
@@ -1234,6 +1533,7 @@ public class PlayerActivity extends AppCompatActivity{
                                 return;
                             }else if(mediaPlayer==null){
                                 Toast.makeText(NotificationActionService.this, "App is Terminated", Toast.LENGTH_LONG).show();
+                                stopNotification();
                             }else if(!mediaPlayer.isPlaying()){
                                 mediaPlayer.start();
                             }else if(mediaPlayer!=null && !mediaPlayer.isPlaying()){
@@ -1265,35 +1565,11 @@ public class PlayerActivity extends AppCompatActivity{
                             //Toast.makeText(getApplicationContext(), "Stop Pressed", Toast.LENGTH_SHORT).show();
                             if(mediaPlayer!=null){
                                 mediaPlayer.stop();
-                                NotificationManagerCompat.from(NotificationActionService.this).cancel(NOTIFICATION_ID);
-                                stopSelf();
-                                try{
-                                    if(mNoisyRecieverOn){
-                                        unregisterReceiver(receiver);
-                                        Log.d(TAG, "run: Noisy Reciever Unregistered");
-                                    }
-                                }catch (IllegalArgumentException e){
-                                    Log.d(TAG, "run: IllegalArgumentException"+e.getMessage());
-                                }catch (NullPointerException e){
-                                    Log.d(TAG, "run: IllegalArgumentException"+e.getMessage());
-
-                                }
+                                stopNotification();
 
                             }
                             else {
-                                NotificationManagerCompat.from(NotificationActionService.this).cancel(NOTIFICATION_ID);
-                                stopSelf();
-                                try{
-                                    if(mNoisyRecieverOn){
-                                        unregisterReceiver(receiver);
-                                        Log.d(TAG, "run: Noisy Reciever Unregistered");
-                                    }
-                                }catch (IllegalArgumentException e){
-                                    Log.d(TAG, "run: IllegalArgumentException"+e.getMessage());
-                                }catch (NullPointerException e){
-                                    Log.d(TAG, "run: IllegalArgumentException"+e.getMessage());
-
-                                }
+                                stopNotification();
 
 
                             }
@@ -1334,9 +1610,10 @@ public class PlayerActivity extends AppCompatActivity{
                                 playSongNotification(index);
 
                                 Log.d(TAG, "ACTION_NEXT: incremented index : "+index);
-                                saveCurrentIndexPref(getString(R.string.shared_current_index),index, NotificationActionService.this);
+                                saveIntPref(getString(R.string.shared_current_index),index, NotificationActionService.this);
                             }else {
                                 Toast.makeText(NotificationActionService.this, "App is Terminated", Toast.LENGTH_LONG).show();
+                                stopNotification();
                                 return;
                             }
                         }
@@ -1369,9 +1646,10 @@ public class PlayerActivity extends AppCompatActivity{
                                 playSongNotification(index);
                                 Log.d(TAG, "ACTION_NEXT: decremented index : "+index);
                                 updateNotificationName(index);
-                                saveCurrentIndexPref(getString(R.string.shared_current_index),index, NotificationActionService.this);
+                                saveIntPref(getString(R.string.shared_current_index),index, NotificationActionService.this);
                             }else {
                                 Toast.makeText(NotificationActionService.this, "App is Terminated", Toast.LENGTH_LONG).show();
+                                stopNotification();
                                 return;
                             }
                         }

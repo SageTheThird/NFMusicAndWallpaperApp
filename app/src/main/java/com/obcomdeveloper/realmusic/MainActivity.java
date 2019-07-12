@@ -131,9 +131,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void downloadPlaylistFirstSongOnce(){
-//        PlayerActivity.saveCurrentIndexPref(getString(R.string.shared_run_once),1,this);
+//        PlayerActivity.saveIntPref(getString(R.string.shared_run_once),1,this);
 //
-//        if(PlayerActivity.getCurrentIndexPref(getString(R.string.shared_run_once),this)==1){
+//        if(PlayerActivity.getIntPref(getString(R.string.shared_run_once),this)==1){
             //download the song
 
             if ((networkInfo == null || !networkInfo.isConnected())) {
@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-         //   PlayerActivity.saveCurrentIndexPref(getString(R.string.shared_run_once),2,this);
+         //   PlayerActivity.saveIntPref(getString(R.string.shared_run_once),2,this);
 
        // }
     }
@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
                     .setCancelable(false)
                     .build();
             //download file
-            download("Shahmen - Abacus.mp3", extraDirectory,STORAGE_EXTRAS_REFERENCE);
+            download("Rick and Morty (Dubstep).mp3", extraDirectory,STORAGE_EXTRAS_REFERENCE);
         }
 
     }

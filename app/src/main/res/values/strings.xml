@@ -9,6 +9,7 @@
     <string name="storage_song_db">songs</string>
     <string name="store_extras_db">extras</string>
     <string name="db_resized_wallpapers">resized_wallpapers</string>
+    <string name="db_random_quotes">random_quotes</string>
 
     <!--Fragmeny Names-->
     <string name="LYRICS_FRAGMENT">LYRICS_FRAGMENT</string>
@@ -28,8 +29,10 @@
     <string name="downloadUrl">downloadUrl</string>
     <string name="LYRICSFILE">LYRICSFILE</string>
     <string name="GENIUSFILENAME">GENIUSFILENAME</string>
-    <string name="all_songs_object_list">songname</string>
+    <string name="all_songs_object_list">all_songs_objects</string>
+    <string name="existing_songs_object_list">existing_objects_list</string>
     <string name="folder_songs_list">songslist</string>
+    <string name="trigger_on_page">on_page</string>
 
 
     <!--Random String-->
@@ -53,6 +56,7 @@
     <string name="child_count_playlist">child_count_playlist</string>
     <string name="repeat_state">repeat_state</string>
     <string name="current_song_name">current_song_name</string>
+    <string name="count_random_quotes">count_random_quotes</string>
 
 
     <!--Fragment Names-->
@@ -111,5 +115,6 @@
     <string name="about_email"> Email Address:\nskurtz00420@gmail.com</string>
     <string name="about_ps">P.S. The ads just helps in support and growth of the app.
 </string>
+    <string name="once_random_q_count_pref">init_random_q_count</string>
 
 </resources>
