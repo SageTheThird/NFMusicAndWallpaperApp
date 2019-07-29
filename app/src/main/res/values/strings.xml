@@ -39,12 +39,16 @@
     <string name="drawable_universal">drawable://</string>
     <string name="mp3_extenstion">.mp3</string>
     <string name="txt_extenstion">.txt</string>
+    <string name="playlist_firstrun_lyrics_song_name">Why.mp3</string>
+    <string name="extras_firstrun_lyrics_song_name">Rick and Morty (Dubstep)</string>
 
     <!--Intent Service Extras-->
     <string name="service_songs_list">service_songs_list</string>
     <string name="current_index">current_index</string>
     <string name="lyrics_file_name">lyrics_file_name</string>
     <string name="genius_url">genius_url</string>
+    <string name="small_walls_list">small_walls_list</string>
+    <string name="full_walls_ist">full_walls_list</string>
 
     <!--SharePreferences Keys-->
     <string name="shared_array_list_key">array_list_key</string>
@@ -57,6 +61,8 @@
     <string name="repeat_state">repeat_state</string>
     <string name="current_song_name">current_song_name</string>
     <string name="count_random_quotes">count_random_quotes</string>
+    <string name="existing_objects_list_prefs">existing_objects_list_prefs</string>
+    <string name="random_quotes_list_prefs">random_quotes_list_prefs</string>
 
 
     <!--Fragment Names-->
@@ -116,5 +122,7 @@
     <string name="about_ps">P.S. The ads just helps in support and growth of the app.
 </string>
     <string name="once_random_q_count_pref">init_random_q_count</string>
+    <string name="timesClicked">timesClicked</string>
+    <string name="timesClicked_set">timesClicked_set</string>
 
 </resources>

@@ -25,18 +25,16 @@ public class UltraPagerAdapter extends PagerAdapter {
     private static final String TAG = "UltraPagerAdapter";
 
     private Context context;
-    private boolean isMultiScr;
-    private ArrayList<String> mImagesUrls;
+    private List<Wallpaper> full_walls_list;
     private int mUrlPosition;
     private List<Wallpaper> small_walls_list;
 
 
-    public UltraPagerAdapter(boolean isMultiScr, ArrayList<String> mImagesUrls, Context context,int urlPosition,
+    public UltraPagerAdapter(List<Wallpaper> full_walls_list, Context context,int urlPosition,
                              List<Wallpaper> small_walls_list) {
 
         this.context=context;
-        this.isMultiScr = isMultiScr;
-        this.mImagesUrls = mImagesUrls;
+        this.full_walls_list = full_walls_list;
         this.mUrlPosition =urlPosition;
         this.small_walls_list=small_walls_list;
 
@@ -45,7 +43,7 @@ public class UltraPagerAdapter extends PagerAdapter {
    @Override
     public int getCount() {
 
-        return mImagesUrls.size();
+        return full_walls_list.size();
     }
 
     @Override
@@ -67,18 +65,15 @@ public class UltraPagerAdapter extends PagerAdapter {
 
 
         //mUrlPosition=position;
-        Log.d(TAG, "AdapterPosition: "+position);
-        Log.d(TAG, "mUrlPosition: "+mUrlPosition);
 
 
-        UniversalImageLoader.setImage(mImagesUrls.get(position),imageView,progressBar,"");
+        UniversalImageLoader.setImage(full_walls_list.get(position).getDownload_url(),imageView,progressBar,"");
 
         item_view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(context, ImageClickActivity.class);
-                intent.putExtra("clickedurl",mImagesUrls.get(position));
-                intent.putExtra("smallclickedurl",small_walls_list.get(position).getDownload_url());
+                intent.putExtra("clickedurl",full_walls_list.get(position).getDownload_url());
                 context.startActivity(intent);
             }
         });

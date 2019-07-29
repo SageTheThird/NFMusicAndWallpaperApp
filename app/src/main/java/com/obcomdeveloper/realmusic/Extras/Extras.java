@@ -45,6 +45,7 @@ import com.obcomdeveloper.realmusic.Adapters.ExtraListAdapter;
 import com.obcomdeveloper.realmusic.R;
 import com.obcomdeveloper.realmusic.Songs.PlayerActivity;
 import com.obcomdeveloper.realmusic.Utils.Ads;
+import com.obcomdeveloper.realmusic.Utils.DownloadFiles;
 import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ public class Extras extends AppCompatActivity {
     private ListView listView;
     private ImageView mBackground;
     private Context mContext = Extras.this;
-    private String directory;
+    private String directory,lyrics_directory;
     private ConnectivityManager connectivityManager;
     private NetworkInfo networkInfo;
 
@@ -181,10 +182,10 @@ public class Extras extends AppCompatActivity {
         mBackground = findViewById(R.id.background);
         Picasso
                 .with(this)
-                .load(R.drawable.playlist_blurred)
+                .load(R.drawable.extras_background)
                 //.resize(800, 800)
 
-                .placeholder(R.drawable.madeinsociety)
+                .placeholder(R.drawable.extras_backgroundloading)
                 .into(mBackground);
 
     }
@@ -193,8 +194,17 @@ public class Extras extends AppCompatActivity {
         //directory
         directory = Environment.getExternalStorageDirectory().getAbsolutePath() +
                 "/Android/data/" + this.getPackageName() + "/files/Extras/";
+        lyrics_directory=Environment.getExternalStorageDirectory().getAbsolutePath() +
+                "/Android/data/" + this.getPackageName() + "/files/Lyrics";
 
         File direct = new File(directory);
+        File direct_lyrics = new File(lyrics_directory);
+
+        if (!direct_lyrics.exists() ) {
+            File myDirectory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
+                    "/Android/data/" + this.getPackageName() + "/files/Lyrics");
+            myDirectory.mkdir();
+        }
 
         if (!direct.exists()) {
             File myDirectory = new File(Environment.getExternalStorageDirectory().
@@ -225,6 +235,7 @@ public class Extras extends AppCompatActivity {
                 filesIndex++;
             }
             Log.d(TAG, "getFilesListFromFolder: filesNameIndex : "+filesNameList.size());
+
             PlayerActivity.saveArrayList(filesNameList, getString(R.string.shared_array_list_key), mContext);
         }
 
@@ -252,16 +263,31 @@ public class Extras extends AppCompatActivity {
     }
 
 
+    public void download_lyrics_file(final String fileNameInto, final String downloadDirectory, String download_url) {
+
+
+
+
+        DownloadFiles downloadFiles = new DownloadFiles(
+                mContext,
+                ".txt",
+                downloadDirectory,
+                fileNameInto,
+                null);
+
+        downloadFiles.downloadingFiles(download_url);
+    }
+
     public void download(final String fileNameInto, final String downloadDirectory,String download_url) {
 
 
 
-        DownloadFilesExtra downloadFiles = new DownloadFilesExtra(
+        DownloadFiles downloadFiles = new DownloadFiles(
                 mContext,
                 ".mp3",
                 downloadDirectory,
                 fileNameInto,
-                onDownloadComplete);
+                dialog);
 
         final long downloadid = downloadFiles.downloadingFiles(download_url);
 
@@ -272,9 +298,9 @@ public class Extras extends AppCompatActivity {
         onDownloadComplete = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //Fetching the download id received with the broadcast
+                //Fetching the downloadSong id received with the broadcast
                 long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-                //Checking if the received broadcast is for our enqueued download by matching download id
+                //Checking if the received broadcast is for our enqueued downloadSong by matching downloadSong id
                 if (downloadID == id) {
 
 
@@ -415,7 +441,6 @@ public class Extras extends AppCompatActivity {
             }
         }
 
-        Log.d(TAG, "getFilesListFromFolder: existing_songs_models_list : "+existing_songs_models_list.size());
     }
 
     //////-------------------------------LISTENERS------------------------/////////////
@@ -429,6 +454,7 @@ public class Extras extends AppCompatActivity {
             String download_url=songs_list.get(position).getDownload_url();
             String song_name = songs_list.get(position).getSong_name();
             String songFull = song_name + getString(R.string.mp3_extenstion);
+            String lyrics_url=songs_list.get(position).getLyrics_url();
 
 
 
@@ -452,7 +478,7 @@ public class Extras extends AppCompatActivity {
 
 
             }
-            //if not download it
+            //if not downloadSong it
             else {
                 Log.d(TAG, "onItemClick: song not found");
                 if ((networkInfo == null || !networkInfo.isConnected())) {
@@ -474,8 +500,12 @@ public class Extras extends AppCompatActivity {
                         }
                     });
 
-                    //download file
+                    //downloadSong file
                     download(song_name, directory,download_url);
+                    if(lyrics_url != null){
+                        download_lyrics_file(song_name,lyrics_directory,lyrics_url);
+                    }
+
                 }
             }
         }
@@ -485,67 +515,3 @@ public class Extras extends AppCompatActivity {
     //////-------------------------------LISTENERS------------------------/////////////
 
 }
-
-class DownloadFilesExtra {
-
-    private Context context;
-    private String fileExtension;
-    private String destinationDirectory;
-    private String fileName;
-    private BroadcastReceiver onDownloadCompleteAsync;
-
-    public DownloadFilesExtra(Context context,
-                              String fileExtension,
-                              String destinationDirectory,
-                              String fileName,
-                              BroadcastReceiver onDownloadCompleteAsync) {
-
-        this.context = context;
-        this.fileExtension = fileExtension;
-        this.destinationDirectory = destinationDirectory;
-        this.fileName = fileName;
-        this.onDownloadCompleteAsync = onDownloadCompleteAsync;
-    }
-
-
-    public long downloadingFiles(String url) {
-        dialog.show();
-        long mDownloadId = 0;
-
-        DownloadManager downloadManager = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
-            downloadManager = (DownloadManager) context
-                    .getSystemService(Context.DOWNLOAD_SERVICE);
-        }
-        Uri uri = Uri.parse(url);
-        DownloadManager.Request request = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
-            request = new DownloadManager.Request(uri);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN);
-
-
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-            request.setDestinationUri(Uri.fromFile(new File(destinationDirectory, fileName + fileExtension)));
-        }
-
-        if (downloadManager != null) {
-            mDownloadId = downloadManager.enqueue(request);
-        }
-
-        return mDownloadId;
-
-
-    }
-
-
-
-}
-
-
-
-
-
-

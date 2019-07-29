@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,6 +13,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -56,10 +58,8 @@ public class Book_Activity extends AppCompatActivity {
     private static final String TAG = "Book_Activity";
 
     // android:centerColor="#203A43"
-    ArrayList<String> imagesUrlLis = new ArrayList<>();
+    private List<Wallpaper> full_walls_list;
     private Button back_viewPager;
-    private String downloadUrl;
-    private ImageView img;
     private FloatingActionButton downloadBtn, setBtn;
     private int urlPosition;
 
@@ -76,6 +76,8 @@ public class Book_Activity extends AppCompatActivity {
     private InterstitialAd interstitialAd;
 
     private ImageView blurred_iv;
+    private int timesClicked_download;
+    private int timesClicked_set;
 
 
     @Override
@@ -84,31 +86,35 @@ public class Book_Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_wallpaper);
-        adView =findViewById(R.id.adView);
-        interstitialAd=new InterstitialAd(this);
-
-
-
-
 
         //methods
         initWidgets();
         initImageLoader();
         getIncomingIntent();
         adapterSetup();
+        adsSetup();
 
         //listeners
         downloadBtn.setOnClickListener(downloadBtnClickListener);
         setBtn.setOnClickListener(setWallClickListener);
 
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if(prefs.getBoolean("setCountToZero_timesClicked", true)) {
+            timesClicked_download =0;
+            timesClicked_set=0;
+            saveIntPref(getString(R.string.timesClicked), timesClicked_download,this);
+            saveIntPref(getString(R.string.timesClicked_set), timesClicked_set,this);
+            prefs.edit().putBoolean("setCountToZero_timesClicked", false).commit();
+        }
+    }
+
+    private void adsSetup(){
         //ads
         ads=new Ads();
         ads.initAdMob(this);
         ads.setupBanner(adView);
         ads.setupInterstitial(this,getString(R.string.interstitial_ad_test_unit_id),interstitialAd);
-
-
 
     }
 
@@ -119,6 +125,11 @@ public class Book_Activity extends AppCompatActivity {
         coordinatorLayout = findViewById(R.id.coordinatorLayout);
         blurred_iv = findViewById(R.id.blurImageView);
         small_walls_list=new ArrayList<>();
+
+        adView =findViewById(R.id.adView);
+        interstitialAd=new InterstitialAd(this);
+        full_walls_list= new ArrayList<>();
+
 
     }
     private void initImageLoader(){
@@ -134,10 +145,9 @@ public class Book_Activity extends AppCompatActivity {
 
     private void getIncomingIntent() {
         Intent intent = getIntent();
-        downloadUrl = intent.getStringExtra(getString(R.string.downloadUrl));
-        imagesUrlLis = intent.getStringArrayListExtra(getString(R.string.imagesUrl));
+        full_walls_list = intent.getParcelableArrayListExtra(getString(R.string.full_walls_ist));
         urlPosition = intent.getIntExtra(getString(R.string.position), 5);
-        small_walls_list=intent.getParcelableArrayListExtra("small_wall_list");
+        small_walls_list=intent.getParcelableArrayListExtra(getString(R.string.small_walls_list));
 
     }
 
@@ -169,7 +179,8 @@ public class Book_Activity extends AppCompatActivity {
     private void adapterSetup() {
 
         viewpager = findViewById(R.id.ultraViewPager);
-        PagerAdapter adapter = new UltraPagerAdapter(false, imagesUrlLis, Book_Activity.this, urlPosition,small_walls_list);
+        PagerAdapter adapter = new UltraPagerAdapter( full_walls_list, Book_Activity.this,
+                                                      urlPosition,small_walls_list);
         viewpager.setAdapter(adapter);
         viewpager.setCurrentItem(urlPosition);
 
@@ -197,7 +208,7 @@ public class Book_Activity extends AppCompatActivity {
             public void onPageSelected(int i) {
 
                 if (i%4==0 && i>0){
-                    Toast.makeText(mContext, "4th Position Reached : ", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(mContext, "4th Position Reached : ", Toast.LENGTH_LONG).show();
 
                 }
 
@@ -225,14 +236,12 @@ public class Book_Activity extends AppCompatActivity {
     View.OnClickListener downloadBtnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ads.loadinterstitial(interstitialAd);
-                }
-            });
 
-            DownloadImage(imagesUrlLis.get(viewpager.getCurrentItem()));
+            showToast("Downloading Image");
+
+            loadAdIfDownloadClickedTimes(3);
+
+            DownloadImage(full_walls_list.get(viewpager.getCurrentItem()).getDownload_url());
 
         }
     };
@@ -241,7 +250,17 @@ public class Book_Activity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
 
-            showSnackbar("Setting Wallpaper");
+            showToast("Setting Wallpaper");
+
+            loadAdIfSetClickedTimes(3);
+
+            setImageAsBackground(full_walls_list.get(viewpager.getCurrentItem()).getDownload_url());
+        }
+    };
+
+    private void loadAdIfDownloadClickedTimes(int times){
+
+        if(getIntPref(getString(R.string.timesClicked),mContext)==times){
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -250,9 +269,36 @@ public class Book_Activity extends AppCompatActivity {
                 }
             });
 
-            setImageAsBackground(imagesUrlLis.get(viewpager.getCurrentItem()));
+            timesClicked_download=0;
+            saveIntPref(getString(R.string.timesClicked), timesClicked_download,mContext);
         }
-    };
+
+        int temp=getIntPref(getString(R.string.timesClicked),mContext);
+        temp++;
+        Log.d(TAG, "loadAdIfDownloadClickedTimes: timesClicked_download : "+temp);
+        saveIntPref(getString(R.string.timesClicked),temp,mContext);
+
+    }
+    private void loadAdIfSetClickedTimes(int times){
+
+        if(getIntPref(getString(R.string.timesClicked_set),mContext)==times){
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ads.loadinterstitial(interstitialAd);
+                }
+            });
+
+            timesClicked_set=0;
+            saveIntPref(getString(R.string.timesClicked_set), timesClicked_set,mContext);
+        }
+        int temp=getIntPref(getString(R.string.timesClicked_set),mContext);
+        temp++;
+        saveIntPref(getString(R.string.timesClicked_set),temp,mContext);
+
+
+    }
     public void setImageAsBackground(final String imageUrl) {
 
         Needle.onBackgroundThread().execute(new Runnable() {
@@ -280,6 +326,18 @@ public class Book_Activity extends AppCompatActivity {
 
 
 
+    }
+
+    public static void saveIntPref(String key, int index, Context context){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(key, index);
+        editor.commit();
+    }
+    public static int getIntPref(String key, Context context){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        int myIntValue = prefs.getInt(key, -1);
+        return myIntValue;
     }
 
 

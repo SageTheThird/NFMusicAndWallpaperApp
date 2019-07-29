@@ -26,7 +26,7 @@ public class ExtraListAdapter extends ArrayAdapter<Song> {
     private Context mContext;
     private List<Song> songs_list =null;
     private ArrayList<Song> temp_array;
-    private ArrayList<String> saved_songs_list;
+    private List<String> saved_songs_list;
     private int mPlayingSong;
     private String isPlaying;
 

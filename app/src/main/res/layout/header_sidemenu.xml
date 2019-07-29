@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:background="#FFF"
 
-    android:src="@drawable/drawer_background"
+    android:src="@drawable/drawer"
     android:scaleType="centerCrop"
     tools:ignore="ContentDescription">
 </ImageView>

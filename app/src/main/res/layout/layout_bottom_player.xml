@@ -15,7 +15,7 @@
         <ImageView
             android:id="@+id/lyrics_button"
             android:layout_width="match_parent"
-            android:layout_height="45dp"
+            android:layout_height="42dp"
             android:background="@drawable/rectangle"
             android:stateListAnimator="@null"
 
@@ -28,7 +28,7 @@
             android:text="Lyrics"
 
             android:textColor="@color/white"
-            android:textSize="15sp"
+            android:textSize="13sp"
             />
 
     </RelativeLayout>
@@ -42,7 +42,7 @@
         <ImageView
             android:id="@+id/geniusbutton"
             android:layout_width="match_parent"
-            android:layout_height="45dp"
+            android:layout_height="42dp"
             android:background="@drawable/rectangle"
             android:stateListAnimator="@null"
             android:text="Genius"
@@ -56,7 +56,7 @@
             android:text="Genius"
 
             android:textColor="@color/white"
-            android:textSize="15sp"
+            android:textSize="13sp"
             />
 
     </RelativeLayout>

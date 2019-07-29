@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
     tools:context="com.obcomdeveloper.realmusic.Songs.playlist_Activity"
     >
 
@@ -16,7 +15,8 @@
         android:layout_height="match_parent"
         android:id="@+id/playlist_background"
         android:scaleType="fitXY"
-        tools:ignore="ContentDescription" />
+        tools:ignore="ContentDescription"
+        android:layout_above="@id/adView"/>
 
 
 
@@ -55,8 +55,29 @@
             android:descendantFocusability="beforeDescendants"
             />
 
+
         <TextView
             android:layout_below="@id/searchEdit"
+            android:id="@+id/patent_playlist_note"
+            android:text="Note : "
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="11sp"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:freezesText="true"
+            android:singleLine="true"
+            android:scrollHorizontally="true"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="10dp"
+
+            />
+
+        <TextView
+            android:layout_below="@id/searchEdit"
+            android:layout_toRightOf="@id/patent_playlist_note"
             android:id="@+id/patent_playlist"
             android:text="@string/patent_msg"
             android:layout_width="match_parent"
@@ -69,7 +90,6 @@
             android:freezesText="true"
             android:singleLine="true"
             android:scrollHorizontally="true"
-            android:layout_marginStart="30dp"
             android:layout_marginEnd="30dp"
             android:layout_marginTop="10dp"
 
@@ -77,9 +97,9 @@
 
         <TextView
             android:layout_below="@id/patent_playlist"
-            android:id="@+id/random_quotes_playlist"
-            android:text="@string/patent_msg"
-            android:layout_width="match_parent"
+            android:id="@+id/random_quotes_playlist_rand"
+            android:text="Random Lyrics : "
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:textSize="11sp"
@@ -90,6 +110,26 @@
             android:singleLine="true"
             android:scrollHorizontally="true"
             android:layout_marginStart="30dp"
+            android:layout_marginTop="10dp"
+
+            />
+
+
+        <TextView
+            android:layout_toRightOf="@id/random_quotes_playlist_rand"
+            android:layout_below="@id/patent_playlist"
+            android:id="@+id/random_quotes_playlist"
+            android:text="Random Lyrics"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="11sp"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:freezesText="true"
+            android:singleLine="true"
+            android:scrollHorizontally="true"
             android:layout_marginEnd="30dp"
             android:layout_marginTop="10dp"
 

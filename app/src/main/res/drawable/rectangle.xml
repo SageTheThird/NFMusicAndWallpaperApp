@@ -7,6 +7,6 @@
         android:right="2dp"
         android:id="@+id/lyrics_genius_btn_color"
         android:bottom="2dp" />
-    <corners android:radius="7dp" />
+    <corners android:radius="4dp" />
     <solid android:color="@color/transparentBlack" />
 </shape>

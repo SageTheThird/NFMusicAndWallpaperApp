@@ -10,8 +10,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -45,24 +43,26 @@ import com.obcomdeveloper.realmusic.Models.RowItem;
 import com.obcomdeveloper.realmusic.Models.Song;
 import com.obcomdeveloper.realmusic.R;
 import com.obcomdeveloper.realmusic.Utils.Ads;
+
+import com.obcomdeveloper.realmusic.Utils.DownloadFiles;
 import com.obcomdeveloper.realmusic.Utils.Quotes;
+import com.obcomdeveloper.realmusic.Utils.UIUpdater;
 import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 import dmax.dialog.SpotsDialog;
 
-import static com.obcomdeveloper.realmusic.Songs.playlist_Activity.dialog;
-
 
 public class playlist_Activity extends AppCompatActivity {
     private static final String TAG = "playlist_Activity";
 
     public static final int AD_TIME_INTERVAL=90*1000;
-    public static final int RANDOM_QUOTE_INTERVAL=10*1000;
+    public static final int RANDOM_QUOTE_INTERVAL=20*1000;
 
     public static final int PLAYLIST_IDENTIFIER=20;
     public static ListView listView;
@@ -74,7 +74,7 @@ public class playlist_Activity extends AppCompatActivity {
     private ArrayList<RowItem> arrayList;
     private BroadcastReceiver onDownloadComplete;
     private Context mContext=playlist_Activity.this;
-    private String directory;
+    private String track_directory,lyrics_directory;
 
 
     private ArrayList<String> filesNameList=new ArrayList<>();
@@ -85,7 +85,7 @@ public class playlist_Activity extends AppCompatActivity {
 
     private EditText searchView;
 
-    private TextView patentTextView,random_quotes;
+    private TextView patentTextView, random_quotes_tv;
 
     //ads
     private AdView adView;
@@ -100,11 +100,14 @@ public class playlist_Activity extends AppCompatActivity {
     private List<String> temp_list;
     private List<Song> existing_songs_models_list;
 
-    //random_quotes for textview
+    //random_quotes_tv for textview
     private DatabaseReference quotes_Ref;
 
-    int count_quotes;
+    private int count_quotes;
 
+    private UIUpdater mUIUpdater;
+
+    private List<String> random_quotes_list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,17 +120,18 @@ public class playlist_Activity extends AppCompatActivity {
         searchView=findViewById(R.id.searchEdit);
         listView = findViewById(R.id.listViewPlaylist);
         patentTextView =findViewById(R.id.patent_playlist);
-        random_quotes =findViewById(R.id.random_quotes_playlist);
+        random_quotes_tv =findViewById(R.id.random_quotes_playlist);
         adView =findViewById(R.id.adView);
         interstitialAd=new InterstitialAd(this);
         songs_list=new ArrayList<>();
+        random_quotes_list=new ArrayList<>();
 
 
         patentTextView.setHorizontallyScrolling(true);
         patentTextView.setSelected(true);
 
-        random_quotes.setHorizontallyScrolling(true);
-        random_quotes.setSelected(true);
+        random_quotes_tv.setHorizontallyScrolling(true);
+        random_quotes_tv.setSelected(true);
 
         //methods
         directorySetup();
@@ -165,16 +169,11 @@ public class playlist_Activity extends AppCompatActivity {
 
                 String quotes=dataSnapshot.getValue().toString();
                 String modified_string=quotes.substring(1);
+                //String[] quotes_array=modified_string.split("-");
+                List<String> quotes_list = Arrays.asList(modified_string.split("-"));
 
+                PlayerActivity.saveArrayList(quotes_list,getString(R.string.random_quotes_list_prefs),mContext);
 
-                String[] quotes_array=modified_string.split("-");
-                Quotes.setRandom_lyrics_array(quotes_array);
-
-//                for(int i=0;i<quotes_array.length;i++) {
-//                    Log.d(TAG, "onDataChange: Quotes_Array[" + i + "] : " + quotes_array[i]);
-//                }
-
-                random_quote.run();
 
             }
 
@@ -191,6 +190,31 @@ public class playlist_Activity extends AppCompatActivity {
 
         mAdRunnable.run();
         //
+        mUIUpdater = new UIUpdater(new Runnable() {
+            @Override
+            public void run() {
+                //do what ever you want to do with your textview
+                try{
+
+                    random_quotes_list=PlayerActivity.getArrayList(getString(R.string.random_quotes_list_prefs),mContext);
+                    count_quotes=PlayerActivity.getIntPref(getString(R.string.count_random_quotes),mContext);
+                    Log.d(TAG, "run: count _ : "+count_quotes);
+                    random_quotes_tv.setText(random_quotes_list.get(count_quotes));
+                    if(count_quotes == random_quotes_list.size()-1){
+                        count_quotes=0;
+                        PlayerActivity.saveIntPref(getString(R.string.count_random_quotes),count_quotes,mContext);
+                    }else {
+                        count_quotes++;
+                        PlayerActivity.saveIntPref(getString(R.string.count_random_quotes),count_quotes,mContext);
+                    }
+
+
+                }catch (NullPointerException e){
+                    e.printStackTrace();
+                }
+            }
+        });
+
 
     }
 
@@ -208,7 +232,7 @@ public class playlist_Activity extends AppCompatActivity {
         }
     };
 
-    private Runnable random_quote=new Runnable() {
+    private Runnable random_quote_runnable=new Runnable() {
 
 
 
@@ -221,7 +245,7 @@ public class playlist_Activity extends AppCompatActivity {
 
                         count_quotes=PlayerActivity.getIntPref(getString(R.string.count_random_quotes),mContext);
                         Log.d(TAG, "run: count _ : "+count_quotes);
-                        random_quotes.setText(Quotes.getRandom_lyrics_array()[count_quotes]);
+                        random_quotes_tv.setText(Quotes.getRandom_lyrics_array()[count_quotes]);
                         if(count_quotes >= Quotes.getRandom_lyrics_array().length){
                             count_quotes=0;
                             PlayerActivity.saveIntPref(getString(R.string.count_random_quotes),count_quotes,mContext);
@@ -239,6 +263,8 @@ public class playlist_Activity extends AppCompatActivity {
             mHandler.postDelayed(this,RANDOM_QUOTE_INTERVAL);
         }
     };
+
+
 
     private void searchSetup() {
         searchView.addTextChangedListener(new TextWatcher() {
@@ -266,93 +292,13 @@ public class playlist_Activity extends AppCompatActivity {
         });
     }
 
-    private void setup_existing_ojects_list(){
-        for(int j=0;j<temp_list.size();j++){
-            String temp_name=temp_list.get(j);
-            for(int k=0;k<songs_list.size();k++){
-                if(songs_list.get(k).getSong_name().equals(temp_name)){
-                    existing_songs_models_list.add(songs_list.get(k));
-                }
-            }
-        }
-
-    }
-
-    AdapterView.OnItemClickListener SongClickListener=new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-
-
-            setup_existing_ojects_list();
-
-            String download_url=songs_list.get(position).getDownload_url();
-            String song_name = songs_list.get(position).getSong_name();
-            String songFull = song_name + getString(R.string.mp3_extenstion);
-
-
-
-
-            //if file is there in the fileNameList i-e present in the folder it will play it
-            if (filesNameList.contains(songFull)) {
-
-                int index=filesNameList.indexOf(songFull);
-                Log.d(TAG, "onItemClick: song found in the arrayList/directory");
-
-                startActivity(new Intent(mContext, PlayerActivity.class)
-                        .putExtra(getString(R.string.current_index), index)
-                        .putStringArrayListExtra(getString(R.string.folder_songs_list), filesNameList)
-                        .putParcelableArrayListExtra(getString(R.string.all_songs_object_list), (ArrayList<? extends Parcelable>) songs_list)
-                        .putParcelableArrayListExtra(getString(R.string.existing_songs_object_list), (ArrayList<? extends Parcelable>) existing_songs_models_list)
-                        .putExtra(getString(R.string.coming_from_playlist_activity)
-                                , getString(R.string.coming_from_playlist_activity))
-                        .putExtra(getString(R.string.coming_from_playlist_activity_int)
-                                ,PLAYLIST_IDENTIFIER)
-
-
-                );
-                Animatoo.animateZoom(mContext);
-
-
-            }
-            //if not download it
-            else {
-                Log.d(TAG, "onItemClick: song not found");
-                if ((networkInfo == null || !networkInfo.isConnected())) {
-                    showToast("Please Check Your Internet Connection!");
-                    return;
-                } else {
-
-                    //dialog for when downloading
-                    dialog = new SpotsDialog.Builder()
-                            .setContext(mContext)
-                            .setTheme(R.style.Custom)
-                            .setCancelable(false)
-                            .build();
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ads.loadinterstitial(interstitialAd);
-                        }
-                    });
-
-
-                    //download file
-                    download(song_name, directory,download_url);
-                }
-            }
-        }
-    };
-
-
     private void getFilesListFromFolder(){
         temp_list=new ArrayList<>();
         existing_songs_models_list=new ArrayList<>();
         int filesIndex=0;
-        //String path = directory;
-        Log.d("Folder Files", "Path: " + directory);
-        File directoryFolder = new File(directory);
+        //String path = track_directory;
+        Log.d("Folder Files", "Path: " + track_directory);
+        File directoryFolder = new File(track_directory);
         File[] files = directoryFolder.listFiles();
         //Log.d("Folder Files", "Size: "+ files.length);
 
@@ -383,15 +329,114 @@ public class playlist_Activity extends AppCompatActivity {
         }
     }
 
+
+    private void setup_existing_ojects_list(){
+        for(int j=0;j<temp_list.size();j++){
+            String temp_name=temp_list.get(j);
+            for(int k=0;k<songs_list.size();k++){
+                if(songs_list.get(k).getSong_name().equals(temp_name)){
+                    existing_songs_models_list.add(songs_list.get(k));
+                }
+            }
+        }
+
+        PlayerActivity.saveArrayListObjects(existing_songs_models_list,getString(R.string.existing_objects_list_prefs),mContext);
+        Log.d(TAG, "onItemClick: existing size : "+existing_songs_models_list.size());
+
+    }
+
+    AdapterView.OnItemClickListener SongClickListener=new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+
+
+            setup_existing_ojects_list();
+
+            String download_url=songs_list.get(position).getDownload_url();
+            String song_name = songs_list.get(position).getSong_name();
+            String songFull = song_name + getString(R.string.mp3_extenstion);
+            String lyrics_url=songs_list.get(position).getLyrics_url();
+
+
+
+
+            //if file is there in the fileNameList i-e present in the folder it will play it
+            if (filesNameList.contains(songFull)) {
+
+                int index=filesNameList.indexOf(songFull);
+                Log.d(TAG, "onItemClick: song found in the arrayList/track_directory");
+
+                startActivity(new Intent(mContext, PlayerActivity.class)
+                        .putExtra(getString(R.string.current_index), index)
+                        .putStringArrayListExtra(getString(R.string.folder_songs_list), filesNameList)
+                        .putParcelableArrayListExtra(getString(R.string.all_songs_object_list), (ArrayList<? extends Parcelable>) songs_list)
+                        .putParcelableArrayListExtra(getString(R.string.existing_songs_object_list), (ArrayList<? extends Parcelable>) existing_songs_models_list)
+                        .putExtra(getString(R.string.coming_from_playlist_activity)
+                                , getString(R.string.coming_from_playlist_activity))
+                        .putExtra(getString(R.string.coming_from_playlist_activity_int)
+                                ,PLAYLIST_IDENTIFIER)
+                );
+
+                Log.d(TAG, "onItemClick: existing size : "+existing_songs_models_list.size());
+                Animatoo.animateZoom(mContext);
+
+
+            }
+            //if not downloadSong it
+            else {
+                Log.d(TAG, "onItemClick: song not found");
+                if ((networkInfo == null || !networkInfo.isConnected())) {
+                    showToast("Please Check Your Internet Connection!");
+                    return;
+                } else {
+
+                    //dialog for when downloading
+                    dialog = new SpotsDialog.Builder()
+                            .setContext(mContext)
+                            .setTheme(R.style.Custom)
+                            .setCancelable(false)
+                            .build();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ads.loadinterstitial(interstitialAd);
+                        }
+                    });
+
+
+                    //downloadSong file
+                    downloadSong(song_name, track_directory,download_url);
+                    if(lyrics_url != null){
+                        download_lyrics_file(song_name,lyrics_directory,lyrics_url);
+
+                    }
+                }
+            }
+        }
+    };
+
+
     private void directorySetup(){
-        //directory
-        directory = Environment.getExternalStorageDirectory().getAbsolutePath() +
+        //track_directory
+        track_directory = Environment.getExternalStorageDirectory().getAbsolutePath() +
                 "/Android/data/" + this.getPackageName() + "/files/Documents";
+        lyrics_directory=Environment.getExternalStorageDirectory().getAbsolutePath() +
+                "/Android/data/" + this.getPackageName() + "/files/Lyrics";
 
-        File direct = new File(directory);
+        File direct_track = new File(track_directory);
+        File direct_lyrics = new File(lyrics_directory);
 
-        if (!direct.exists()) {
-            File myDirectory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/" + this.getPackageName() + "/files/Documents");
+        if (!direct_lyrics.exists() ) {
+            File myDirectory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
+                    "/Android/data/" + this.getPackageName() + "/files/Lyrics");
+            myDirectory.mkdir();
+        }
+
+        if (!direct_track.exists() ) {
+            File myDirectory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
+                    "/Android/data/" + this.getPackageName() + "/files/Documents");
             myDirectory.mkdir();
         }
 
@@ -409,15 +454,57 @@ public class playlist_Activity extends AppCompatActivity {
         playlist_background = findViewById(R.id.playlist_background);
         Picasso
                 .with(this)
-                .load(R.drawable.playlist_blurred)
+                .load(R.drawable.playlist_backthree)
                 //.resize(800, 800)
 
-                .placeholder(R.drawable.madeinsociety)
+                .placeholder(R.drawable.playlist_backthreeloading)
                 .into(playlist_background);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-    public void download(final String fileNameInto, final String downloadDirectory,String download_url) {
+        try{
+            if(mUIUpdater != null){
+                mUIUpdater.startUpdates();
+            }
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        }
+
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try{
+            if(mUIUpdater != null){
+                mUIUpdater.stopUpdates();
+            }
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void download_lyrics_file(final String fileNameInto, final String downloadDirectory, String download_url) {
+
+
+
+
+        DownloadFiles downloadFiles = new DownloadFiles(
+                mContext,
+                ".txt",
+                downloadDirectory,
+                fileNameInto,
+                null);
+
+        downloadFiles.downloadingFiles(download_url);
+    }
+
+    public void downloadSong(final String fileNameInto, final String downloadDirectory, String download_url) {
+
 
 
 
@@ -426,7 +513,7 @@ public class playlist_Activity extends AppCompatActivity {
                 ".mp3",
                 downloadDirectory,
                 fileNameInto,
-                onDownloadComplete);
+                dialog);
 
         final long downloadid = downloadFiles.downloadingFiles(download_url);
 
@@ -437,9 +524,9 @@ public class playlist_Activity extends AppCompatActivity {
         onDownloadComplete = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //Fetching the download id received with the broadcast
+                //Fetching the downloadSong id received with the broadcast
                 long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-                //Checking if the received broadcast is for our enqueued download by matching download id
+                //Checking if the received broadcast is for our enqueued downloadSong by matching downloadSong id
                 if (downloadID == id) {
 
 
@@ -589,61 +676,6 @@ public class playlist_Activity extends AppCompatActivity {
     }
 }
 
-class DownloadFiles {
-
-    private Context context;
-    private String fileExtension;
-    private String destinationDirectory;
-    private String fileName;
-    private BroadcastReceiver onDownloadCompleteAsync;
-
-    public DownloadFiles(Context context,
-                         String fileExtension,
-                         String destinationDirectory,
-                         String fileName,
-                         BroadcastReceiver onDownloadCompleteAsync) {
-
-        this.context = context;
-        this.fileExtension = fileExtension;
-        this.destinationDirectory = destinationDirectory;
-        this.fileName = fileName;
-        this.onDownloadCompleteAsync = onDownloadCompleteAsync;
-    }
-
-
-    public long downloadingFiles(String url) {
-        dialog.show();
-        long mDownloadId = 0;
-
-        DownloadManager downloadManager = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
-            downloadManager = (DownloadManager) context
-                    .getSystemService(Context.DOWNLOAD_SERVICE);
-        }
-        Uri uri = Uri.parse(url);
-        DownloadManager.Request request = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
-            request = new DownloadManager.Request(uri);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN);
-
-
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-            request.setDestinationUri(Uri.fromFile(new File(destinationDirectory, fileName + fileExtension)));
-        }
-
-        if (downloadManager != null) {
-            mDownloadId = downloadManager.enqueue(request);
-        }
-
-        return mDownloadId;
-
-
-    }
-
-}
 
 
 

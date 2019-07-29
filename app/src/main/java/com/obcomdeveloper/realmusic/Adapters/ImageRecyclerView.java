@@ -37,7 +37,7 @@ public class ImageRecyclerView extends RecyclerView.Adapter<ImageRecyclerView.Im
 
 
         int width=context.getResources().getDisplayMetrics().widthPixels;
-        int cardWidth=width/2;
+        int cardWidth=width/3;
         Log.d(TAG, "onBindViewHolder: Card Width : "+cardWidth);
         holder.cardView.setLayoutParams(new CardView.LayoutParams(cardWidth,900));
 
@@ -110,6 +110,16 @@ public class ImageRecyclerView extends RecyclerView.Adapter<ImageRecyclerView.Im
     public void setOnItemClickListener(onItemClickListener listener){
 
         this.listener=listener;
+    }
+
+    public void addAll(List<Wallpaper> newUsers) {
+        int initialSize = walls_list.size();
+        walls_list.addAll(newUsers);
+        notifyItemRangeInserted(initialSize, newUsers.size());
+    }
+
+    public String getLastItemId() {
+        return walls_list.get(walls_list.size() - 1).getId();
     }
 
 

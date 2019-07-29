@@ -30,7 +30,6 @@ public class ImageClickActivity extends AppCompatActivity {
 
         Intent intent=getIntent();
         String url=intent.getStringExtra("clickedurl");
-        String small_url=intent.getStringExtra("smallclickedurl");
         UniversalImageLoader.setImage(url,fullscreen_iv,null,"");
     }
 

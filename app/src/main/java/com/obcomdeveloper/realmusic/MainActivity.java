@@ -13,7 +13,6 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -29,10 +28,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.WindowManager;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.blankj.utilcode.util.CacheDiskUtils;
 import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -44,18 +44,14 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.obcomdeveloper.realmusic.Extras.Extras;
 import com.obcomdeveloper.realmusic.Songs.playlist_Activity;
+import com.obcomdeveloper.realmusic.Utils.DownloadFiles;
 import com.obcomdeveloper.realmusic.Utils.UniversalImageLoader;
 import com.obcomdeveloper.realmusic.Wallpapers.WallpaperMain;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
-
-
 import java.io.File;
 import dmax.dialog.SpotsDialog;
 import hotchemi.android.rate.AppRate;
-import smartdevelop.ir.eram.showcaseviewlib.GuideView;
-import smartdevelop.ir.eram.showcaseviewlib.config.DismissType;
-
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -128,13 +124,14 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
     }
 
     private void downloadPlaylistFirstSongOnce(){
 //        PlayerActivity.saveIntPref(getString(R.string.shared_run_once),1,this);
 //
 //        if(PlayerActivity.getIntPref(getString(R.string.shared_run_once),this)==1){
-            //download the song
+            //downloadSong the song
 
             if ((networkInfo == null || !networkInfo.isConnected())) {
                 showToast("Please Check Your Internet Connection!");
@@ -147,8 +144,8 @@ public class MainActivity extends AppCompatActivity {
                         .setTheme(R.style.ForMain)
                         .setCancelable(false)
                         .build();
-                //download file
-                download("Why.mp3", directory,STORAGE_SONG_REFERENCE);
+                //downloadSong file
+                download("When I Grow Up.mp3", directory,STORAGE_SONG_REFERENCE);
             }
 
 
@@ -181,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
                     .setTheme(R.style.ForMain)
                     .setCancelable(false)
                     .build();
-            //download file
+            //downloadSong file
             download("Rick and Morty (Dubstep).mp3", extraDirectory,STORAGE_EXTRAS_REFERENCE);
         }
 
@@ -367,9 +364,9 @@ public class MainActivity extends AppCompatActivity {
         onDownloadComplete = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //Fetching the download id received with the broadcast
+                //Fetching the downloadSong id received with the broadcast
                 long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-                //Checking if the received broadcast is for our enqueued download by matching download id
+                //Checking if the received broadcast is for our enqueued downloadSong by matching downloadSong id
                 if (downloadID == id) {
 
 
@@ -408,7 +405,7 @@ public class MainActivity extends AppCompatActivity {
         storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
             public void onSuccess(Uri uri) {
-                //after download url from file is fetched it will download file
+                //after downloadSong url from file is fetched it will downloadSong file
 
                 String url = uri.toString();
                 DownloadFiles downloadFiles = new DownloadFiles(
@@ -416,7 +413,7 @@ public class MainActivity extends AppCompatActivity {
                         "",
                         downloadDirectory,
                         fileNameInto,
-                        onDownloadComplete);
+                        dialog);
 
                 final long downloadid = downloadFiles.downloadingFiles(url);
 
@@ -444,61 +441,5 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-    class DownloadFiles {
-
-        private Context context;
-        private String fileExtension;
-        private String destinationDirectory;
-        private String fileName;
-        private BroadcastReceiver onDownloadCompleteAsync;
-
-        public DownloadFiles(Context context,
-                             String fileExtension,
-                             String destinationDirectory,
-                             String fileName,
-                             BroadcastReceiver onDownloadCompleteAsync) {
-
-            this.context = context;
-            this.fileExtension = fileExtension;
-            this.destinationDirectory = destinationDirectory;
-            this.fileName = fileName;
-            this.onDownloadCompleteAsync = onDownloadCompleteAsync;
-        }
-
-
-        public long downloadingFiles(String url) {
-            dialog.show();
-            long mDownloadId = 0;
-
-            DownloadManager downloadManager = null;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
-                downloadManager = (DownloadManager) context
-                        .getSystemService(Context.DOWNLOAD_SERVICE);
-            }
-            Uri uri = Uri.parse(url);
-            DownloadManager.Request request = null;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
-                request = new DownloadManager.Request(uri);
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN);
-
-
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-                request.setDestinationUri(Uri.fromFile(new File(destinationDirectory, fileName + fileExtension)));
-            }
-
-            if (downloadManager != null) {
-                mDownloadId = downloadManager.enqueue(request);
-            }
-
-            return mDownloadId;
-
-
-        }
-
-    }
 }
 

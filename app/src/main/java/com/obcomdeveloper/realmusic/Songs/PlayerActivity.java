@@ -3,6 +3,7 @@ package com.obcomdeveloper.realmusic.Songs;
 import android.animation.ValueAnimator;
 import android.app.IntentService;
 import android.app.PendingIntent;
+import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -52,10 +53,14 @@ import com.obcomdeveloper.realmusic.Utils.ZoomOutTransformation;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import needle.Needle;
 import smartdevelop.ir.eram.showcaseviewlib.GuideView;
 import smartdevelop.ir.eram.showcaseviewlib.config.DismissType;
 
@@ -105,7 +110,7 @@ public class PlayerActivity extends AppCompatActivity{
     public static MediaPlayer mediaPlayer;
     private SeekBar seekBar;
     private Button mPause_btn,mRepeat,mShuffle,mNext_btn,mPrev_btn;
-    private TextView mSongname_view, mTotal_duration_view, mCurrent_duration_view,subSongText;
+    private TextView mSongname_view, mTotal_duration_view, mCurrent_duration_view, mArtist_tv;
     private String mLyric_file = "", mGenius_file = "";
     private Intent intent;
     private static ArrayList<String> mSongs_list;
@@ -371,7 +376,7 @@ public class PlayerActivity extends AppCompatActivity{
         }else {
             Extras.adapter.notifyDataSetChanged();
         }
-        updateNotificationTitle();
+        updateNotification();
 
     }
     private void previousTrack(){
@@ -386,7 +391,7 @@ public class PlayerActivity extends AppCompatActivity{
         }else {
             Extras.adapter.notifyDataSetChanged();
         }
-        updateNotificationTitle();
+        updateNotification();
     }
 
     private void registerReciever() {
@@ -550,7 +555,7 @@ public class PlayerActivity extends AppCompatActivity{
         int myIntValue = prefs.getInt(key, -1);
         return myIntValue;
     }
-    public  static void saveArrayList(ArrayList<String> list, String key,Context context){
+    public  static void saveArrayList(List<String> list, String key,Context context){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = prefs.edit();
         Gson gson = new Gson();
@@ -560,11 +565,28 @@ public class PlayerActivity extends AppCompatActivity{
     }
 
 
-    public static ArrayList<String> getArrayList(String key,Context context){
+    public static List<String> getArrayList(String key,Context context){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         Gson gson = new Gson();
         String json = prefs.getString(key, null);
         Type type = new TypeToken<ArrayList<String>>() {}.getType();
+        return gson.fromJson(json, type);
+    }
+    public  static void saveArrayListObjects(List<Song> list, String key,Context context){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(list);
+        editor.putString(key, json);
+        editor.apply();     // This line is IMPORTANT !!!
+    }
+
+
+    public static List<Song> getArrayListObjects(String key,Context context){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        Gson gson = new Gson();
+        String json = prefs.getString(key, null);
+        Type type = new TypeToken<ArrayList<Song>>() {}.getType();
         return gson.fromJson(json, type);
     }
 
@@ -604,6 +626,7 @@ public class PlayerActivity extends AppCompatActivity{
 
 
         existing_songs_ojects_list=intent.getParcelableArrayListExtra(getString(R.string.existing_songs_object_list));
+        saveArrayListObjects(existing_songs_ojects_list,getString(R.string.existing_objects_list_prefs),mContext);
         Log.d(TAG, "getIncomingIntent: existing_songs_ojects_list : "+existing_songs_ojects_list.size());
 
 
@@ -618,6 +641,8 @@ public class PlayerActivity extends AppCompatActivity{
         setupLyrics(mCurrentIndex);
         //setup Genius
         setupGenius(mCurrentIndex);
+
+        updateNotification();
 
         ////////-------------------
 
@@ -638,6 +663,12 @@ public class PlayerActivity extends AppCompatActivity{
 
     public void setSongName(int index) {
         String currentName = existing_songs_ojects_list.get(index).getSong_name();
+        if(activityIdentifier == EXTRAS_ACTIVITY_IDENTIFIER){
+            String artist_name=existing_songs_ojects_list.get(index).getArtist_name();
+            mArtist_tv.setText(artist_name);
+        }else {
+            mArtist_tv.setText("NF");
+        }
         mSongname_view.setText(currentName);
         mSongname_view.setHorizontallyScrolling(true);
         mSongname_view.setSelected(true);
@@ -657,7 +688,7 @@ public class PlayerActivity extends AppCompatActivity{
         mTotal_duration_view = findViewById(R.id.fullDurationView);
         mCurrent_duration_view = findViewById(R.id.currentDuration);
         mEquilizer = findViewById(R.id.equilizer);
-        subSongText = findViewById(R.id.songtextView2);
+        mArtist_tv = findViewById(R.id.artist_tv);
         mRepeat = findViewById(R.id.repeat);
         mShuffle=findViewById(R.id.shuffle);
 
@@ -721,12 +752,13 @@ public class PlayerActivity extends AppCompatActivity{
             FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath()
                     + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Documents/";
             Log.d(TAG, "playSong: Identifier : Playlist Path");
+            mArtist_tv.setText("NF");
         }
         if(activityIdentifier==EXTRAS_ACTIVITY_IDENTIFIER){
             FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath()
                     + "/Android/data/" + getApplicationContext().getPackageName() + "/files/Extras/";
             Log.d(TAG, "playSong: Identifier : Extras Path : "+FOLDER_PATH);
-            subSongText.setText("");
+            mArtist_tv.setText(existing_songs_ojects_list.get(mCurrentIndex).getArtist_name());
         }
         final String song_full = FOLDER_PATH + songName;
 
@@ -792,6 +824,7 @@ public class PlayerActivity extends AppCompatActivity{
 
 
                                                         nextTrack();
+                                                        updateNotification();
                                                         getThumbnailofPlayingIndex();
                                                         updateViewPager();
 
@@ -846,9 +879,12 @@ public class PlayerActivity extends AppCompatActivity{
                                             }else{
 
                                                 if(mSongs_list.size() >1){
+
                                                     nextTrack();
+                                                    updateNotification();
                                                     getThumbnailofPlayingIndex();
                                                     updateViewPager();
+
 
                                                 }
 
@@ -892,15 +928,16 @@ public class PlayerActivity extends AppCompatActivity{
         });
     }
 
-    private void updateNotificationTitle(){
+    private void updateNotification(){
         try {
             if(notificationBuilder != null){
                 Log.d(TAG, "onCompletion: updating notification name");
                 notificationBuilder.setContentTitle(songNameNotification(mCurrentIndex,mContext));
+                notificationBuilder.setContentText(songSubtext(mCurrentIndex,mContext));
                 notificationManager.notify(NOTIFICATION_ID,notificationBuilder.build());
             }
         }catch (Exception e){
-            Log.d(TAG, "updateNotificationTitle: Exception " +e.getMessage());
+            Log.d(TAG, "updateNotification: Exception " +e.getMessage());
         }
 
     }
@@ -1176,11 +1213,56 @@ public class PlayerActivity extends AppCompatActivity{
     public static String songNameNotification(int index,Context context){
 
 
-        ArrayList<String> songs=getArrayList(context.getString(R.string.shared_array_list_key),context);
+        List <String> songs=getArrayList(context.getString(R.string.shared_array_list_key),context);
         //int index=getIntPref(getString(R.string.current_index),this);
         String songname=songs.get(index);
-        String songnameminusMP3=songname.replace(".mp3","");
-        return songnameminusMP3;
+        String songName_=songname.replace(".mp3","");
+        return songName_;
+
+    }
+    public static String songSubtext(int index,Context context){
+
+
+        if(activityIdentifier == PLAYLIST_ACTIVITY_IDENTIFIER){
+            return "NF";
+        }else {
+            List<Song> songs=getArrayListObjects(context.getString(R.string.existing_objects_list_prefs),context);
+            //int index=getIntPref(getString(R.string.current_index),this);
+            String artist_name=songs.get(index).getArtist_name();
+            return artist_name;
+
+        }
+
+    }
+    public static void updateNotificationThumbnail(int index, final Context context) {
+
+        final String imageUrl=getArrayListObjects(context.getString(R.string.existing_objects_list_prefs),context).get(index).getThumbnail();
+
+        Needle.onBackgroundThread().execute(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap myBitmap = null;
+                final WallpaperManager myWallpaperManager
+                        = WallpaperManager.getInstance(context);
+                try {
+
+                    URL url = new URL(imageUrl);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoInput(true);
+                    connection.connect();
+                    InputStream input = connection.getInputStream();
+                    myBitmap = BitmapFactory.decodeStream(input);
+
+                    notificationBuilder.setLargeIcon(myBitmap);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+
+                }
+            }
+        });
+
+
 
     }
     private void displayNotification(Context context) {
@@ -1231,7 +1313,7 @@ public class PlayerActivity extends AppCompatActivity{
                         .setContentTitle(songNameNotification
                                 (getIntPref(getString(R.string.shared_current_index),this),this))
                         .setLargeIcon(artwork)
-                        .setContentText("Playing")
+                        .setContentText(songSubtext(getIntPref(getString(R.string.shared_current_index),this),this))
                         .setContentIntent(clickPendingIntent)
 
 
@@ -1251,7 +1333,7 @@ public class PlayerActivity extends AppCompatActivity{
                                 "StopAction", stopPendingIntent))
 
                         .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
-                                .setShowActionsInCompactView(0,2,3,4)
+                                .setShowActionsInCompactView(0,1,3)
                                 .setMediaSession(mediaSessionCompat.getSessionToken()))
                         //.setSubText("Playing")
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -1287,7 +1369,7 @@ public class PlayerActivity extends AppCompatActivity{
             Log.d(TAG, "onCreate: IntentService");
         }
 
-        ArrayList<String> songs_list=new ArrayList<>();
+        List<String> songs_list=new ArrayList<>();
         int index_current;
 
         public void setIndex_current(int index_current) {
@@ -1298,11 +1380,11 @@ public class PlayerActivity extends AppCompatActivity{
             return index_current;
         }
 
-        public ArrayList<String> getSongs_list() {
+        public List<String> getSongs_list() {
             return songs_list;
         }
 
-        public void setSongs_list(ArrayList<String> songs_list) {
+        public void setSongs_list(List<String> songs_list) {
             this.songs_list = songs_list;
         }
 
@@ -1360,7 +1442,7 @@ public class PlayerActivity extends AppCompatActivity{
                                 if(getBooleanPref(getString(R.string.repeat_state),NotificationActionService.this)){
                                     //mRepeat.setBackgroundResource(R.drawable.ic_repeat_one);
                                     int index =getIndex_current();
-                                    //updateNotificationName(index);
+                                    //updateNotification(index);
                                     playSongNotification(index);
                                     Log.d(TAG, "onCompletion: Repeats On - Moving On");
                                 }else{
@@ -1375,7 +1457,7 @@ public class PlayerActivity extends AppCompatActivity{
                                     index++;
                                     index %= getSongs_list().size();
                                     // playerActivity.setSongName(mCurrentIndex);
-                                    updateNotificationName(index);
+                                    updateNotification(index);
                                     playSongNotification(index);
 
                                     Log.d(TAG, "ACTION_NEXT: incremented index : "+index);
@@ -1413,10 +1495,11 @@ public class PlayerActivity extends AppCompatActivity{
             }
         }
 
-        public void updateNotificationName(int index){
+        public void updateNotification(int index){
             notificationBuilder.setContentTitle(PlayerActivity
                     .songNameNotification(index, NotificationActionService.this));
-            PlayerActivity.songNameNotification(index, NotificationActionService.this);
+            //PlayerActivity.songNameNotification(index, NotificationActionService.this);
+            notificationBuilder.setContentText(PlayerActivity.songSubtext(index,NotificationActionService.this));
             notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
         }
 
@@ -1606,7 +1689,7 @@ public class PlayerActivity extends AppCompatActivity{
                                 index++;
                                 index %= getSongs_list().size();
                                 // playerActivity.setSongName(mCurrentIndex);
-                                updateNotificationName(index);
+                                updateNotification(index);
                                 playSongNotification(index);
 
                                 Log.d(TAG, "ACTION_NEXT: incremented index : "+index);
@@ -1645,7 +1728,7 @@ public class PlayerActivity extends AppCompatActivity{
                                 index = index > 0 ? index - 1 : getSongs_list().size() - 1;
                                 playSongNotification(index);
                                 Log.d(TAG, "ACTION_NEXT: decremented index : "+index);
-                                updateNotificationName(index);
+                                updateNotification(index);
                                 saveIntPref(getString(R.string.shared_current_index),index, NotificationActionService.this);
                             }else {
                                 Toast.makeText(NotificationActionService.this, "App is Terminated", Toast.LENGTH_LONG).show();

@@ -49,7 +49,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/relative2"
         android:id="@+id/relative3"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="30dp">
         <include
             layout="@layout/layout_below_cover_player"/>
 
