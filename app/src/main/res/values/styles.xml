@@ -40,4 +40,26 @@
         <item name="colorAccent">#272424</item>
     </style>
 
+    <!-- Alert Dialog -->
+    <style name="MyAlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:colorBackground">@color/alertDialogWindowBackground</item>
+        <item name="android:windowBackground">@color/alertDialogColorBackground</item>
+    </style>
+
+    <style name="Divider">
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <style name="Divider.Horizontal" parent="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item> // You can change thickness here.
+
+    </style>
+
+    <style name="Divider.Vertical" parent="Divider">
+        <item name="android:layout_width">1dp</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
 </resources>

@@ -8,18 +8,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -34,18 +28,16 @@ import android.widget.Toast;
 import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.obcomdeveloper.realmusic.DataSource.UniversalViewModel;
 import com.obcomdeveloper.realmusic.Models.Song;
 import com.obcomdeveloper.realmusic.Adapters.ExtraListAdapter;
+import com.obcomdeveloper.realmusic.Models.Wallpaper;
 import com.obcomdeveloper.realmusic.R;
 import com.obcomdeveloper.realmusic.Songs.PlayerActivity;
 import com.obcomdeveloper.realmusic.Utils.Ads;
 import com.obcomdeveloper.realmusic.Utils.DownloadFiles;
+import com.obcomdeveloper.realmusic.Utils.SharedPreferences;
 import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.util.ArrayList;
@@ -54,9 +46,16 @@ import java.util.List;
 import java.util.Locale;
 
 import dmax.dialog.SpotsDialog;
-import needle.Needle;
-
-import static com.obcomdeveloper.realmusic.Extras.Extras.dialog;
+import io.reactivex.Maybe;
+import io.reactivex.MaybeObserver;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 
 
 public class Extras extends AppCompatActivity {
@@ -91,6 +90,14 @@ public class Extras extends AppCompatActivity {
     private List<String> temp_list;
     private List<Song> existing_songs_models_list;
 
+    private ProgressDialog dialog_loading;
+    private UniversalViewModel mUniversalViewModel;
+
+    private SharedPreferences mSharedPrefs;
+    private FloatingActionButton floatingActionButton;
+    private CompositeDisposable mDisposibles=new CompositeDisposable();
+    private int pageNumber=1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +108,10 @@ public class Extras extends AppCompatActivity {
         listView = findViewById(R.id.recyclerviewextra);
         searchText=findViewById(R.id.searchExtra);
         patentTextView =findViewById(R.id.patent_extra);
+        mUniversalViewModel =new UniversalViewModel(Extras.this);
+        mSharedPrefs=new SharedPreferences(Extras.this);
+        floatingActionButton=findViewById(R.id.floating_button);
+        floatingActionButton.setOnClickListener(FloatingButtonClickListener);
 
 
         patentTextView.setHorizontallyScrolling(true);
@@ -122,24 +133,6 @@ public class Extras extends AppCompatActivity {
         setupSearch();
 
 
-
-
-
-//        FOR DATABASE ENTRY
-//        int i=20;
-//        while(i>=0){
-//            DatabaseReference songRef = FirebaseDatabase.getInstance().getReference().child("extras").push();
-//
-//            Map<String,String> map=new HashMap<>();
-//            map.put(getString(R.string.song_id),""+i);
-//            map.put(getString(R.string.song_genius_url),"null");
-//            map.put(getString(R.string.song_download_url),"null");
-//            map.put(getString(R.string.song_song_name),"null");
-//            songRef.setValue(map);
-//            i--;
-//        }
-
-
         //Listeners
         listView.setOnItemClickListener(SongClickListener);
 
@@ -149,6 +142,52 @@ public class Extras extends AppCompatActivity {
         ads.initAdMob(this);
         ads.setupBanner(adView);
         ads.setupInterstitial(this,getString(R.string.interstitial_ad_test_unit_id),interstitialAd);
+
+    }
+    View.OnClickListener FloatingButtonClickListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            continuePlayingSong();
+        }
+    };
+
+
+    private void continuePlayingSong(){
+
+        setup_existing_ojects_list();
+
+        int tempPlaying=mSharedPrefs.getInt(mContext.getString(R.string.shared_current_index),0);
+
+        if( tempPlaying != -1 && existing_songs_models_list.size() > tempPlaying){
+
+
+            String song_name = existing_songs_models_list.get(mSharedPrefs.getInt(mContext.getString(R.string.shared_current_index),0)).getSong_name();
+            String songFull = song_name + getString(R.string.mp3_extenstion);
+
+
+            //if file is there in the fileNameList i-e present in the folder it will play it
+            if (filesNameList.contains(songFull)) {
+
+                int index=filesNameList.indexOf(songFull);
+
+                startActivity(new Intent(Extras.this, PlayerActivity.class)
+                        .putExtra(getString(R.string.current_index), index)
+                        .putStringArrayListExtra(getString(R.string.folder_songs_list), filesNameList)
+                        .putParcelableArrayListExtra(getString(R.string.existing_songs_object_list), (ArrayList<? extends Parcelable>) existing_songs_models_list)
+                        .putExtra(getString(R.string.coming_from_extra_activity)
+                                , getString(R.string.coming_from_extra_activity))
+                        .putExtra(getString(R.string.coming_from_extra_activity_int)
+                                ,EXTRA_IDENTIFIER)
+                );
+
+                Animatoo.animateZoom(mContext);
+
+
+            }
+        }else {
+            Toast.makeText(mContext, "Play a Song First", Toast.LENGTH_LONG).show();
+        }
+
 
     }
 
@@ -236,7 +275,7 @@ public class Extras extends AppCompatActivity {
             }
             Log.d(TAG, "getFilesListFromFolder: filesNameIndex : "+filesNameList.size());
 
-            PlayerActivity.saveArrayList(filesNameList, getString(R.string.shared_array_list_key), mContext);
+            mSharedPrefs.saveList(filesNameList, getString(R.string.shared_array_list_key));
         }
 
 
@@ -337,6 +376,7 @@ public class Extras extends AppCompatActivity {
         if (onDownloadComplete != null) {
             try{
                 unregisterReceiver(onDownloadComplete);
+                mDisposibles.clear();
             }catch (NullPointerException e){
                 Log.d(TAG, "onDestroy: NullPointerException " +e.getMessage());
             }catch (IllegalArgumentException e){
@@ -349,92 +389,157 @@ public class Extras extends AppCompatActivity {
 
 
     }
-    public static void saveChildCountPref(String key,long index,Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putLong(key, index);
-        editor.commit();
-    }
-    public static long getChildCountPref(String key,Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        long myIntValue = prefs.getLong(key, -1);
-        return myIntValue;
+
+    public void setPageNumber(int pageNumber){
+        pageNumber=pageNumber;
     }
 
+    private void showProgressDialog(){
+        dialog_loading = new ProgressDialog(this,R.style.MyAlertDialogStyle);
+        dialog_loading.setTitle("Loading..");
+        dialog_loading.setCanceledOnTouchOutside(false);
+        dialog_loading.show();
+    }
     private void setupListView() {
-        final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("extras");
-        final ProgressDialog dialog = new ProgressDialog(this,R.style.MyAlertDialogStyle);
-        dialog.setTitle("Loading..");
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.show();
 
-        //myRef.addValueEventListener(myRef_ValueEventListener);
-        myRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                final long count =dataSnapshot.getChildrenCount();
-                saveChildCountPref(getString(R.string.child_count_extras),count,mContext);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        myRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                Song song = dataSnapshot.getValue(Song.class);
-                songs_list.add(song);
+        showProgressDialog();
+        //mUniversalViewModel.setPageNumber(3);
+        Maybe<List<Song>> extrasObservable= mUniversalViewModel.getSongsExtrasList();
 
 
+//        Observable<List<Wallpaper>> extraRealObservable=extrasObservable.
+//                flatMapObservable(new Function<List<Wallpaper>, ObservableSource<Wallpaper>>() {
+//                    @Override
+//                    public ObservableSource<Wallpaper> apply(List<Wallpaper> wallpapers) throws Exception {
+//                        List<Wallpaper> items = new ArrayList<>();
+//                        List<Observable> list=new ArrayList<>();
+//
+//                        for (int i = 0; i < pageNumber * 10; i++) {
+//                            items.add(wallpapers.get(i));
+//
+//
+//                            Observable<Wallpaper> maybeSource = Observable.just(items.get(i)).subscribeOn(Schedulers.io())
+//                                    .observeOn(AndroidSchedulers.mainThread());
+//                            list.add(maybeSource);
+//                        }
+//
+//
+//                        return list;
+//                    }
+//        }).subscribeOn(Schedulers.io())
+//        .observeOn(AndroidSchedulers.mainThread())
+//                ;
+//
+//        extraRealObservable.buffer(34).subscribe(new Observer<List<List<Wallpaper>>>() {
+//                                                     @Override
+//                                                     public void onSubscribe(Disposable d) {
+//
+//                                                     }
+//
+//                                                     @Override
+//                                                     public void onNext(List<List<Wallpaper>> lists) {
+//
+//                                                         Log.d(TAG, "onNext: "+lists.size());
+//                                                     }
+//
+//                                                     @Override
+//                                                     public void onError(Throwable e) {
+//
+//                                                         Log.d(TAG, "onError: ");
+//                                                     }
+//
+//                                                     @Override
+//                                                     public void onComplete() {
+//
+//                                                         Log.d(TAG, "onComplete: ");
+//                                                     }
+//                                                 });
 
-                //when reaches the final child and List is complete it will reverse the list
-                if(songs_list.size() == getChildCountPref(getString(R.string.child_count_extras),mContext)){
-                    Collections.reverse(songs_list);
-                }
+//
+//
+//        extrasObservable.concatMap(new Function<List<Wallpaper>, Maybe<List<Wallpaper>>>() {
+//            @Override
+//            public Maybe<List<Wallpaper>> apply(List<Wallpaper> wallpapers) throws Exception {
+//
+//                List<Wallpaper> items=new ArrayList<>();
+//
+//                for(int i=0;i< pageNumber *10;i++){
+//                    items.add(wallpapers.get(i));
+//                }
+//
+//                Maybe<List<Wallpaper>> maybeSource= Maybe.just(items).subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread());
+//
+//
+//                return maybeSource;
+//            }
+//        }).subscribe(new MaybeObserver<List<Wallpaper>>() {
+//                         @Override
+//                         public void onSubscribe(Disposable d) {
+//
+//                         }
+//
+//                         @Override
+//                         public void onSuccess(List<Wallpaper> wallpapers) {
+//
+//                             Log.d(TAG, "onSuccess:  "+wallpapers.size());
+//
+//
+//                         }
+//
+//                         @Override
+//                         public void onError(Throwable e) {
+//
+//                         }
+//
+//                         @Override
+//                         public void onComplete() {
+//
+//                         }
+//                     });
 
-                adapter = new ExtraListAdapter(mContext, R.layout.item_extra, songs_list);
-                listView.setAdapter(adapter);
-                dialog.dismiss();
-            }
+                setPageNumber(4);
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
-            }
+        extrasObservable.
+                subscribe(new MaybeObserver<List<Song>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
 
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                        mDisposibles.add(d);
 
-            }
+                    }
 
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    @Override
+                    public void onSuccess(List<Song> songs) {
 
-            }
+                        Log.d(TAG, "onSuccess: size " +songs.size());
+                        songs_list=songs;
+                        Collections.reverse(songs_list);
+                        adapter = new ExtraListAdapter(mContext, R.layout.item_extra, songs_list);
+                        listView.setAdapter(adapter);
+                        dialog_loading.dismiss();
+                    }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                    @Override
+                    public void onError(Throwable e) {
 
-            }
-        });
-        myRef.keepSynced(true);
+                    }
 
-        //myRef.addChildEventListener(myRef_ChildEventListener);
+                    @Override
+                    public void onComplete() {
 
-        //remove listeners
-        //myRef.removeEventListener(myRef_ValueEventListener);
-        //myRef.removeEventListener(myRef_ChildEventListener);
 
+
+                    }
+                });
 
     }
 
     private void setup_existing_ojects_list(){
         for(int j=0;j<temp_list.size();j++){
             String temp_name=temp_list.get(j);
-            for(int k=0;k<getChildCountPref(getString(R.string.child_count_extras),mContext);k++){
+            for(int k=0;k<songs_list.size();k++){
                 if(songs_list.get(k).getSong_name().equals(temp_name)){
                     existing_songs_models_list.add(songs_list.get(k));
                 }
@@ -466,7 +571,6 @@ public class Extras extends AppCompatActivity {
                 startActivity(new Intent(Extras.this, PlayerActivity.class)
                         .putExtra(getString(R.string.current_index), index)
                         .putStringArrayListExtra(getString(R.string.folder_songs_list), filesNameList)
-                        .putParcelableArrayListExtra(getString(R.string.all_songs_object_list), (ArrayList<? extends Parcelable>) songs_list)
                         .putParcelableArrayListExtra(getString(R.string.existing_songs_object_list), (ArrayList<? extends Parcelable>) existing_songs_models_list)
                         .putExtra(getString(R.string.coming_from_extra_activity)
                                 , getString(R.string.coming_from_extra_activity))
@@ -510,6 +614,8 @@ public class Extras extends AppCompatActivity {
             }
         }
     };
+
+
 
 
     //////-------------------------------LISTENERS------------------------/////////////

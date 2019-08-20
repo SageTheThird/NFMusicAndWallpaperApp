@@ -3,19 +3,16 @@ package com.obcomdeveloper.realmusic.Utils;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.LayerDrawable;
-import android.media.Image;
-import android.support.annotation.ColorRes;
-import android.support.annotation.DrawableRes;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v7.content.res.AppCompatResources;
-import android.support.v7.widget.CardView;
+
+import androidx.annotation.ColorRes;
+import androidx.annotation.DrawableRes;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.appcompat.content.res.AppCompatResources;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -23,11 +20,7 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 
 
-import com.blankj.utilcode.util.ColorUtils;
-import com.blankj.utilcode.util.ResourceUtils;
-import com.nostra13.universalimageloader.core.decode.ImageDecodingInfo;
 import com.nostra13.universalimageloader.core.process.BitmapProcessor;
-import com.obcomdeveloper.realmusic.R;
 import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -36,8 +29,6 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
-import com.obcomdeveloper.realmusic.Wallpapers.Book_Activity;
-import com.squareup.picasso.Picasso;
 
 import needle.Needle;
 

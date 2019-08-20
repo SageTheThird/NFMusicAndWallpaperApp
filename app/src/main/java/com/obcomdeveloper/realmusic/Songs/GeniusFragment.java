@@ -2,7 +2,7 @@ package com.obcomdeveloper.realmusic.Songs;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,8 +12,8 @@ import android.webkit.WebView;
 
 import com.obcomdeveloper.realmusic.R;
 
-public class genius_fragment extends Fragment {
-    private static final String TAG = "genius_fragment";
+public class GeniusFragment extends Fragment {
+    private static final String TAG = "GeniusFragment";
     private WebView geniusWebView;
     private String genius_url;
 

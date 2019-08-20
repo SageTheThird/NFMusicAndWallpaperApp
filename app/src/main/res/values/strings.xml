@@ -119,10 +119,24 @@
      </string>
 
     <string name="about_email"> Email Address:\nskurtz00420@gmail.com</string>
-    <string name="about_ps">P.S. The ads just helps in support and growth of the app.
-</string>
+    <string name="about_ps">P.S. The ads just helps in support and growth of the app.</string>
     <string name="once_random_q_count_pref">init_random_q_count</string>
     <string name="timesClicked">timesClicked</string>
     <string name="timesClicked_set">timesClicked_set</string>
+    <string name="setCountToZero">setCountToZero</string>
+    <string name="firstGuideViewPager">firstGuideViewpager</string>
+    <string name="firstguide">firstGuide</string>
+
+
+    <!--NOTIFICATION-->
+    <string name="Activity_Notification">Activity</string>
+    <string name="Image_Notification">image</string>
+    <string name="Style_Notification">style</string>
+    <string name="Incoming_ForExtras">Extras</string>
+    <string name="Incoming_ForPlaylist">Playlist</string>
+    <string name="Incoming_ForWallpapers">Wallpapers</string>
+    <string name="BigPicture_Style">BigPicture</string>
+    <string name="Inbox_Style">Inbox</string>
+    <string name="FreeVersion_NotificationSub">freeVersion</string>
 
 </resources>

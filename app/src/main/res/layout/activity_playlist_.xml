@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.obcomdeveloper.realmusic.Songs.playlist_Activity"
+    tools:context="com.obcomdeveloper.realmusic.Songs.PlaylistActivity"
     >
 
 
@@ -151,7 +151,28 @@
             android:requiresFadingEdge="vertical"
             />
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:id="@+id/floating_button"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_floating_play"
+            android:backgroundTint="#3D3B3B"
+            />
+
+
+
     </RelativeLayout>
+
+    <ProgressBar
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_above="@id/adView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:id="@+id/pagination_progressBar"
+        android:visibility="invisible"/>
 
     <com.google.android.gms.ads.AdView
         xmlns:ads="http://schemas.android.com/apk/res-auto"

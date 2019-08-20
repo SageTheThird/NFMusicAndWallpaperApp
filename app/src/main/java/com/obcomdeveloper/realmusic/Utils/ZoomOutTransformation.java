@@ -1,7 +1,7 @@
 package com.obcomdeveloper.realmusic.Utils;
 
 
-import android.support.v4.view.ViewPager;
+import androidx.viewpager.widget.ViewPager;
 import android.view.View;
 
 public class ZoomOutTransformation implements ViewPager.PageTransformer {

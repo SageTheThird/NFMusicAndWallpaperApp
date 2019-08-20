@@ -7,45 +7,42 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Parcelable;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.textservice.SpellCheckerInfo;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.obcomdeveloper.realmusic.Adapters.SongRecyclerView;
-import com.obcomdeveloper.realmusic.Models.RowItem;
+import com.obcomdeveloper.realmusic.DataSource.UniversalViewModel;
+import com.obcomdeveloper.realmusic.Models.Quote;
 import com.obcomdeveloper.realmusic.Models.Song;
 import com.obcomdeveloper.realmusic.R;
 import com.obcomdeveloper.realmusic.Utils.Ads;
 
 import com.obcomdeveloper.realmusic.Utils.DownloadFiles;
-import com.obcomdeveloper.realmusic.Utils.Quotes;
 import com.obcomdeveloper.realmusic.Utils.UIUpdater;
 import com.squareup.picasso.Picasso;
 import java.io.File;
@@ -56,28 +53,34 @@ import java.util.List;
 import java.util.Locale;
 
 import dmax.dialog.SpotsDialog;
+import io.reactivex.Maybe;
+import io.reactivex.MaybeObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.processors.PublishProcessor;
+import io.reactivex.schedulers.Schedulers;
 
 
-public class playlist_Activity extends AppCompatActivity {
-    private static final String TAG = "playlist_Activity";
+public class PlaylistActivity extends AppCompatActivity {
+    private static final String TAG = "PlaylistActivity";
 
-    public static final int AD_TIME_INTERVAL=90*1000;
-    public static final int RANDOM_QUOTE_INTERVAL=20*1000;
+    public static final int AD_TIME_INTERVAL = 90 * 1000;
+    public static final int RANDOM_QUOTE_INTERVAL = 20 * 1000;
 
-    public static final int PLAYLIST_IDENTIFIER=20;
+    public static final int PLAYLIST_IDENTIFIER = 20;
     public static ListView listView;
     static AlertDialog dialog;
     private ImageView playlist_background;
     private ConnectivityManager connectivityManager;
     private NetworkInfo networkInfo;
     //static Progress progress;
-    private ArrayList<RowItem> arrayList;
     private BroadcastReceiver onDownloadComplete;
-    private Context mContext=playlist_Activity.this;
-    private String track_directory,lyrics_directory;
+    private Context mContext = PlaylistActivity.this;
+    private String track_directory, lyrics_directory;
 
 
-    private ArrayList<String> filesNameList=new ArrayList<>();
+    private List<String> filesNameList = new ArrayList<>();
 
     public static SongRecyclerView playlist_adapter;
 
@@ -93,8 +96,7 @@ public class playlist_Activity extends AppCompatActivity {
     private InterstitialAd interstitialAd;
 
 
-
-    private Handler mHandler=new Handler();
+    private Handler mHandler = new Handler();
 
     //
     private List<String> temp_list;
@@ -109,29 +111,52 @@ public class playlist_Activity extends AppCompatActivity {
 
     private List<String> random_quotes_list;
 
+    private FloatingActionButton floatingActionButton;
+
+    private UniversalViewModel mUniversalViewModel;
+
+    private ProgressDialog dialog_loading;
+
+    private com.obcomdeveloper.realmusic.Utils.SharedPreferences mSharedPrefs;
+
+    private CompositeDisposable mDisposibles = new CompositeDisposable();
+
+    private ProgressBar loadingProgress;
+
+    //Pagination
+    private boolean loading = false;
+    private int pageNumber = 1;
+    private final int VISIBLE_THRESHOLD = 1;
+    private int lastVisibleItem;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.activity_playlist_);
-        quotes_Ref=FirebaseDatabase.getInstance().getReference().child(getString(R.string.db_random_quotes)).child("array");
+        quotes_Ref = FirebaseDatabase.getInstance().getReference().child(getString(R.string.db_random_quotes)).child("array");
 
-        searchView=findViewById(R.id.searchEdit);
+        searchView = findViewById(R.id.searchEdit);
         listView = findViewById(R.id.listViewPlaylist);
-        patentTextView =findViewById(R.id.patent_playlist);
-        random_quotes_tv =findViewById(R.id.random_quotes_playlist);
-        adView =findViewById(R.id.adView);
-        interstitialAd=new InterstitialAd(this);
-        songs_list=new ArrayList<>();
-        random_quotes_list=new ArrayList<>();
-
+        patentTextView = findViewById(R.id.patent_playlist);
+        random_quotes_tv = findViewById(R.id.random_quotes_playlist);
+        adView = findViewById(R.id.adView);
+        interstitialAd = new InterstitialAd(this);
+        songs_list = new ArrayList<>();
+        random_quotes_list = new ArrayList<>();
+        floatingActionButton = findViewById(R.id.floating_button);
+        loadingProgress=findViewById(R.id.pagination_progressBar);
+        floatingActionButton.setOnClickListener(FloatingButtonClickListener);
 
         patentTextView.setHorizontallyScrolling(true);
         patentTextView.setSelected(true);
 
         random_quotes_tv.setHorizontallyScrolling(true);
         random_quotes_tv.setSelected(true);
+        mUniversalViewModel = new UniversalViewModel(PlaylistActivity.this);
+        mSharedPrefs = new com.obcomdeveloper.realmusic.Utils.SharedPreferences(PlaylistActivity.this);
+
 
         //methods
         directorySetup();
@@ -147,73 +172,210 @@ public class playlist_Activity extends AppCompatActivity {
 
 
         //ads
-        ads=new Ads();
+        ads = new Ads();
         ads.initAdMob(this);
         ads.setupBanner(adView);
-        ads.setupInterstitial(this,getString(R.string.interstitial_ad_test_unit_id),interstitialAd);
+        ads.setupInterstitial(this, getString(R.string.interstitial_ad_test_unit_id), interstitialAd);
 
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if(prefs.getBoolean("setCountToZero", true)) {
-            Log.d(TAG, "onCreate: count _ pref : called");
-            count_quotes=0;
-            PlayerActivity.saveIntPref(getString(R.string.count_random_quotes),count_quotes,this);
-            prefs.edit().putBoolean("setCountToZero", false).commit();
-        }
-
-
-        quotes_Ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-
-                String quotes=dataSnapshot.getValue().toString();
-                String modified_string=quotes.substring(1);
-                //String[] quotes_array=modified_string.split("-");
-                List<String> quotes_list = Arrays.asList(modified_string.split("-"));
-
-                PlayerActivity.saveArrayList(quotes_list,getString(R.string.random_quotes_list_prefs),mContext);
-
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        Log.d(TAG, "onCreate: after Set Array Size : "+Quotes.getRandom_lyrics_array().length);
-
-
+        initQuotesTv();
+        setupQuotesTv();
 
 
         mAdRunnable.run();
         //
+
+
+    }
+
+    private void setupQuotesTv() {
+
+
         mUIUpdater = new UIUpdater(new Runnable() {
             @Override
             public void run() {
                 //do what ever you want to do with your textview
-                try{
+                try {
 
-                    random_quotes_list=PlayerActivity.getArrayList(getString(R.string.random_quotes_list_prefs),mContext);
-                    count_quotes=PlayerActivity.getIntPref(getString(R.string.count_random_quotes),mContext);
-                    Log.d(TAG, "run: count _ : "+count_quotes);
+                    random_quotes_list = mSharedPrefs.getList(getString(R.string.random_quotes_list_prefs));
+                    count_quotes = mSharedPrefs.getInt(getString(R.string.count_random_quotes), 1);
                     random_quotes_tv.setText(random_quotes_list.get(count_quotes));
-                    if(count_quotes == random_quotes_list.size()-1){
-                        count_quotes=0;
-                        PlayerActivity.saveIntPref(getString(R.string.count_random_quotes),count_quotes,mContext);
-                    }else {
+                    if (count_quotes == random_quotes_list.size() - 1) {
+                        count_quotes = 0;
+                        mSharedPrefs.saveInt(getString(R.string.count_random_quotes), count_quotes);
+                    } else {
                         count_quotes++;
-                        PlayerActivity.saveIntPref(getString(R.string.count_random_quotes),count_quotes,mContext);
+                        mSharedPrefs.saveInt(getString(R.string.count_random_quotes), count_quotes);
                     }
 
 
-                }catch (NullPointerException e){
+                } catch (NullPointerException e) {
                     e.printStackTrace();
                 }
             }
         });
+
+        Maybe<Quote> quotesObservable = mUniversalViewModel.getQuotes();
+
+        quotesObservable.subscribe(new MaybeObserver<Quote>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+
+                mDisposibles.add(d);
+
+            }
+
+            @Override
+            public void onSuccess(Quote quote) {
+
+                String temp = quote.getArray();
+                String modified_string = temp.substring(1);
+                //String[] quotes_array=modified_string.split("-");
+                List<String> quotes_list = Arrays.asList(modified_string.split("-"));
+
+                mSharedPrefs.saveList(quotes_list, getString(R.string.random_quotes_list_prefs));
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+                Toast.makeText(mContext, "" + e.getMessage(), Toast.LENGTH_LONG).show();
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
+
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+                lastVisibleItem = view.getLastVisiblePosition();
+                if (!loading
+                        && totalItemCount <= (lastVisibleItem + VISIBLE_THRESHOLD)) {
+
+                    if(lastVisibleItem <= totalItemCount){
+                        loadingProgress.setVisibility(View.VISIBLE);
+                    }
+
+
+                    pageNumber++;
+
+                    mUniversalViewModel.getSongsPlaylist(pageNumber).
+                            subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new MaybeObserver<List<Song>>() {
+                                @Override
+                                public void onSubscribe(Disposable d) {
+                                    mDisposibles.add(d);
+                                }
+
+                                @Override
+                                public void onSuccess(List<Song> list) {
+                                    //playlist_adapter.clearList();
+                                    if(playlist_adapter!=null){
+
+                                        //playlist_adapter.clearList();
+
+                                        if(songs_list != null){
+
+
+
+                                        }
+                                        Collections.reverse(list);
+                                        playlist_adapter.removeLastItem();
+                                        playlist_adapter.addItems(list);
+                                        if(loadingProgress.getVisibility() == View.VISIBLE){
+                                            loadingProgress.setVisibility(View.INVISIBLE);
+                                        }
+
+                                        //playlist_adapter.notifyDataSetChanged();
+                                        loading = false;
+                                    }
+
+                                }
+
+                                @Override
+                                public void onError(Throwable e) {
+
+                                }
+
+                                @Override
+                                public void onComplete() {
+
+                                }
+                            });
+                    //paginator.onNext(pageNumber);
+                    loading = true;
+
+                }
+            }
+        });
+
+
+    }
+
+
+    private void initQuotesTv(){
+
+
+        if(mSharedPrefs.getBoolean(getString(R.string.setCountToZero), true)) {
+
+            count_quotes=0;
+            mSharedPrefs.saveInt(getString(R.string.count_random_quotes),count_quotes);
+            mSharedPrefs.saveBoolean(getString(R.string.setCountToZero), false);
+
+        }
+
+
+    }
+
+    private void continuePlayingSong(){
+
+        setup_existing_ojects_list();
+
+        int tempPlaying=mSharedPrefs.getInt(mContext.getString(R.string.shared_current_index),0);
+
+        if( tempPlaying != -1 && existing_songs_models_list.size() > tempPlaying){
+
+
+            String song_name = existing_songs_models_list.get(mSharedPrefs.getInt(mContext.getString(R.string.shared_current_index),0)).getSong_name();
+            String songFull = song_name + getString(R.string.mp3_extenstion);
+
+            filesNameList=mSharedPrefs.getList(getString(R.string.shared_array_list_key));
+
+            //if file is there in the fileNameList i-e present in the folder it will play it
+            if (filesNameList.contains(songFull)) {
+
+                int index=filesNameList.indexOf(songFull);
+
+                startActivity(new Intent(mContext, PlayerActivity.class)
+                        .putExtra(getString(R.string.current_index), index)
+                        .putStringArrayListExtra(getString(R.string.folder_songs_list), (ArrayList<String>) filesNameList)
+                        .putParcelableArrayListExtra(getString(R.string.existing_songs_object_list), (ArrayList<? extends Parcelable>) existing_songs_models_list)
+                        .putExtra(getString(R.string.coming_from_playlist_activity)
+                                , getString(R.string.coming_from_playlist_activity))
+                        .putExtra(getString(R.string.coming_from_playlist_activity_int)
+                                ,PLAYLIST_IDENTIFIER)
+                );
+
+
+                Animatoo.animateZoom(mContext);
+
+
+            }
+        }else {
+            Toast.makeText(mContext, "Play a Song First", Toast.LENGTH_LONG).show();
+        }
 
 
     }
@@ -232,39 +394,16 @@ public class playlist_Activity extends AppCompatActivity {
         }
     };
 
-    private Runnable random_quote_runnable=new Runnable() {
 
 
 
+
+    View.OnClickListener FloatingButtonClickListener=new View.OnClickListener() {
         @Override
-        public void run() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try{
-
-                        count_quotes=PlayerActivity.getIntPref(getString(R.string.count_random_quotes),mContext);
-                        Log.d(TAG, "run: count _ : "+count_quotes);
-                        random_quotes_tv.setText(Quotes.getRandom_lyrics_array()[count_quotes]);
-                        if(count_quotes >= Quotes.getRandom_lyrics_array().length){
-                            count_quotes=0;
-                            PlayerActivity.saveIntPref(getString(R.string.count_random_quotes),count_quotes,mContext);
-                        }
-                        count_quotes++;
-                        PlayerActivity.saveIntPref(getString(R.string.count_random_quotes),count_quotes,mContext);
-
-                    }catch (NullPointerException e){
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-
-            mHandler.postDelayed(this,RANDOM_QUOTE_INTERVAL);
+        public void onClick(View v) {
+            continuePlayingSong();
         }
     };
-
-
 
     private void searchSetup() {
         searchView.addTextChangedListener(new TextWatcher() {
@@ -293,27 +432,32 @@ public class playlist_Activity extends AppCompatActivity {
     }
 
     private void getFilesListFromFolder(){
+
         temp_list=new ArrayList<>();
         existing_songs_models_list=new ArrayList<>();
+
         int filesIndex=0;
         //String path = track_directory;
-        Log.d("Folder Files", "Path: " + track_directory);
+
         File directoryFolder = new File(track_directory);
         File[] files = directoryFolder.listFiles();
-        //Log.d("Folder Files", "Size: "+ files.length);
+
 
         if(files.length == 0){
+
             Log.d(TAG, "onCreate: Folder Empty");
 
         }else {
 
             for (int i = 0; i < files.length; i++)
             {
-                Log.d("Files", "FileName:" + files[i].getName());
+
                 filesNameList.add(filesIndex,files[i].getName());
                 filesIndex++;
+
             }
-            PlayerActivity.saveArrayList(filesNameList,getString(R.string.shared_array_list_key),mContext);
+
+            mSharedPrefs.saveList(filesNameList,getString(R.string.shared_array_list_key));
         }
 
         folder_files_to_temp_list();
@@ -322,26 +466,33 @@ public class playlist_Activity extends AppCompatActivity {
     }
 
     private void folder_files_to_temp_list(){
+
         for(int i=0;i<filesNameList.size();i++){
+
             String name= filesNameList.get(i).replace(".mp3","");
-            Log.d(TAG, "getFilesListFromFolder: temp_name : "+name+ "songs_list_size : "+songs_list.size());
             temp_list.add(name);
+
         }
     }
 
 
     private void setup_existing_ojects_list(){
         for(int j=0;j<temp_list.size();j++){
+
             String temp_name=temp_list.get(j);
+
             for(int k=0;k<songs_list.size();k++){
+
                 if(songs_list.get(k).getSong_name().equals(temp_name)){
+
                     existing_songs_models_list.add(songs_list.get(k));
+
                 }
             }
         }
 
-        PlayerActivity.saveArrayListObjects(existing_songs_models_list,getString(R.string.existing_objects_list_prefs),mContext);
-        Log.d(TAG, "onItemClick: existing size : "+existing_songs_models_list.size());
+        mSharedPrefs.saveObjectsList(existing_songs_models_list,getString(R.string.existing_objects_list_prefs));
+
 
     }
 
@@ -359,18 +510,17 @@ public class playlist_Activity extends AppCompatActivity {
             String lyrics_url=songs_list.get(position).getLyrics_url();
 
 
+            filesNameList=mSharedPrefs.getList(getString(R.string.shared_array_list_key));
 
 
             //if file is there in the fileNameList i-e present in the folder it will play it
             if (filesNameList.contains(songFull)) {
 
                 int index=filesNameList.indexOf(songFull);
-                Log.d(TAG, "onItemClick: song found in the arrayList/track_directory");
 
                 startActivity(new Intent(mContext, PlayerActivity.class)
                         .putExtra(getString(R.string.current_index), index)
-                        .putStringArrayListExtra(getString(R.string.folder_songs_list), filesNameList)
-                        .putParcelableArrayListExtra(getString(R.string.all_songs_object_list), (ArrayList<? extends Parcelable>) songs_list)
+                        .putStringArrayListExtra(getString(R.string.folder_songs_list), (ArrayList<String>) filesNameList)
                         .putParcelableArrayListExtra(getString(R.string.existing_songs_object_list), (ArrayList<? extends Parcelable>) existing_songs_models_list)
                         .putExtra(getString(R.string.coming_from_playlist_activity)
                                 , getString(R.string.coming_from_playlist_activity))
@@ -378,14 +528,14 @@ public class playlist_Activity extends AppCompatActivity {
                                 ,PLAYLIST_IDENTIFIER)
                 );
 
-                Log.d(TAG, "onItemClick: existing size : "+existing_songs_models_list.size());
+
                 Animatoo.animateZoom(mContext);
 
 
             }
             //if not downloadSong it
             else {
-                Log.d(TAG, "onItemClick: song not found");
+
                 if ((networkInfo == null || !networkInfo.isConnected())) {
                     showToast("Please Check Your Internet Connection!");
                     return;
@@ -444,7 +594,7 @@ public class playlist_Activity extends AppCompatActivity {
     private void internetConnectivity(){
         //Internet Connectivity
         connectivityManager = (ConnectivityManager)
-                playlist_Activity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+                PlaylistActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
         networkInfo = connectivityManager.getActiveNetworkInfo();
 
     }
@@ -544,87 +694,64 @@ public class playlist_Activity extends AppCompatActivity {
     }
 
 
-
-
-    public static void saveChildCountPref(String key,long index,Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putLong(key, index);
-        editor.commit();
-    }
-    public static long getChildCountPref(String key,Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        long myIntValue = prefs.getLong(key, -1);
-        return myIntValue;
-    }
     public  void setupListView() {
-        final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("songs");
-        final ProgressDialog dialog=new ProgressDialog(this,R.style.MyAlertDialogStyle);
-        dialog.setTitle("Loading..");
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.show();
-        //myRef.addValueEventListener(myRef_ValueEventListener);
-        myRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                final long count =dataSnapshot.getChildrenCount();
-                saveChildCountPref(getString(R.string.child_count_playlist),count,mContext);
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+        showProgressDialog();
 
-            }
-        });
-        myRef.keepSynced(true);
-        //myRef.addChildEventListener(myRef_ChildEventListener);
-        myRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                Song song = dataSnapshot.getValue(Song.class);
-                songs_list.add(song);
+        Maybe<List<Song>> playlistObservable= mUniversalViewModel.getSongsPlaylist(pageNumber);
 
 
+        playlistObservable.
+                subscribe(new MaybeObserver<List<Song>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
 
-                //when reaches the final child and List is complete it will reverse the list
-                if(songs_list.size() == getChildCountPref(getString(R.string.child_count_playlist),mContext)){
-                    Collections.reverse(songs_list);
-                }
+                        mDisposibles.add(d);
 
+                    }
 
+                    @Override
+                    public void onSuccess(List<Song> songs) {
 
-                playlist_adapter = new SongRecyclerView(mContext, R.layout.item, songs_list);
-                listView.setAdapter(playlist_adapter);
-                dialog.dismiss();
+                        Log.d(TAG, "onSuccess: "+songs.size());
 
-            }
+                        Collections.reverse(songs);
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                        for(int i=0;i<songs.size();i++){
+                            Log.d(TAG, "onSuccess: SongsId's  :   "+songs.get(i).getId());
+                            String id=songs.get(i).getId();
+                            Log.d(TAG, "onSuccess: "+id);
+                        }
 
-            }
+                        playlist_adapter = new SongRecyclerView(mContext, R.layout.item,songs);
+                        listView.setAdapter(playlist_adapter);
+                        //playlist_adapter.addItems(songs);
+                        //playlist_adapter.notifyDataSetChanged();
+                        dialog_loading.dismiss();
+                    }
 
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                    @Override
+                    public void onError(Throwable e) {
 
-            }
+                    }
 
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        //remove listeners
-        //myRef.removeEventListener(myRef_ChildEventListener);
-        //myRef.removeEventListener(myRef_ValueEventListener);
+                    @Override
+                    public void onComplete() {
 
 
+
+                    }
+                });
+
+
+
+    }
+
+    private void showProgressDialog(){
+        dialog_loading=new ProgressDialog(this,R.style.MyAlertDialogStyle);
+        dialog_loading.setTitle("Loading..");
+        dialog_loading.setCanceledOnTouchOutside(false);
+        dialog_loading.show();
     }
 
 
@@ -662,6 +789,7 @@ public class playlist_Activity extends AppCompatActivity {
         if (onDownloadComplete != null) {
             try{
                 unregisterReceiver(onDownloadComplete);
+                mDisposibles.clear();
             }catch (NullPointerException e){
                 Log.d(TAG, "onDestroy: NullPointerException " +e.getMessage());
             }catch (IllegalArgumentException e){
@@ -674,6 +802,7 @@ public class playlist_Activity extends AppCompatActivity {
 
 
     }
+
 }
 
 

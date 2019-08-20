@@ -19,5 +19,7 @@
     <color name="drawer_background">#272F32</color>
     <color name="wallpaper_background">#242524</color>
     <color name="lyric_button">#041016</color>
+    <color name="alertDialogColorBackground">#FFFFFF</color>
+    <color name="alertDialogWindowBackground">#E2DBDB</color>
 
 </resources>

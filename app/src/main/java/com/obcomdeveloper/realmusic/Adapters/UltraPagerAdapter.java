@@ -2,14 +2,13 @@ package com.obcomdeveloper.realmusic.Adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v4.view.PagerAdapter;
-import android.util.Log;
+import androidx.annotation.NonNull;
+import androidx.viewpager.widget.PagerAdapter;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
@@ -18,7 +17,6 @@ import com.obcomdeveloper.realmusic.R;
 import com.obcomdeveloper.realmusic.Utils.UniversalImageLoader;
 import com.obcomdeveloper.realmusic.Wallpapers.ImageClickActivity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class UltraPagerAdapter extends PagerAdapter {

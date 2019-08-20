@@ -1,8 +1,8 @@
 package com.obcomdeveloper.realmusic.Adapters;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v4.view.PagerAdapter;
+import androidx.annotation.NonNull;
+import androidx.viewpager.widget.PagerAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 import com.obcomdeveloper.realmusic.Models.Song;
 import com.obcomdeveloper.realmusic.R;
 import com.obcomdeveloper.realmusic.Songs.PlayerActivity;
+import com.obcomdeveloper.realmusic.Utils.SharedPreferences;
 import com.obcomdeveloper.realmusic.Utils.UniversalImageLoader;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class PlayerPagerAdapter extends PagerAdapter {
 
     private Context context;
     private List<Song> song_list;
+    private SharedPreferences mSharedPrefs;
 
 
 
@@ -30,6 +32,7 @@ public class PlayerPagerAdapter extends PagerAdapter {
         this.context=context;
         this.song_list = song_list;
 
+        mSharedPrefs=new SharedPreferences(context);
     }
 
    @Override
@@ -60,8 +63,7 @@ public class PlayerPagerAdapter extends PagerAdapter {
 
 
 
-        String thumbnail=song_list.get(PlayerActivity.
-                getIntPref(context.getString(R.string.shared_current_index),context)).getThumbnail();
+        String thumbnail=song_list.get(mSharedPrefs.getInt(context.getString(R.string.shared_current_index),0)).getThumbnail();
         UniversalImageLoader.setImage(thumbnail,imageView,null,"");
 //        Needle.onBackgroundThread().execute(new Runnable() {
 ////            @Override

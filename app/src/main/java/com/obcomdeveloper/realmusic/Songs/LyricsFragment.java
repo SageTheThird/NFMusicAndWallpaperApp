@@ -1,11 +1,9 @@
 package com.obcomdeveloper.realmusic.Songs;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.NestedScrollView;
+import androidx.fragment.app.Fragment;
+import androidx.core.widget.NestedScrollView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,11 +16,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 
-public class lyrics_frag extends Fragment {
-    private static final String TAG = "lyrics_frag";
+public class LyricsFragment extends Fragment {
+    private static final String TAG = "LyricsFragment";
 
     private NestedScrollView nestedScrollView;
     private TextView lyrics_textView;

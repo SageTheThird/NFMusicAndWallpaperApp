@@ -1,9 +1,9 @@
 package com.obcomdeveloper.realmusic.Adapters;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.obcomdeveloper.realmusic.Models.Song;
 import com.obcomdeveloper.realmusic.Models.Wallpaper;
 import com.obcomdeveloper.realmusic.R;
 import com.obcomdeveloper.realmusic.Utils.Animation;
@@ -111,11 +112,34 @@ public class ImageRecyclerView extends RecyclerView.Adapter<ImageRecyclerView.Im
 
         this.listener=listener;
     }
+    public void addItems(List<Wallpaper> list){
+        this.walls_list.addAll(list);
+        notifyDataSetChanged();
+    }
+
+
+
+    public boolean clearList(){
+
+        try{
+            if(walls_list != null){
+                this.walls_list.clear();
+                //songs_list=new ArrayList<>();
+            }
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        }
+
+
+        return true;
+    }
+
 
     public void addAll(List<Wallpaper> newUsers) {
         int initialSize = walls_list.size();
         walls_list.addAll(newUsers);
         notifyItemRangeInserted(initialSize, newUsers.size());
+
     }
 
     public String getLastItemId() {

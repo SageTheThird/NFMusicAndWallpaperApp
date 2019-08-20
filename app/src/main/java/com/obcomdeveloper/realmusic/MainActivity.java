@@ -3,6 +3,8 @@ package com.obcomdeveloper.realmusic;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -13,18 +15,20 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import com.google.android.material.navigation.NavigationView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.WindowManager;
@@ -32,28 +36,44 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.blankj.utilcode.util.CacheDiskUtils;
 import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.obcomdeveloper.realmusic.Extras.Extras;
-import com.obcomdeveloper.realmusic.Songs.playlist_Activity;
+import com.obcomdeveloper.realmusic.Models.Song;
+import com.obcomdeveloper.realmusic.Songs.PlaylistActivity;
 import com.obcomdeveloper.realmusic.Utils.DownloadFiles;
 import com.obcomdeveloper.realmusic.Utils.UniversalImageLoader;
 import com.obcomdeveloper.realmusic.Wallpapers.WallpaperMain;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import dmax.dialog.SpotsDialog;
+import durdinapps.rxfirebase2.DataSnapshotMapper;
+import durdinapps.rxfirebase2.RxFirebaseDatabase;
 import hotchemi.android.rate.AppRate;
+import io.reactivex.Maybe;
+import io.reactivex.MaybeObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
+import static com.obcomdeveloper.realmusic.FCM.MyFCMService.CHANNEL_ID;
 
 public class MainActivity extends AppCompatActivity {
+
     private static final String TAG = "MainActivity";
     public static final int STORAGE_SONG_REFERENCE=1;
     public static final int STORAGE_EXTRAS_REFERENCE=2;
@@ -78,6 +98,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView toolbar_tv;
 
+    private List<Song> list;
+
 
 
     @Override
@@ -93,10 +115,11 @@ public class MainActivity extends AppCompatActivity {
         initWidgets();
         initImageLoader();
         imageLoading();
-        firebaseNotificationSetup();
+        //firebaseNotificationSetup();
         drawerSetup();
         navigationSetup();
 
+        list=new ArrayList<>();
 
         //will only run once per app install
         if ((networkInfo == null || !networkInfo.isConnected())) {
@@ -225,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.menu_playlist:
 
                         checkUserPermission();
-                        startActivity(new Intent(MainActivity.this, playlist_Activity.class));
+                        startActivity(new Intent(MainActivity.this, PlaylistActivity.class));
                         Animatoo.animateZoom(mContext);
 
                         break;

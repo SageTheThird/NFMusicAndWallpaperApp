@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -25,21 +25,21 @@
         android:layout_marginEnd="30dp"
         android:layout_marginBottom="70dp">
 
-        <android.support.v7.widget.CardView
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:cardCornerRadius="10dp">
 
-            <android.support.v4.view.ViewPager
+            <androidx.viewpager.widget.ViewPager
                 android:id="@+id/ultraViewPager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 >
 
 
-            </android.support.v4.view.ViewPager>
+            </androidx.viewpager.widget.ViewPager>
 
-        </android.support.v7.widget.CardView>
+        </androidx.cardview.widget.CardView>
 
 
     </RelativeLayout>
@@ -88,4 +88,4 @@
         ads:layout_anchor="@+id/blurImageView"
         ads:layout_anchorGravity="bottom|center"></com.google.android.gms.ads.AdView>
 
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

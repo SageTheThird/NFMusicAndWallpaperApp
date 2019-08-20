@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:visibility="visible"
     android:id="@+id/linearLayout"
-    tools:context=".Songs.genius_fragment">
+    tools:context=".Songs.GeniusFragment">
 
    <!-- <Button
         android:id="@+id/genius_back"

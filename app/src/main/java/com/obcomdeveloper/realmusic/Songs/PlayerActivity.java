@@ -1,13 +1,10 @@
 package com.obcomdeveloper.realmusic.Songs;
 
-import android.animation.ValueAnimator;
 import android.app.IntentService;
 import android.app.PendingIntent;
-import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
@@ -18,15 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.view.PagerAdapter;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -35,41 +24,38 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.viewpager.widget.PagerAdapter;
 import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.google.android.gms.ads.InterstitialAd;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.obcomdeveloper.realmusic.Adapters.PlayerPagerAdapter;
-import com.obcomdeveloper.realmusic.Adapters.UltraPagerAdapter;
 import com.obcomdeveloper.realmusic.Extras.Extras;
 import com.obcomdeveloper.realmusic.Models.Song;
 import com.obcomdeveloper.realmusic.R;
 import com.obcomdeveloper.realmusic.Utils.Ads;
 import com.obcomdeveloper.realmusic.Utils.CustomViewPager;
 import com.obcomdeveloper.realmusic.Utils.HeadphonesReciever;
+import com.obcomdeveloper.realmusic.Utils.SharedPreferences;
 import com.obcomdeveloper.realmusic.Utils.UniversalImageLoader;
 import com.obcomdeveloper.realmusic.Utils.ViewUtilities;
 import com.obcomdeveloper.realmusic.Utils.ZoomOutTransformation;
 import com.squareup.picasso.Picasso;
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import needle.Needle;
 import smartdevelop.ir.eram.showcaseviewlib.GuideView;
 import smartdevelop.ir.eram.showcaseviewlib.config.DismissType;
-
 import static android.media.audiofx.AudioEffect.CONTENT_TYPE_MUSIC;
 import static android.media.audiofx.AudioEffect.EXTRA_AUDIO_SESSION;
 import static android.media.audiofx.AudioEffect.EXTRA_CONTENT_TYPE;
 
 
-public class PlayerActivity extends AppCompatActivity{
+public class PlayerActivity extends AppCompatActivity {
 
     private static final String TAG = "PlayerActivity";
 
@@ -100,12 +86,9 @@ public class PlayerActivity extends AppCompatActivity{
     private static final int AUDIO_FOCUSED = 2;
     private static int mCurrentAudioFocusState = AUDIO_NO_FOCUS_NO_DUCK;
     private static final int REQUEST_EQ = 0;
-
     //activity Identifiers
     public static final int PLAYLIST_ACTIVITY_IDENTIFIER=20;
     public static final int EXTRAS_ACTIVITY_IDENTIFIER=10;
-
-
     private Context mContext = PlayerActivity.this;
     public static MediaPlayer mediaPlayer;
     private SeekBar seekBar;
@@ -115,60 +98,34 @@ public class PlayerActivity extends AppCompatActivity{
     private Intent intent;
     private static ArrayList<String> mSongs_list;
     private ImageView mBack_arrow,mEquilizer, mGenius_btn, mLyrics_btn,mBackground_iv;
-
     private Handler myHandler = new Handler();
     //for song list
     private static int mCurrentIndex;
-
-
     MediaSessionCompat mediaSessionCompat;
-
-
     //action_intents
     private Intent pauseIntent,playIntent,stopIntent,nextIntent,prevIntent,clickIntent;
-
     //audio focus change
     private static AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
-
-    //
-
     private static AudioManager mAudioManager;
-
-
     //equilizer
     public static NotificationCompat.Builder notificationBuilder;
     public static NotificationManagerCompat notificationManager;
     public static int activityIdentifier;
-    private List<Song> list_of_objects_songs;
-
     private boolean isButtonClicked = false;
     private boolean resumeSong=false;
     private boolean repeatOn=false;
-
     public static HeadphonesReciever receiver;
-    
     private static boolean mNoisyRecieverOn=false;
-
     //ads
     private Ads ads;
     private InterstitialAd interstitialAd;
-
-
     //test
     private ImageView blurred_iv;
     private CustomViewPager viewPager;
-    private UltraPagerAdapter adapter;
-
-    private SharedPreferences prefs;
-
-
-    //viewpager animation
-    private int animFactor;
-    private ValueAnimator animator = new ValueAnimator();
-
+    private com.obcomdeveloper.realmusic.Utils.SharedPreferences mSharedPrefs;
     private List<Song> existing_songs_ojects_list;
-
     private boolean trigger_on_page;
+    private PagerAdapter adapter;
 
 
 
@@ -180,17 +137,13 @@ public class PlayerActivity extends AppCompatActivity{
         setContentView(R.layout.test_player);
 
 
-
+        mSharedPrefs = new com.obcomdeveloper.realmusic.Utils.SharedPreferences(PlayerActivity.this);
         trigger_on_page=true;
-        saveBooleanPref(getString(R.string.trigger_on_page),trigger_on_page,mContext);
-
-
-
+        mSharedPrefs.saveBoolean(getString(R.string.trigger_on_page),trigger_on_page);
 
 
         interstitialAd=new InterstitialAd(this);
-
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mediaSessionCompat = new MediaSessionCompat(this, "someTag");
 
 
 
@@ -200,9 +153,13 @@ public class PlayerActivity extends AppCompatActivity{
         initWidgets();
         getIncomingIntent();
         if(activityIdentifier==PLAYLIST_ACTIVITY_IDENTIFIER){
-            playlist_Activity.playlist_adapter.notifyDataSetChanged();
+
+            PlaylistActivity.playlist_adapter.notifyDataSetChanged();
+
         }else {
+
             Extras.adapter.notifyDataSetChanged();
+
         }
 
 
@@ -222,24 +179,11 @@ public class PlayerActivity extends AppCompatActivity{
         mNext_btn.setOnClickListener(NextClickListener);
         mPrev_btn.setOnClickListener(PrevClickListener);
 
-
-        if(prefs.getBoolean("firstGuideViewpager", true)) {
-
-            guideBuilder(this);
-
-            prefs.edit().putBoolean("firstGuideViewpager", false).commit();
-        }
-
-        //notific
-        mediaSessionCompat = new MediaSessionCompat(this, "someTag");
+        initFirstGuide();
 
         //audio focus change
         audioFocusListener();
         tryToGetAudioFocus(this);
-        
-
-        Log.d(TAG, "onCreate: Reciever Registered");
-
 
         //listeners
         mEquilizer.setOnClickListener(OpenEqualizerListener);
@@ -247,7 +191,7 @@ public class PlayerActivity extends AppCompatActivity{
         mShuffle.setOnClickListener(ShuffleClickListener);
 
 
-        if(getBooleanPref(getString(R.string.repeat_state),this)){
+        if(mSharedPrefs.getBoolean(getString(R.string.repeat_state),false)){
             mRepeat.setBackgroundResource(R.drawable.ic_repeat_one);
         }else {
             mRepeat.setBackgroundResource(R.drawable.ic_repeat_not);
@@ -262,17 +206,34 @@ public class PlayerActivity extends AppCompatActivity{
         ads.initAdMob(this);
         ads.setupInterstitial(this,getString(R.string.interstitial_ad_test_unit_id),interstitialAd);
 
+        blurredBackgroundSetup();
+        viewpagerSetup();
 
 
+    }
 
-        //viewpager
+    private void initFirstGuide() {
 
+        if(mSharedPrefs.getBoolean(getString(R.string.firstGuideViewPager), true)) {
+
+            guideBuilder(this);
+
+            mSharedPrefs.saveBoolean(getString(R.string.firstGuideViewPager), false);
+
+        }
+
+    }
+
+    private void blurredBackgroundSetup() {
         String thumbnail=existing_songs_ojects_list.get(mCurrentIndex).getThumbnail();
         UniversalImageLoader.setBlurredImage(thumbnail,
                 blurred_iv,null,"",seekBar,mLyrics_btn,mGenius_btn);
-        PagerAdapter adapter = new PlayerPagerAdapter(existing_songs_ojects_list,
-                PlayerActivity.this);
 
+    }
+
+    private void viewpagerSetup() {
+        adapter = new PlayerPagerAdapter(existing_songs_ojects_list,
+                PlayerActivity.this);
         viewPager.setAdapter(adapter);
         viewPager.setCurrentItem(mCurrentIndex);
         ZoomOutTransformation zoomOutTransformation=new ZoomOutTransformation();
@@ -291,7 +252,7 @@ public class PlayerActivity extends AppCompatActivity{
             @Override
             public void onPageSelected(int i) {
 
-                if(getBooleanPref(getString(R.string.trigger_on_page),mContext)){
+                if(mSharedPrefs.getBoolean(getString(R.string.trigger_on_page),false)){
 
                     if(i > previousPosition){
                         Log.d(TAG, "onPageSelected: Next Swipe");
@@ -308,7 +269,7 @@ public class PlayerActivity extends AppCompatActivity{
                     }
                 }else {
                     trigger_on_page=true;
-                    saveBooleanPref(getString(R.string.trigger_on_page),trigger_on_page,mContext);
+                    mSharedPrefs.saveBoolean(getString(R.string.trigger_on_page),trigger_on_page);
                 }
 
 
@@ -319,20 +280,17 @@ public class PlayerActivity extends AppCompatActivity{
 
             }
         });
-
-
     }
 
     private void guideBuilder(Context context){
 
             new GuideView.Builder(context)
-                    .setTitle("Swipe")
-                    .setContentText("For Next or Previous Track")
+                    .setTitle("SWIPE")
+                    .setContentText("For Next or Previous Track\n(Load Songs First)")
                     .setTargetView(viewPager)
                     .setIndicatorHeight(100f)
                     .setContentTextSize(15)
                     .setTitleTextSize(17)
-
                     //.setContentTypeFace(Typeface)//optional
                     //.setTitleTypeFace()//optional
                     .setDismissType(DismissType.anywhere) //optional - default dismissible by TargetView
@@ -348,20 +306,10 @@ public class PlayerActivity extends AppCompatActivity{
         UniversalImageLoader.setBlurredImage(thumbnail,
                 blurred_iv,null,"",seekBar,mLyrics_btn,mGenius_btn);
 
-//        String song_name=mSongs_list.get(mCurrentIndex).replace(".mp3","");
-//        for(int i1=0;i1<list_of_objects_songs.size();i1++){
-//            if(list_of_objects_songs.get(i1).getSong_name().equals(song_name)){
-//                String thumbnail=list_of_objects_songs.get(i1).getThumbnail();
-//                UniversalImageLoader.setBlurredImage(thumbnail,
-//                        blurred_iv,null,"",seekBar,mLyrics_btn,mGenius_btn);
-//
-//
-//            }
-//        }
-
 
     }
     private void nextTrack(){
+
         mCurrentIndex++;
         mCurrentIndex %= mSongs_list.size();
         setSongName(mCurrentIndex);
@@ -370,9 +318,9 @@ public class PlayerActivity extends AppCompatActivity{
         setupLyrics(mCurrentIndex);
         //genius
         setupGenius(mCurrentIndex);
-        saveIntPref(getString(R.string.shared_current_index),mCurrentIndex,mContext);
+        mSharedPrefs.saveInt(getString(R.string.shared_current_index),mCurrentIndex);
         if(activityIdentifier==PLAYLIST_ACTIVITY_IDENTIFIER){
-            playlist_Activity.playlist_adapter.notifyDataSetChanged();
+            PlaylistActivity.playlist_adapter.notifyDataSetChanged();
         }else {
             Extras.adapter.notifyDataSetChanged();
         }
@@ -380,14 +328,15 @@ public class PlayerActivity extends AppCompatActivity{
 
     }
     private void previousTrack(){
+
         mCurrentIndex = mCurrentIndex > 0 ? mCurrentIndex - 1 : mSongs_list.size() - 1;
         setSongName(mCurrentIndex);
         playSong(mCurrentIndex,activityIdentifier);
         setupLyrics(mCurrentIndex);
         setupGenius(mCurrentIndex);
-        saveIntPref(getString(R.string.shared_current_index),mCurrentIndex,mContext);
+        mSharedPrefs.saveInt(getString(R.string.shared_current_index),mCurrentIndex);
         if(activityIdentifier==PLAYLIST_ACTIVITY_IDENTIFIER){
-            playlist_Activity.playlist_adapter.notifyDataSetChanged();
+            PlaylistActivity.playlist_adapter.notifyDataSetChanged();
         }else {
             Extras.adapter.notifyDataSetChanged();
         }
@@ -521,74 +470,7 @@ public class PlayerActivity extends AppCompatActivity{
     //-------------------------------AUDIO FOCUS CHANGE LISTENER----------------------/////
     //-------------------------------AUDIO FOCUS CHANGE LISTENER----------------------/////
 
-    public static void saveStringPref(String key,String name,Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(key, name);
-        editor.commit();
-    }
 
-    public static String getStringPref(String key,Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String myStringValue = prefs.getString(key,"defaultValue");
-        return myStringValue;
-    }
-    public static void saveBooleanPref(String key, boolean state, Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(key, state);
-        editor.commit();
-    }
-    public static boolean getBooleanPref(String key, Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean myBolValue = prefs.getBoolean(key,false);
-        return myBolValue;
-    }
-    public static void saveIntPref(String key, int index, Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt(key, index);
-        editor.commit();
-    }
-    public static int getIntPref(String key, Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        int myIntValue = prefs.getInt(key, -1);
-        return myIntValue;
-    }
-    public  static void saveArrayList(List<String> list, String key,Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = prefs.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(list);
-        editor.putString(key, json);
-        editor.apply();     // This line is IMPORTANT !!!
-    }
-
-
-    public static List<String> getArrayList(String key,Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        Gson gson = new Gson();
-        String json = prefs.getString(key, null);
-        Type type = new TypeToken<ArrayList<String>>() {}.getType();
-        return gson.fromJson(json, type);
-    }
-    public  static void saveArrayListObjects(List<Song> list, String key,Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = prefs.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(list);
-        editor.putString(key, json);
-        editor.apply();     // This line is IMPORTANT !!!
-    }
-
-
-    public static List<Song> getArrayListObjects(String key,Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        Gson gson = new Gson();
-        String json = prefs.getString(key, null);
-        Type type = new TypeToken<ArrayList<Song>>() {}.getType();
-        return gson.fromJson(json, type);
-    }
 
     private void getIncomingIntent() {
         existing_songs_ojects_list=new ArrayList<>();
@@ -610,30 +492,29 @@ public class PlayerActivity extends AppCompatActivity{
 
         String current_song_tapped=mSongs_list.get(mCurrentIndex);
 
-        if(mCurrentIndex == getIntPref(getString(R.string.shared_current_index),mContext)
-        && current_song_tapped.equals(getStringPref(getString(R.string.current_song_name),this))){
+        if(mCurrentIndex == mSharedPrefs.getInt(getString(R.string.shared_current_index),0)
+        && current_song_tapped.equals(mSharedPrefs.getString(getString(R.string.current_song_name),"null"))){
             Log.d(TAG, "getIncomingIntent: Same Song");
             resumeSong=true;
             if(mSongs_list.size() == 1){
-                saveStringPref(getString(R.string.current_song_name),current_song_tapped,this);
+                mSharedPrefs.saveString(getString(R.string.current_song_name),current_song_tapped);
             }
 
 
         }else {
-            saveIntPref(getString(R.string.shared_current_index),mCurrentIndex,mContext);
-            saveStringPref(getString(R.string.current_song_name),current_song_tapped,this);
+            mSharedPrefs.saveInt(getString(R.string.shared_current_index),mCurrentIndex);
+            mSharedPrefs.saveString(getString(R.string.current_song_name),current_song_tapped);
         }
 
 
         existing_songs_ojects_list=intent.getParcelableArrayListExtra(getString(R.string.existing_songs_object_list));
-        saveArrayListObjects(existing_songs_ojects_list,getString(R.string.existing_objects_list_prefs),mContext);
+        mSharedPrefs.saveObjectsList(existing_songs_ojects_list,getString(R.string.existing_objects_list_prefs));
         Log.d(TAG, "getIncomingIntent: existing_songs_ojects_list : "+existing_songs_ojects_list.size());
 
 
-        list_of_objects_songs=intent.getParcelableArrayListExtra(getString(R.string.all_songs_object_list));
 
         //saving
-        saveArrayList(mSongs_list,getString(R.string.shared_array_list_key),mContext);
+        mSharedPrefs.saveList(mSongs_list,getString(R.string.shared_array_list_key));
 
         //songTextView setup
         setSongName(mCurrentIndex);
@@ -710,7 +591,7 @@ public class PlayerActivity extends AppCompatActivity{
 
 
     public void openGeniusFragment(String genius_url) {
-        genius_fragment fragment=new genius_fragment();
+        GeniusFragment fragment=new GeniusFragment();
         Bundle args=new Bundle();
         args.putString(getString(R.string.genius_url),genius_url);
         fragment.setArguments(args);
@@ -726,7 +607,7 @@ public class PlayerActivity extends AppCompatActivity{
     public void openLyricsFragment(String lyrics_file_name) {
 
 
-        lyrics_frag fragment=new lyrics_frag();
+        LyricsFragment fragment=new LyricsFragment();
         Bundle args=new Bundle();
         args.putString(getString(R.string.lyrics_file_name),lyrics_file_name);
         fragment.setArguments(args);
@@ -808,13 +689,13 @@ public class PlayerActivity extends AppCompatActivity{
                                                 if(mRepeat.getBackground().getConstantState().equals(getResources()
                                                         .getDrawable(R.drawable.ic_repeat_one).getConstantState())) {
                                                     repeatOn = true;
-                                                    saveBooleanPref(getString(R.string.repeat_state), repeatOn, mContext);
+                                                    mSharedPrefs.saveBoolean(getString(R.string.repeat_state), repeatOn);
                                                 }else {
                                                     repeatOn = false;
-                                                    saveBooleanPref(getString(R.string.repeat_state), repeatOn, mContext);
+                                                    mSharedPrefs.saveBoolean(getString(R.string.repeat_state), repeatOn);
                                                 }
 
-                                                if(getBooleanPref(getString(R.string.repeat_state),mContext)){
+                                                if(mSharedPrefs.getBoolean(getString(R.string.repeat_state),false)){
                                                     //mRepeat.setBackgroundResource(R.drawable.ic_repeat_one);
                                                     setSongName(mCurrentIndex);
                                                     playSong(mCurrentIndex,activityIdentifier);
@@ -866,13 +747,13 @@ public class PlayerActivity extends AppCompatActivity{
                                             if(mRepeat.getBackground().getConstantState().equals(getResources()
                                                     .getDrawable(R.drawable.ic_repeat_one).getConstantState())) {
                                                 repeatOn = true;
-                                                saveBooleanPref(getString(R.string.repeat_state), repeatOn, mContext);
+                                                mSharedPrefs.saveBoolean(getString(R.string.repeat_state), repeatOn);
                                             }else {
                                                 repeatOn = false;
-                                                saveBooleanPref(getString(R.string.repeat_state), repeatOn, mContext);
+                                                mSharedPrefs.saveBoolean(getString(R.string.repeat_state), repeatOn);
                                             }
 
-                                            if(getBooleanPref(getString(R.string.repeat_state),mContext)){
+                                            if(mSharedPrefs.getBoolean(getString(R.string.repeat_state),false)){
                                                 //mRepeat.setBackgroundResource(R.drawable.ic_repeat_one);
                                                 setSongName(mCurrentIndex);
                                                 playSong(mCurrentIndex,activityIdentifier);
@@ -919,7 +800,7 @@ public class PlayerActivity extends AppCompatActivity{
 
     private void updateViewPager(){
         trigger_on_page=false;
-        saveBooleanPref(getString(R.string.trigger_on_page),trigger_on_page,mContext);
+        mSharedPrefs.saveBoolean(getString(R.string.trigger_on_page),trigger_on_page);
         ViewUtilities.waitForLayout(viewPager, new Runnable() {
             @Override
             public void run() {
@@ -1055,13 +936,13 @@ public class PlayerActivity extends AppCompatActivity{
 
                 mRepeat.setBackgroundResource(R.drawable.ic_repeat_not);
                 repeatOn=false;
-                saveBooleanPref(getString(R.string.repeat_state),repeatOn,mContext);
+                mSharedPrefs.saveBoolean(getString(R.string.repeat_state),repeatOn);
 
             }else{
                 if(mSongs_list.size() > 1){
                     mRepeat.setBackgroundResource(R.drawable.ic_repeat_one);
                     repeatOn=true;
-                    saveBooleanPref(getString(R.string.repeat_state),repeatOn,mContext);
+                    mSharedPrefs.saveBoolean(getString(R.string.repeat_state),repeatOn);
                 }
 
             }
@@ -1167,13 +1048,18 @@ public class PlayerActivity extends AppCompatActivity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        try {
-//            if(mNoisyRecieverOn){
-//                unregisterReceiver(mNoisyReceiver);
-//            }
-//        }catch (NullPointerException e){
-//            Log.d(TAG, "onDestroy: NullPointerException"+e.getMessage());
-//        }
+
+        try{
+            if(mNoisyRecieverOn){
+                unregisterReceiver(receiver);
+                Log.d(TAG, "run: Noisy Reciever Unregistered");
+            }
+        }catch (IllegalArgumentException e){
+            Log.d(TAG, "run: IllegalArgumentException"+e.getMessage());
+        }catch (NullPointerException e){
+            Log.d(TAG, "run: IllegalArgumentException"+e.getMessage());
+
+        }
 
         Log.d(TAG, "onDestroy: Reciever Unregistered");
     }
@@ -1212,8 +1098,8 @@ public class PlayerActivity extends AppCompatActivity{
     }
     public static String songNameNotification(int index,Context context){
 
-
-        List <String> songs=getArrayList(context.getString(R.string.shared_array_list_key),context);
+        SharedPreferences mSharedPrefs=new SharedPreferences(context);
+        List <String> songs= mSharedPrefs.getList(context.getString(R.string.shared_array_list_key));
         //int index=getIntPref(getString(R.string.current_index),this);
         String songname=songs.get(index);
         String songName_=songname.replace(".mp3","");
@@ -1226,7 +1112,8 @@ public class PlayerActivity extends AppCompatActivity{
         if(activityIdentifier == PLAYLIST_ACTIVITY_IDENTIFIER){
             return "NF";
         }else {
-            List<Song> songs=getArrayListObjects(context.getString(R.string.existing_objects_list_prefs),context);
+            SharedPreferences mSharedPrefs=new SharedPreferences(context);
+            List<Song> songs=mSharedPrefs.getObjectsList(context.getString(R.string.existing_objects_list_prefs));
             //int index=getIntPref(getString(R.string.current_index),this);
             String artist_name=songs.get(index).getArtist_name();
             return artist_name;
@@ -1234,46 +1121,13 @@ public class PlayerActivity extends AppCompatActivity{
         }
 
     }
-    public static void updateNotificationThumbnail(int index, final Context context) {
 
-        final String imageUrl=getArrayListObjects(context.getString(R.string.existing_objects_list_prefs),context).get(index).getThumbnail();
-
-        Needle.onBackgroundThread().execute(new Runnable() {
-            @Override
-            public void run() {
-                Bitmap myBitmap = null;
-                final WallpaperManager myWallpaperManager
-                        = WallpaperManager.getInstance(context);
-                try {
-
-                    URL url = new URL(imageUrl);
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    connection.setDoInput(true);
-                    connection.connect();
-                    InputStream input = connection.getInputStream();
-                    myBitmap = BitmapFactory.decodeStream(input);
-
-                    notificationBuilder.setLargeIcon(myBitmap);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-
-                }
-            }
-        });
-
-
-
-    }
     private void displayNotification(Context context) {
-
-
-
 
         Bitmap artwork = BitmapFactory.decodeResource(getResources(), R.drawable.notifi_thumbnail);
 
         if(activityIdentifier == PLAYLIST_ACTIVITY_IDENTIFIER){
-            clickIntent=new Intent(this,playlist_Activity.class);
+            clickIntent=new Intent(this, PlaylistActivity.class);
         }else {
             clickIntent=new Intent(this, Extras.class);
         }
@@ -1311,9 +1165,9 @@ public class PlayerActivity extends AppCompatActivity{
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_play)
                         .setContentTitle(songNameNotification
-                                (getIntPref(getString(R.string.shared_current_index),this),this))
+                                (mSharedPrefs.getInt(getString(R.string.shared_current_index),0),this))
                         .setLargeIcon(artwork)
-                        .setContentText(songSubtext(getIntPref(getString(R.string.shared_current_index),this),this))
+                        .setContentText(songSubtext(mSharedPrefs.getInt(getString(R.string.shared_current_index),0),this))
                         .setContentIntent(clickPendingIntent)
 
 
@@ -1332,7 +1186,7 @@ public class PlayerActivity extends AppCompatActivity{
                         .addAction(new NotificationCompat.Action(R.drawable.ic_cross,
                                 "StopAction", stopPendingIntent))
 
-                        .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
+                        .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                                 .setShowActionsInCompactView(0,1,3)
                                 .setMediaSession(mediaSessionCompat.getSessionToken()))
                         //.setSubText("Playing")
@@ -1353,10 +1207,15 @@ public class PlayerActivity extends AppCompatActivity{
 
     ////////------------------------------------INTENT SERVICE-------------------////////////
     ////////------------------------------------INTENT SERVICE-------------------////////////
+
+
+
     public static class NotificationActionService extends IntentService {
+
+
+
+
         private static final String TAG = "NotificationActionServi";
-
-
         public NotificationActionService() {
             super(NotificationActionService.class.getSimpleName());
             Log.d(TAG, "NotificationActionService: IntentService ");
@@ -1366,8 +1225,15 @@ public class PlayerActivity extends AppCompatActivity{
         @Override
         public void onCreate() {
             super.onCreate();
+            mSharedPrefs=new SharedPreferences(NotificationActionService.this);
+            mPlayerActivity=new PlayerActivity();
             Log.d(TAG, "onCreate: IntentService");
+
         }
+
+
+        private SharedPreferences mSharedPrefs;
+        private PlayerActivity mPlayerActivity;
 
         List<String> songs_list=new ArrayList<>();
         int index_current;
@@ -1439,7 +1305,7 @@ public class PlayerActivity extends AppCompatActivity{
                             @Override
                             public void onCompletion(MediaPlayer mp) {
 
-                                if(getBooleanPref(getString(R.string.repeat_state),NotificationActionService.this)){
+                                if(mSharedPrefs.getBoolean(getString(R.string.repeat_state),false)){
                                     //mRepeat.setBackgroundResource(R.drawable.ic_repeat_one);
                                     int index =getIndex_current();
                                     //updateNotification(index);
@@ -1449,10 +1315,9 @@ public class PlayerActivity extends AppCompatActivity{
 
                                     Log.d(TAG, "onCompletion: Repeats Off - Moving On");
                                     //mRepeat.setBackgroundResource(R.drawable.ic_repeat_not);
-                                    setIndex_current(getIntPref(getString(R.string.shared_current_index),
-                                            NotificationActionService.this));
-                                    setSongs_list(getArrayList(getString(R.string.shared_array_list_key),
-                                            NotificationActionService.this));
+                                    setIndex_current(mSharedPrefs.getInt(getString(R.string.shared_current_index),
+                                            0));
+                                    setSongs_list(mSharedPrefs.getList(getString(R.string.shared_array_list_key)));
                                     int index=getIndex_current();
                                     index++;
                                     index %= getSongs_list().size();
@@ -1461,15 +1326,14 @@ public class PlayerActivity extends AppCompatActivity{
                                     playSongNotification(index);
 
                                     Log.d(TAG, "ACTION_NEXT: incremented index : "+index);
-                                    saveIntPref(getString(R.string.shared_current_index),index,
-                                            NotificationActionService.this);
+                                    mSharedPrefs.saveInt(getString(R.string.shared_current_index),index);
 
 
 
                                     try{
-                                        if(playlist_Activity.playlist_adapter != null || Extras.adapter != null){
+                                        if(PlaylistActivity.playlist_adapter != null || Extras.adapter != null){
                                             if(activityIdentifier==PLAYLIST_ACTIVITY_IDENTIFIER){
-                                                playlist_Activity.playlist_adapter.notifyDataSetChanged();
+                                                PlaylistActivity.playlist_adapter.notifyDataSetChanged();
                                             }else {
                                                 Extras.adapter.notifyDataSetChanged();
                                             }
@@ -1529,19 +1393,19 @@ public class PlayerActivity extends AppCompatActivity{
 
             if(intent.getAction()==ACTION_NEXT){
 
-                setIndex_current(getIntPref(getString(R.string.shared_current_index),this));
-                setSongs_list(getArrayList(getString(R.string.shared_array_list_key),this));
+                setIndex_current(mSharedPrefs.getInt(getString(R.string.shared_current_index),0));
+                setSongs_list(mSharedPrefs.getList(getString(R.string.shared_array_list_key)));
                 Log.d(TAG, "onStartCommand: NEXT");
             }
             if(intent.getAction()==ACTION_PREV){
                 Log.d(TAG, "onStartCommand: PAUSE");
-                setIndex_current(getIntPref(getString(R.string.shared_current_index),this));
-                setSongs_list(getArrayList(getString(R.string.shared_array_list_key),this));
+                setIndex_current(mSharedPrefs.getInt(getString(R.string.shared_current_index),0));
+                setSongs_list(mSharedPrefs.getList(getString(R.string.shared_array_list_key)));
             }
             if(intent.getAction()==ACTION_PLAY){
                 Log.d(TAG, "onStartCommand: PLAY");
-                setIndex_current(getIntPref(getString(R.string.shared_current_index),this));
-                setSongs_list(getArrayList(getString(R.string.shared_array_list_key),this));
+                setIndex_current(mSharedPrefs.getInt(getString(R.string.shared_current_index),0));
+                setSongs_list(mSharedPrefs.getList(getString(R.string.shared_array_list_key)));
             }
 
             return super.onStartCommand(intent, flags, startId);
@@ -1693,7 +1557,7 @@ public class PlayerActivity extends AppCompatActivity{
                                 playSongNotification(index);
 
                                 Log.d(TAG, "ACTION_NEXT: incremented index : "+index);
-                                saveIntPref(getString(R.string.shared_current_index),index, NotificationActionService.this);
+                                mSharedPrefs.saveInt(getString(R.string.shared_current_index),index);
                             }else {
                                 Toast.makeText(NotificationActionService.this, "App is Terminated", Toast.LENGTH_LONG).show();
                                 stopNotification();
@@ -1729,7 +1593,7 @@ public class PlayerActivity extends AppCompatActivity{
                                 playSongNotification(index);
                                 Log.d(TAG, "ACTION_NEXT: decremented index : "+index);
                                 updateNotification(index);
-                                saveIntPref(getString(R.string.shared_current_index),index, NotificationActionService.this);
+                                mSharedPrefs.saveInt(getString(R.string.shared_current_index),index);
                             }else {
                                 Toast.makeText(NotificationActionService.this, "App is Terminated", Toast.LENGTH_LONG).show();
                                 stopNotification();
@@ -1752,7 +1616,26 @@ public class PlayerActivity extends AppCompatActivity{
 
 
         }
+
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            try{
+                if(mNoisyRecieverOn){
+                    unregisterReceiver(receiver);
+                    Log.d(TAG, "run: Noisy Reciever Unregistered");
+                }
+            }catch (IllegalArgumentException e){
+                Log.d(TAG, "run: IllegalArgumentException"+e.getMessage());
+            }catch (NullPointerException e){
+                Log.d(TAG, "run: IllegalArgumentException"+e.getMessage());
+
+            }
+        }
     }
+
+
 
     ////////------------------------------------INTENT SERVICE-------------------////////////
     ////////------------------------------------INTENT SERVICE-------------------////////////

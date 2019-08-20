@@ -63,7 +63,6 @@
         <ListView
             android:id="@+id/recyclerviewextra"
             android:layout_width="match_parent"
-
             android:layout_height="match_parent"
             android:layout_marginStart="25dp"
             android:layout_marginTop="90dp"
@@ -71,6 +70,18 @@
             android:layout_marginBottom="70dp"
             android:fadingEdgeLength="100dp"
             android:requiresFadingEdge="vertical" />
+
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:id="@+id/floating_button"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_floating_play"
+            android:backgroundTint="#3D3B3B"
+            />
+
 
     </RelativeLayout>
 

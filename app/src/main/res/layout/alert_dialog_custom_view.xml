@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="10dp"
+
+    >
+
+
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/first_tv"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:text="Are You Sure?"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/second_tv"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_below="@id/first_tv"
+                android:layout_marginTop="10dp"
+                android:text="Track Will Be unloaded"
+                android:textStyle="bold"
+
+
+                />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/confirm_dialog_card"
+
+                android:layout_width="wrap_content"
+
+                android:layout_height="wrap_content"
+
+                android:layout_below="@id/second_tv"
+                android:layout_marginTop="18dp"
+                android:layout_alignParentRight="true"
+                android:layout_marginStart="20dp"
+
+
+                app:cardCornerRadius="4dp">
+
+                <Button
+                    android:id="@+id/confirm_dialog_btn"
+                    android:layout_width="60dp"
+                    android:layout_height="40dp"
+                    android:background="@null"
+                    android:text="Confirm"
+                    android:textSize="10sp"
+                    />
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="18dp"
+                android:layout_below="@id/second_tv"
+                app:cardCornerRadius="4dp"
+                android:layout_toLeftOf="@id/confirm_dialog_card"
+                >
+
+                <Button
+                    android:id="@+id/cancel_dialog_btn"
+                    android:layout_width="60dp"
+                    android:layout_height="40dp"
+                    android:background="@null"
+                    android:text="Cancel"
+                    android:textSize="10sp" />
+
+            </androidx.cardview.widget.CardView>
+
+
+        </RelativeLayout>
+
+
+
+
+</androidx.cardview.widget.CardView>
