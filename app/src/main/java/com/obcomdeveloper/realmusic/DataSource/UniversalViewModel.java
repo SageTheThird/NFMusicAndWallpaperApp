@@ -23,8 +23,8 @@ public class UniversalViewModel {
         return mRepo.getSongsPlaylist(page);
     }
 
-    public Maybe<List<Song>> getSongsExtrasList(){
-        return mRepo.getSongExtras();
+    public Maybe<List<Song>> getSongsExtrasList(int page){
+        return mRepo.getSongExtras(page);
     }
 
     public Maybe<List<Wallpaper>> getThumbsList(int page){

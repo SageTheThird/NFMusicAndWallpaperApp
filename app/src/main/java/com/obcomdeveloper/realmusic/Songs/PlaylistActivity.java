@@ -15,18 +15,19 @@ import android.os.Handler;
 import android.os.Parcelable;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.textservice.SpellCheckerInfo;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +45,7 @@ import com.obcomdeveloper.realmusic.Utils.Ads;
 
 import com.obcomdeveloper.realmusic.Utils.DownloadFiles;
 import com.obcomdeveloper.realmusic.Utils.UIUpdater;
+import com.obcomdeveloper.realmusic.room.DatabaseTransactions;
 import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.util.ArrayList;
@@ -58,18 +60,17 @@ import io.reactivex.MaybeObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.processors.PublishProcessor;
 import io.reactivex.schedulers.Schedulers;
 
 
-public class PlaylistActivity extends AppCompatActivity {
+public class PlaylistActivity extends AppCompatActivity implements SongRecyclerView.PlaylistClickListener {
     private static final String TAG = "PlaylistActivity";
 
     public static final int AD_TIME_INTERVAL = 90 * 1000;
     public static final int RANDOM_QUOTE_INTERVAL = 20 * 1000;
 
     public static final int PLAYLIST_IDENTIFIER = 20;
-    public static ListView listView;
+    public RecyclerView recyclerView;
     static AlertDialog dialog;
     private ImageView playlist_background;
     private ConnectivityManager connectivityManager;
@@ -84,7 +85,7 @@ public class PlaylistActivity extends AppCompatActivity {
 
     public static SongRecyclerView playlist_adapter;
 
-    private List<Song> songs_list;
+    private List<Song> songs_list_forclick;
 
     private EditText searchView;
 
@@ -123,11 +124,16 @@ public class PlaylistActivity extends AppCompatActivity {
 
     private ProgressBar loadingProgress;
 
+    private DatabaseTransactions mDatabaseTransactions;
+
     //Pagination
-    private boolean loading = false;
+
     private int pageNumber = 1;
+    private boolean loading = false;
     private final int VISIBLE_THRESHOLD = 1;
     private int lastVisibleItem;
+    private int totalItemCount;
+    private LinearLayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,16 +144,17 @@ public class PlaylistActivity extends AppCompatActivity {
         quotes_Ref = FirebaseDatabase.getInstance().getReference().child(getString(R.string.db_random_quotes)).child("array");
 
         searchView = findViewById(R.id.searchEdit);
-        listView = findViewById(R.id.listViewPlaylist);
+        recyclerView = findViewById(R.id.listViewPlaylist);
         patentTextView = findViewById(R.id.patent_playlist);
         random_quotes_tv = findViewById(R.id.random_quotes_playlist);
         adView = findViewById(R.id.adView);
         interstitialAd = new InterstitialAd(this);
-        songs_list = new ArrayList<>();
+        songs_list_forclick = new ArrayList<>();
         random_quotes_list = new ArrayList<>();
         floatingActionButton = findViewById(R.id.floating_button);
         loadingProgress=findViewById(R.id.pagination_progressBar);
         floatingActionButton.setOnClickListener(FloatingButtonClickListener);
+        layoutManager=new LinearLayoutManager(this);
 
         patentTextView.setHorizontallyScrolling(true);
         patentTextView.setSelected(true);
@@ -163,12 +170,21 @@ public class PlaylistActivity extends AppCompatActivity {
         getFilesListFromFolder();
         layoutImageLoading();
         internetConnectivity();
-        setupListView();
+
+        if(networkInfo == null || !networkInfo.isConnected()){
+            //loadFromDatabase();
+        }else {
+            fetchDataandSet();
+        }
+
         searchSetup();
 
 
+        playlist_adapter = new SongRecyclerView(mContext, R.layout.item,PlaylistActivity.this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(playlist_adapter);
         //listeners
-        listView.setOnItemClickListener(SongClickListener);
+        //recyclerView.setOnItemClickListener(SongClickListener);
 
 
         //ads
@@ -184,7 +200,6 @@ public class PlaylistActivity extends AppCompatActivity {
 
         mAdRunnable.run();
         //
-
 
     }
 
@@ -250,76 +265,6 @@ public class PlaylistActivity extends AppCompatActivity {
             }
         });
 
-        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
-                lastVisibleItem = view.getLastVisiblePosition();
-                if (!loading
-                        && totalItemCount <= (lastVisibleItem + VISIBLE_THRESHOLD)) {
-
-                    if(lastVisibleItem <= totalItemCount){
-                        loadingProgress.setVisibility(View.VISIBLE);
-                    }
-
-
-                    pageNumber++;
-
-                    mUniversalViewModel.getSongsPlaylist(pageNumber).
-                            subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new MaybeObserver<List<Song>>() {
-                                @Override
-                                public void onSubscribe(Disposable d) {
-                                    mDisposibles.add(d);
-                                }
-
-                                @Override
-                                public void onSuccess(List<Song> list) {
-                                    //playlist_adapter.clearList();
-                                    if(playlist_adapter!=null){
-
-                                        //playlist_adapter.clearList();
-
-                                        if(songs_list != null){
-
-
-
-                                        }
-                                        Collections.reverse(list);
-                                        playlist_adapter.removeLastItem();
-                                        playlist_adapter.addItems(list);
-                                        if(loadingProgress.getVisibility() == View.VISIBLE){
-                                            loadingProgress.setVisibility(View.INVISIBLE);
-                                        }
-
-                                        //playlist_adapter.notifyDataSetChanged();
-                                        loading = false;
-                                    }
-
-                                }
-
-                                @Override
-                                public void onError(Throwable e) {
-
-                                }
-
-                                @Override
-                                public void onComplete() {
-
-                                }
-                            });
-                    //paginator.onNext(pageNumber);
-                    loading = true;
-
-                }
-            }
-        });
 
 
     }
@@ -481,11 +426,11 @@ public class PlaylistActivity extends AppCompatActivity {
 
             String temp_name=temp_list.get(j);
 
-            for(int k=0;k<songs_list.size();k++){
+            for(int k=0;k<songs_list_forclick.size();k++){
 
-                if(songs_list.get(k).getSong_name().equals(temp_name)){
+                if(songs_list_forclick.get(k).getSong_name().equals(temp_name)){
 
-                    existing_songs_models_list.add(songs_list.get(k));
+                    existing_songs_models_list.add(songs_list_forclick.get(k));
 
                 }
             }
@@ -495,77 +440,6 @@ public class PlaylistActivity extends AppCompatActivity {
 
 
     }
-
-    AdapterView.OnItemClickListener SongClickListener=new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-
-
-            setup_existing_ojects_list();
-
-            String download_url=songs_list.get(position).getDownload_url();
-            String song_name = songs_list.get(position).getSong_name();
-            String songFull = song_name + getString(R.string.mp3_extenstion);
-            String lyrics_url=songs_list.get(position).getLyrics_url();
-
-
-            filesNameList=mSharedPrefs.getList(getString(R.string.shared_array_list_key));
-
-
-            //if file is there in the fileNameList i-e present in the folder it will play it
-            if (filesNameList.contains(songFull)) {
-
-                int index=filesNameList.indexOf(songFull);
-
-                startActivity(new Intent(mContext, PlayerActivity.class)
-                        .putExtra(getString(R.string.current_index), index)
-                        .putStringArrayListExtra(getString(R.string.folder_songs_list), (ArrayList<String>) filesNameList)
-                        .putParcelableArrayListExtra(getString(R.string.existing_songs_object_list), (ArrayList<? extends Parcelable>) existing_songs_models_list)
-                        .putExtra(getString(R.string.coming_from_playlist_activity)
-                                , getString(R.string.coming_from_playlist_activity))
-                        .putExtra(getString(R.string.coming_from_playlist_activity_int)
-                                ,PLAYLIST_IDENTIFIER)
-                );
-
-
-                Animatoo.animateZoom(mContext);
-
-
-            }
-            //if not downloadSong it
-            else {
-
-                if ((networkInfo == null || !networkInfo.isConnected())) {
-                    showToast("Please Check Your Internet Connection!");
-                    return;
-                } else {
-
-                    //dialog for when downloading
-                    dialog = new SpotsDialog.Builder()
-                            .setContext(mContext)
-                            .setTheme(R.style.Custom)
-                            .setCancelable(false)
-                            .build();
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ads.loadinterstitial(interstitialAd);
-                        }
-                    });
-
-
-                    //downloadSong file
-                    downloadSong(song_name, track_directory,download_url);
-                    if(lyrics_url != null){
-                        download_lyrics_file(song_name,lyrics_directory,lyrics_url);
-
-                    }
-                }
-            }
-        }
-    };
 
 
     private void directorySetup(){
@@ -694,12 +568,11 @@ public class PlaylistActivity extends AppCompatActivity {
     }
 
 
-    public  void setupListView() {
+    public  void fetchDataandSet() {
 
         showProgressDialog();
 
         Maybe<List<Song>> playlistObservable= mUniversalViewModel.getSongsPlaylist(pageNumber);
-
 
         playlistObservable.
                 subscribe(new MaybeObserver<List<Song>>() {
@@ -713,20 +586,12 @@ public class PlaylistActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(List<Song> songs) {
 
-                        Log.d(TAG, "onSuccess: "+songs.size());
-
                         Collections.reverse(songs);
 
-                        for(int i=0;i<songs.size();i++){
-                            Log.d(TAG, "onSuccess: SongsId's  :   "+songs.get(i).getId());
-                            String id=songs.get(i).getId();
-                            Log.d(TAG, "onSuccess: "+id);
-                        }
+                        songs_list_forclick.addAll(songs);
 
-                        playlist_adapter = new SongRecyclerView(mContext, R.layout.item,songs);
-                        listView.setAdapter(playlist_adapter);
-                        //playlist_adapter.addItems(songs);
-                        //playlist_adapter.notifyDataSetChanged();
+                        playlist_adapter.addItems(songs);
+
                         dialog_loading.dismiss();
                     }
 
@@ -742,6 +607,105 @@ public class PlaylistActivity extends AppCompatActivity {
 
                     }
                 });
+
+
+        recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                totalItemCount= layoutManager.getItemCount();
+                lastVisibleItem= layoutManager.findLastVisibleItemPosition();
+
+                if (!loading && totalItemCount <= (lastVisibleItem + VISIBLE_THRESHOLD)) {
+
+                    loading = true;
+                    pageNumber++;
+
+
+                    if( pageNumber <= mSharedPrefs.getInt("estimatePages",0) + 1){
+
+                        loadingProgress.setVisibility(View.VISIBLE);
+
+                        mUniversalViewModel.getSongsPlaylist(pageNumber).
+                                subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new MaybeObserver<List<Song>>() {
+                                    @Override
+                                    public void onSubscribe(Disposable d) {
+
+                                        mDisposibles.add(d);
+
+                                    }
+
+                                    @Override
+                                    public void onSuccess(List<Song> list) {
+                                        //playlist_adapter.clearList();
+                                        Collections.reverse(list);
+                                        int estimatePages=mSharedPrefs.getInt("estimatePages",0);
+
+                                        List<Song> sublist=new ArrayList<>();
+
+                                        if(pageNumber <= estimatePages){
+
+                                            int tempPage=pageNumber -1;
+                                            sublist=list.subList( (tempPage * 9) +tempPage,list.size());
+
+                                        }else {
+                                            sublist=list;
+                                        }
+
+
+
+
+                                        //list.remove(6);
+                                        if(playlist_adapter!=null){
+
+                                            //playlist_adapter.clearList();
+
+                                            for(int i=0;i<sublist.size();i++){
+                                                Log.d(TAG, "onSuccess: SongId's : "+sublist.get(i).getId() + "  "+sublist.get(i).getSong_name());
+                                            }
+                                            Log.d(TAG, "onSuccess: ----------------------------------------------");
+
+                                            songs_list_forclick.addAll(sublist);
+
+
+                                            //playlist_adapter.removeLastItem();
+                                            playlist_adapter.addItems(sublist);
+                                            if(loadingProgress.getVisibility() == View.VISIBLE){
+                                                loadingProgress.setVisibility(View.INVISIBLE);
+                                            }
+
+                                            //playlist_adapter.notifyDataSetChanged();
+                                            loading = false;
+                                        }
+
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable e) {
+
+                                    }
+
+                                    @Override
+                                    public void onComplete() {
+
+                                    }
+                                });
+                    }
+
+
+                    //paginator.onNext(pageNumber);
+
+
+                }
+            }
+        });
 
 
 
@@ -803,6 +767,73 @@ public class PlaylistActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onItemClickListener(Song song, int position, View view) {
+
+        setup_existing_ojects_list();
+
+        String download_url=songs_list_forclick.get(position).getDownload_url();
+        String song_name = songs_list_forclick.get(position).getSong_name();
+        String songFull = song_name + getString(R.string.mp3_extenstion);
+        String lyrics_url=songs_list_forclick.get(position).getLyrics_url();
+
+        
+
+        filesNameList=mSharedPrefs.getList(getString(R.string.shared_array_list_key));
+
+
+        //if file is there in the fileNameList i-e present in the folder it will play it
+        if (filesNameList.contains(songFull)) {
+
+            int index=filesNameList.indexOf(songFull);
+
+            startActivity(new Intent(mContext, PlayerActivity.class)
+                    .putExtra(getString(R.string.current_index), index)
+                    .putStringArrayListExtra(getString(R.string.folder_songs_list), (ArrayList<String>) filesNameList)
+                    .putParcelableArrayListExtra(getString(R.string.existing_songs_object_list), (ArrayList<? extends Parcelable>) existing_songs_models_list)
+                    .putExtra(getString(R.string.coming_from_playlist_activity)
+                            , getString(R.string.coming_from_playlist_activity))
+                    .putExtra(getString(R.string.coming_from_playlist_activity_int)
+                            ,PLAYLIST_IDENTIFIER)
+            );
+
+
+            Animatoo.animateZoom(mContext);
+
+
+        }
+        //if not downloadSong it
+        else {
+
+            if ((networkInfo == null || !networkInfo.isConnected())) {
+                showToast("Please Check Your Internet Connection!");
+                return;
+            } else {
+
+                //dialog for when downloading
+                dialog = new SpotsDialog.Builder()
+                        .setContext(mContext)
+                        .setTheme(R.style.Custom)
+                        .setCancelable(false)
+                        .build();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ads.loadinterstitial(interstitialAd);
+                    }
+                });
+
+
+                //downloadSong file
+                downloadSong(song_name, track_directory,download_url);
+                if(lyrics_url != null){
+                    download_lyrics_file(song_name,lyrics_directory,lyrics_url);
+
+                }
+            }
+        }
+    }
 }
 
 

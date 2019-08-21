@@ -60,7 +60,7 @@
 
 
 
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerviewextra"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -84,6 +84,16 @@
 
 
     </RelativeLayout>
+
+    <ProgressBar
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_above="@id/adView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:id="@+id/pagination_progressBar"
+        android:visibility="invisible"/>
+
 
     <com.google.android.gms.ads.AdView
         xmlns:ads="http://schemas.android.com/apk/res-auto"

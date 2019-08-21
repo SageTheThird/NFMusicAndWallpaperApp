@@ -13,16 +13,20 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.blogspot.atifsoftwares.animatoolib.Animatoo;
@@ -32,7 +36,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.obcomdeveloper.realmusic.DataSource.UniversalViewModel;
 import com.obcomdeveloper.realmusic.Models.Song;
 import com.obcomdeveloper.realmusic.Adapters.ExtraListAdapter;
-import com.obcomdeveloper.realmusic.Models.Wallpaper;
 import com.obcomdeveloper.realmusic.R;
 import com.obcomdeveloper.realmusic.Songs.PlayerActivity;
 import com.obcomdeveloper.realmusic.Utils.Ads;
@@ -48,22 +51,18 @@ import java.util.Locale;
 import dmax.dialog.SpotsDialog;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeObserver;
-import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 
-public class Extras extends AppCompatActivity {
+public class Extras extends AppCompatActivity implements ExtraListAdapter.ExtrasItemClickListener {
     private static final String TAG = "Extras";
     public static final int EXTRA_IDENTIFIER=10;
     static AlertDialog dialog;
-    private List<Song> songs_list;
-    private ListView listView;
+    private List<Song> songs_list_for_click;
+    private RecyclerView recyclerView;
     private ImageView mBackground;
     private Context mContext = Extras.this;
     private String directory,lyrics_directory;
@@ -97,6 +96,13 @@ public class Extras extends AppCompatActivity {
     private FloatingActionButton floatingActionButton;
     private CompositeDisposable mDisposibles=new CompositeDisposable();
     private int pageNumber=1;
+    private boolean loading = false;
+    private final int VISIBLE_THRESHOLD = 1;
+    private int lastVisibleItem;
+    private int totalItemCount;
+    private ProgressBar loadingProgress;
+
+    private LinearLayoutManager layoutManager;
 
 
     @Override
@@ -105,13 +111,15 @@ public class Extras extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.activity_extras);
-        listView = findViewById(R.id.recyclerviewextra);
+        recyclerView = findViewById(R.id.recyclerviewextra);
         searchText=findViewById(R.id.searchExtra);
         patentTextView =findViewById(R.id.patent_extra);
         mUniversalViewModel =new UniversalViewModel(Extras.this);
         mSharedPrefs=new SharedPreferences(Extras.this);
         floatingActionButton=findViewById(R.id.floating_button);
         floatingActionButton.setOnClickListener(FloatingButtonClickListener);
+        layoutManager=new LinearLayoutManager(this);
+        loadingProgress=findViewById(R.id.pagination_progressBar);
 
 
         patentTextView.setHorizontallyScrolling(true);
@@ -122,19 +130,24 @@ public class Extras extends AppCompatActivity {
 
 
 
-        songs_list = new ArrayList<>();
+        songs_list_for_click = new ArrayList<>();
+
+
+        adapter = new ExtraListAdapter(mContext, R.layout.item_extra, Extras.this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(adapter);
 
         //methods
         directorySetup();
         getFilesListFromFolder();
         layoutImageLoading();
         internetConnectivity();
-        setupListView();
+        fetchDataandSet();
         setupSearch();
 
 
         //Listeners
-        listView.setOnItemClickListener(SongClickListener);
+
 
         //ads
         interstitialAd=new InterstitialAd(this);
@@ -287,7 +300,7 @@ public class Extras extends AppCompatActivity {
     private void folder_files_to_temp_list(){
         for(int i=0;i<filesNameList.size();i++){
             String name= filesNameList.get(i).replace(".mp3","");
-            Log.d(TAG, "getFilesListFromFolder: temp_name : "+name+ "songs_list_size : "+songs_list.size());
+            Log.d(TAG, "getFilesListFromFolder: temp_name : "+name+ "songs_list_size : "+songs_list_for_click.size());
             temp_list.add(name);
         }
         Log.d(TAG, "getFilesListFromFolder: temp_list : "+temp_list.size());
@@ -390,134 +403,34 @@ public class Extras extends AppCompatActivity {
 
     }
 
-    public void setPageNumber(int pageNumber){
-        pageNumber=pageNumber;
-    }
-
     private void showProgressDialog(){
         dialog_loading = new ProgressDialog(this,R.style.MyAlertDialogStyle);
         dialog_loading.setTitle("Loading..");
         dialog_loading.setCanceledOnTouchOutside(false);
         dialog_loading.show();
     }
-    private void setupListView() {
+    private void fetchDataandSet() {
 
         showProgressDialog();
-        //mUniversalViewModel.setPageNumber(3);
-        Maybe<List<Song>> extrasObservable= mUniversalViewModel.getSongsExtrasList();
 
+        Maybe<List<Song>> extrasObservable= mUniversalViewModel.getSongsExtrasList(pageNumber);
 
-//        Observable<List<Wallpaper>> extraRealObservable=extrasObservable.
-//                flatMapObservable(new Function<List<Wallpaper>, ObservableSource<Wallpaper>>() {
-//                    @Override
-//                    public ObservableSource<Wallpaper> apply(List<Wallpaper> wallpapers) throws Exception {
-//                        List<Wallpaper> items = new ArrayList<>();
-//                        List<Observable> list=new ArrayList<>();
-//
-//                        for (int i = 0; i < pageNumber * 10; i++) {
-//                            items.add(wallpapers.get(i));
-//
-//
-//                            Observable<Wallpaper> maybeSource = Observable.just(items.get(i)).subscribeOn(Schedulers.io())
-//                                    .observeOn(AndroidSchedulers.mainThread());
-//                            list.add(maybeSource);
-//                        }
-//
-//
-//                        return list;
-//                    }
-//        }).subscribeOn(Schedulers.io())
-//        .observeOn(AndroidSchedulers.mainThread())
-//                ;
-//
-//        extraRealObservable.buffer(34).subscribe(new Observer<List<List<Wallpaper>>>() {
-//                                                     @Override
-//                                                     public void onSubscribe(Disposable d) {
-//
-//                                                     }
-//
-//                                                     @Override
-//                                                     public void onNext(List<List<Wallpaper>> lists) {
-//
-//                                                         Log.d(TAG, "onNext: "+lists.size());
-//                                                     }
-//
-//                                                     @Override
-//                                                     public void onError(Throwable e) {
-//
-//                                                         Log.d(TAG, "onError: ");
-//                                                     }
-//
-//                                                     @Override
-//                                                     public void onComplete() {
-//
-//                                                         Log.d(TAG, "onComplete: ");
-//                                                     }
-//                                                 });
-
-//
-//
-//        extrasObservable.concatMap(new Function<List<Wallpaper>, Maybe<List<Wallpaper>>>() {
-//            @Override
-//            public Maybe<List<Wallpaper>> apply(List<Wallpaper> wallpapers) throws Exception {
-//
-//                List<Wallpaper> items=new ArrayList<>();
-//
-//                for(int i=0;i< pageNumber *10;i++){
-//                    items.add(wallpapers.get(i));
-//                }
-//
-//                Maybe<List<Wallpaper>> maybeSource= Maybe.just(items).subscribeOn(Schedulers.io())
-//                        .observeOn(AndroidSchedulers.mainThread());
-//
-//
-//                return maybeSource;
-//            }
-//        }).subscribe(new MaybeObserver<List<Wallpaper>>() {
-//                         @Override
-//                         public void onSubscribe(Disposable d) {
-//
-//                         }
-//
-//                         @Override
-//                         public void onSuccess(List<Wallpaper> wallpapers) {
-//
-//                             Log.d(TAG, "onSuccess:  "+wallpapers.size());
-//
-//
-//                         }
-//
-//                         @Override
-//                         public void onError(Throwable e) {
-//
-//                         }
-//
-//                         @Override
-//                         public void onComplete() {
-//
-//                         }
-//                     });
-
-                setPageNumber(4);
-
-
-        extrasObservable.
-                subscribe(new MaybeObserver<List<Song>>() {
+        extrasObservable
+                .subscribe(new MaybeObserver<List<Song>>() {
                     @Override
                     public void onSubscribe(Disposable d) {
-
                         mDisposibles.add(d);
-
                     }
 
                     @Override
-                    public void onSuccess(List<Song> songs) {
+                    public void onSuccess(List<Song> list) {
 
-                        Log.d(TAG, "onSuccess: size " +songs.size());
-                        songs_list=songs;
-                        Collections.reverse(songs_list);
-                        adapter = new ExtraListAdapter(mContext, R.layout.item_extra, songs_list);
-                        listView.setAdapter(adapter);
+                        Collections.reverse(list);
+
+                        songs_list_for_click.addAll(list);
+
+                        adapter.addItems(list);
+
                         dialog_loading.dismiss();
                     }
 
@@ -529,19 +442,102 @@ public class Extras extends AppCompatActivity {
                     @Override
                     public void onComplete() {
 
-
-
                     }
                 });
+
+        recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                totalItemCount= layoutManager.getItemCount();
+                lastVisibleItem= layoutManager.findLastVisibleItemPosition();
+
+                if (!loading && totalItemCount <= (lastVisibleItem + VISIBLE_THRESHOLD)) {
+
+                    loading = true;
+                    pageNumber++;
+
+                    int estimatePages=mSharedPrefs.getInt("estimatePages",0) ;
+                    Log.d(TAG, "onScrolled: estimate Pages : "+estimatePages);
+
+                    if( pageNumber <= estimatePages + 1 &&  estimatePages >= 2){
+
+                        loadingProgress.setVisibility(View.VISIBLE);
+
+                        mUniversalViewModel.getSongsExtrasList(pageNumber).
+                                subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new MaybeObserver<List<Song>>() {
+                                    @Override
+                                    public void onSubscribe(Disposable d) {
+
+                                        mDisposibles.add(d);
+
+                                    }
+
+                                    @Override
+                                    public void onSuccess(List<Song> list) {
+                                        //playlist_adapter.clearList();
+                                        Collections.reverse(list);
+                                        int estimatePages=mSharedPrefs.getInt("estimatePages",0);
+
+                                        List<Song> sublist=new ArrayList<>();
+
+                                        if(pageNumber <= estimatePages){
+
+                                            int tempPage=pageNumber -1;
+                                            sublist=list.subList( (tempPage * 9) +tempPage,list.size());
+
+                                        }else {
+                                            sublist=list;
+                                        }
+
+                                        if(adapter!=null){
+
+                                            songs_list_for_click.addAll(sublist);
+
+                                            adapter.addItems(sublist);
+                                            if(loadingProgress.getVisibility() == View.VISIBLE){
+                                                loadingProgress.setVisibility(View.INVISIBLE);
+                                            }
+
+                                            //playlist_adapter.notifyDataSetChanged();
+                                            loading = false;
+                                        }
+
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable e) {
+
+                                    }
+
+                                    @Override
+                                    public void onComplete() {
+
+                                    }
+                                });
+                    }
+
+
+                }
+            }
+        });
 
     }
 
     private void setup_existing_ojects_list(){
         for(int j=0;j<temp_list.size();j++){
             String temp_name=temp_list.get(j);
-            for(int k=0;k<songs_list.size();k++){
-                if(songs_list.get(k).getSong_name().equals(temp_name)){
-                    existing_songs_models_list.add(songs_list.get(k));
+            for(int k=0;k<songs_list_for_click.size();k++){
+                if(songs_list_for_click.get(k).getSong_name().equals(temp_name)){
+                    existing_songs_models_list.add(songs_list_for_click.get(k));
                 }
             }
         }
@@ -550,71 +546,67 @@ public class Extras extends AppCompatActivity {
 
     //////-------------------------------LISTENERS------------------------/////////////
 
-    AdapterView.OnItemClickListener SongClickListener=new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    @Override
+    public void onItemClickListener(Song song, int position, View view) {
+        setup_existing_ojects_list();
 
-            setup_existing_ojects_list();
-
-            String download_url=songs_list.get(position).getDownload_url();
-            String song_name = songs_list.get(position).getSong_name();
-            String songFull = song_name + getString(R.string.mp3_extenstion);
-            String lyrics_url=songs_list.get(position).getLyrics_url();
+        String download_url=songs_list_for_click.get(position).getDownload_url();
+        String song_name = songs_list_for_click.get(position).getSong_name();
+        String songFull = song_name + getString(R.string.mp3_extenstion);
+        String lyrics_url=songs_list_for_click.get(position).getLyrics_url();
 
 
 
-            //if file is there in the fileNameList i-e present in the folder it will play it
-            if (filesNameList.contains(songFull)) {
-                int index=filesNameList.indexOf(songFull);
-                Log.d(TAG, "onItemClick: song found in the arrayList/directory");
+        //if file is there in the fileNameList i-e present in the folder it will play it
+        if (filesNameList.contains(songFull)) {
+            int index=filesNameList.indexOf(songFull);
+            Log.d(TAG, "onItemClick: song found in the arrayList/directory");
 
-                startActivity(new Intent(Extras.this, PlayerActivity.class)
-                        .putExtra(getString(R.string.current_index), index)
-                        .putStringArrayListExtra(getString(R.string.folder_songs_list), filesNameList)
-                        .putParcelableArrayListExtra(getString(R.string.existing_songs_object_list), (ArrayList<? extends Parcelable>) existing_songs_models_list)
-                        .putExtra(getString(R.string.coming_from_extra_activity)
-                                , getString(R.string.coming_from_extra_activity))
-                        .putExtra(getString(R.string.coming_from_extra_activity_int)
-                                ,EXTRA_IDENTIFIER)
-                );
-                Log.d(TAG, "getFilesListFromFolder: existing_songs_models_list : "+existing_songs_models_list.size());
-                Animatoo.animateZoom(mContext);
+            startActivity(new Intent(Extras.this, PlayerActivity.class)
+                    .putExtra(getString(R.string.current_index), index)
+                    .putStringArrayListExtra(getString(R.string.folder_songs_list), filesNameList)
+                    .putParcelableArrayListExtra(getString(R.string.existing_songs_object_list), (ArrayList<? extends Parcelable>) existing_songs_models_list)
+                    .putExtra(getString(R.string.coming_from_extra_activity)
+                            , getString(R.string.coming_from_extra_activity))
+                    .putExtra(getString(R.string.coming_from_extra_activity_int)
+                            ,EXTRA_IDENTIFIER)
+            );
+            Log.d(TAG, "getFilesListFromFolder: existing_songs_models_list : "+existing_songs_models_list.size());
+            Animatoo.animateZoom(mContext);
 
 
-            }
-            //if not downloadSong it
-            else {
-                Log.d(TAG, "onItemClick: song not found");
-                if ((networkInfo == null || !networkInfo.isConnected())) {
-                    showToast("Please Check Your Internet Connection!");
-                    return;
-                } else {
+        }
+        //if not downloadSong it
+        else {
+            Log.d(TAG, "onItemClick: song not found");
+            if ((networkInfo == null || !networkInfo.isConnected())) {
+                showToast("Please Check Your Internet Connection!");
+                return;
+            } else {
 
-                    //dialog for when downloading
-                    dialog = new SpotsDialog.Builder()
-                            .setContext(Extras.this)
-                            .setTheme(R.style.Custom)
-                            .setCancelable(false)
-                            .build();
+                //dialog for when downloading
+                dialog = new SpotsDialog.Builder()
+                        .setContext(Extras.this)
+                        .setTheme(R.style.Custom)
+                        .setCancelable(false)
+                        .build();
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ads.loadinterstitial(interstitialAd);
-                        }
-                    });
-
-                    //downloadSong file
-                    download(song_name, directory,download_url);
-                    if(lyrics_url != null){
-                        download_lyrics_file(song_name,lyrics_directory,lyrics_url);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ads.loadinterstitial(interstitialAd);
                     }
+                });
 
+                //downloadSong file
+                download(song_name, directory,download_url);
+                if(lyrics_url != null){
+                    download_lyrics_file(song_name,lyrics_directory,lyrics_url);
                 }
+
             }
         }
-    };
-
+    }
 
 
 

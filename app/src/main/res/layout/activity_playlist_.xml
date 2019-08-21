@@ -137,7 +137,7 @@
 
 
 
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listViewPlaylist"
             android:layout_below="@id/random_quotes_playlist"
             android:layout_width="match_parent"

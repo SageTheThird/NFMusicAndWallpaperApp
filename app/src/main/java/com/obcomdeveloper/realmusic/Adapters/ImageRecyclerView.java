@@ -17,20 +17,25 @@ import com.obcomdeveloper.realmusic.R;
 import com.obcomdeveloper.realmusic.Utils.Animation;
 import com.obcomdeveloper.realmusic.Utils.UniversalImageLoader;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ImageRecyclerView extends RecyclerView.Adapter<ImageRecyclerView.ImageHolder> {
 
+
+
+
     private static final String TAG = "ImageRecyclerView";
-    private  onItemClickListener listener;
+    private  ImageonItemClickListener mListener;
     private Context context;
     private int previousPosition;
     private List<Wallpaper> walls_list;
 
 
-    public ImageRecyclerView(List<Wallpaper> list, Context context) {
+    public ImageRecyclerView(Context context,ImageonItemClickListener mListener) {
         this.context = context;
-        this.walls_list=list;
+        this.walls_list=new ArrayList<>();
+        this.mListener=mListener;
     }
 
     @Override
@@ -93,9 +98,9 @@ public class ImageRecyclerView extends RecyclerView.Adapter<ImageRecyclerView.Im
                 public void onClick(View v) {
                     int position=getAdapterPosition();
 
-                    if(position!=RecyclerView.NO_POSITION && listener != null){
+                    if(position!=RecyclerView.NO_POSITION && mListener != null){
 
-                        listener.onItemClick(walls_list.get(position),position);
+                        mListener.onItemClick(walls_list.get(position),position);
 
                     }
 
@@ -104,14 +109,11 @@ public class ImageRecyclerView extends RecyclerView.Adapter<ImageRecyclerView.Im
         }
     }
 
-    public interface onItemClickListener{
+    public interface ImageonItemClickListener{
 
         void onItemClick(Wallpaper documentSnapshot, int position);
     }
-    public void setOnItemClickListener(onItemClickListener listener){
 
-        this.listener=listener;
-    }
     public void addItems(List<Wallpaper> list){
         this.walls_list.addAll(list);
         notifyDataSetChanged();

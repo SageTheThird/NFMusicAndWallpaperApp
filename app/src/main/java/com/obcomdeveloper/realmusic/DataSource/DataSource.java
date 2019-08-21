@@ -17,7 +17,7 @@ public interface DataSource {
 
      Maybe<List<Song>> getSongsPlaylist(int page);
 
-     Maybe<List<Song>> getSongExtras();
+     Maybe<List<Song>> getSongExtras(int page);
 
      Maybe<List<Wallpaper>> getThumbsList(int page);
 

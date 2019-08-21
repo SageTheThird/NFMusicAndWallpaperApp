@@ -7,18 +7,16 @@ import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.obcomdeveloper.realmusic.Models.Song;
 import com.obcomdeveloper.realmusic.R;
-import com.obcomdeveloper.realmusic.Songs.PlayerActivity;
 import com.obcomdeveloper.realmusic.Utils.SharedPreferences;
 
 import java.io.File;
@@ -27,8 +25,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class ExtraListAdapter extends ArrayAdapter<Song> {
+public class ExtraListAdapter extends RecyclerView.Adapter<ExtraListAdapter.ViewHolder> {
 
+    private ExtrasItemClickListener mListener;
+
+    public interface ExtrasItemClickListener{
+        void onItemClickListener(Song song,int position,View view);
+    }
 
     private LayoutInflater mInflater;
     private int layoutResource;
@@ -42,50 +45,34 @@ public class ExtraListAdapter extends ArrayAdapter<Song> {
     private AlertDialog alertDialog;
 
 
-    public ExtraListAdapter(Context context, int resource, List<Song> objects) {
-        super(context, resource, objects);
+    public ExtraListAdapter(Context context, int resource,ExtrasItemClickListener mListener) {
+
+
         mInflater=(LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mContext=context;
         layoutResource=resource;
-        this.songs_list =objects;
+        this.songs_list =new ArrayList<>();
 
 
-        this.temp_array = new ArrayList<Song>();
-        this.temp_array.addAll(songs_list);
+        this.temp_array = new ArrayList<>();
+
         mSharedPrefs=new SharedPreferences(context);
 
-    }
-
-
-    private static class ViewHolder{
-        private TextView song_name;
-        private ImageView tick;
-        private ImageView playing;
-        private ImageView delete;
-
-
+        this.mListener=mListener;
     }
 
     @NonNull
     @Override
-    public View getView(final int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        final ViewHolder holder;
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View v=mInflater.inflate(layoutResource,parent,false);
+        return new ExtraListAdapter.ViewHolder(v);
+    }
 
-        if(convertView==null){
-            convertView=mInflater.inflate(layoutResource,parent,false);
-            holder=new ViewHolder();
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-            holder.song_name =convertView.findViewById(R.id.song_nameView_extra);
-            holder.tick=convertView.findViewById(R.id.tick_extra);
-            holder.playing=convertView.findViewById(R.id.playing_extra);
-            holder.delete=convertView.findViewById(R.id.delete_iv);
 
-            convertView.setTag(holder);
-        }else{
-            holder=(ViewHolder) convertView.getTag();
-
-        }
-        holder.song_name.setText(Objects.requireNonNull(getItem(position)).getSong_name());
+        holder.song_name.setText(Objects.requireNonNull(songs_list.get(position)).getSong_name());
 
         saved_songs_list = mSharedPrefs.getList(mContext.getString(R.string.shared_array_list_key));
         mPlayingSong=mSharedPrefs.getInt(mContext.getString(R.string.shared_current_index),0);
@@ -94,14 +81,14 @@ public class ExtraListAdapter extends ArrayAdapter<Song> {
             isPlaying=saved_songs_list.get(mPlayingSong).replace(".mp3","");
         }
 
-        if(Objects.requireNonNull(getItem(position)).getSong_name().equals(isPlaying)){
+        if(Objects.requireNonNull(songs_list.get(position)).getSong_name().equals(isPlaying)){
             holder.playing.setVisibility(View.VISIBLE);
         }else {
             holder.playing.setVisibility(View.INVISIBLE);
         }
 
         //indicates the song exist in folder and ready to play
-        String name= Objects.requireNonNull(getItem(position)).getSong_name() + ".mp3";
+        String name= Objects.requireNonNull(songs_list.get(position)).getSong_name() + ".mp3";
         if(saved_songs_list.contains(name)){
             holder.tick.setBackgroundResource(R.drawable.ic_tick);
             holder.delete.setBackgroundResource(R.drawable.ic_delete);
@@ -129,16 +116,7 @@ public class ExtraListAdapter extends ArrayAdapter<Song> {
                         // create alert dialog
                         alertDialog=temmAlertDialogBuilder.create();
                         alertDialog.show();
-//                        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-//                        int width=mContext.getResources().getDisplayMetrics().widthPixels;
-//                        int cardWidth=width-300;
-//                        lp.copyFrom(alertDialog.getWindow().getAttributes());
-//                        lp.width = cardWidth;
-//                        lp.height = 700;
-//                        lp.x=-170;
-//                        lp.y=50;
-//                        alertDialog.getWindow().setAttributes(lp);
-//
+
 
                     }else {
 
@@ -159,9 +137,38 @@ public class ExtraListAdapter extends ArrayAdapter<Song> {
             });
         }
 
-
-        return convertView;
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onItemClickListener(songs_list.get(position),holder.getAdapterPosition(),holder.itemView);
+            }
+        });
     }
+
+    @Override
+    public int getItemCount() {
+        return songs_list.size();
+    }
+
+
+    public class ViewHolder extends RecyclerView.ViewHolder{
+        private TextView song_name;
+        private ImageView tick;
+        private ImageView playing;
+        private ImageView delete;
+
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            song_name =itemView.findViewById(R.id.song_nameView_extra);
+            tick=itemView.findViewById(R.id.tick_extra);
+            playing=itemView.findViewById(R.id.playing_extra);
+            delete=itemView.findViewById(R.id.delete_iv);
+
+        }
+    }
+
+
 
     // put below code (method) in Adapter class
     public void filter(String charText) {
@@ -248,6 +255,14 @@ public class ExtraListAdapter extends ArrayAdapter<Song> {
 
 
         return alertDialogBuilder;
+    }
+    public void addItems(List<Song> list){
+
+        int initSize=songs_list.size();
+        this.songs_list.addAll(list);
+        this.temp_array.addAll(list);
+        notifyItemRangeChanged(initSize,list.size());
+
     }
 
 

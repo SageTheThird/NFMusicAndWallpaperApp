@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
+    android:id="@+id/bottom_sheet_relativeLayout"
+    android:padding="15dp">
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/text_bottomSheet"
+        android:textSize="15sp"
+        android:textColor="@color/black"
+        android:gravity="center"
+        android:text="Whole Note Will Be Cleared Including Images"
+        android:textStyle="bold"
+        />
+    <Button
+        android:layout_marginTop="15dp"
+        android:layout_below="@id/text_bottomSheet"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:text="Confirm"
+        android:id="@+id/confirm_bottomSheet"
+        android:background="@color/white"
+        android:textAllCaps="false"
+        />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:text="Cancel"
+        android:id="@+id/cancel_bottomSheet"
+        android:layout_below="@id/confirm_bottomSheet"
+        android:background="@color/white"
+        android:textAllCaps="false"/>
+
+</RelativeLayout>
