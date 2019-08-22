@@ -3,6 +3,7 @@ package com.obcomdeveloper.realmusic.Adapters;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,11 +14,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.obcomdeveloper.realmusic.Models.Song;
 import com.obcomdeveloper.realmusic.R;
+import com.obcomdeveloper.realmusic.Utils.MaterialBottomSheet;
 import com.obcomdeveloper.realmusic.Utils.SharedPreferences;
+import com.obcomdeveloper.realmusic.room.DatabaseTransactions;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,7 +29,66 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class ExtraListAdapter extends RecyclerView.Adapter<ExtraListAdapter.ViewHolder> {
+import io.reactivex.CompletableObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
+public class ExtraListAdapter extends RecyclerView.Adapter<ExtraListAdapter.ViewHolder>
+        implements MaterialBottomSheet.BottomSheetListener {
+
+    private MaterialBottomSheet materialBottomSheet;
+    private DatabaseTransactions mDatabaseTransactions;
+
+    @Override
+    public void onConfirmClicked() {
+
+        Toast.makeText(mContext, "Delete Confirmed", Toast.LENGTH_LONG).show();
+        Bundle args=materialBottomSheet.getArguments();
+        int position=args.getInt("position");
+        Song song=args.getParcelable("song");
+        String song_name=song.getSong_name();
+
+        //delete from internal Storage
+        deleteTrack(position);
+
+        //delete from offline database
+        deleteTrackFromDB(song_name);
+
+        if(materialBottomSheet != null){
+            materialBottomSheet.dismiss();
+        }
+    }
+    @Override
+    public void onCancelClicked() {
+        if(materialBottomSheet != null){
+            materialBottomSheet.dismiss();
+        }
+    }
+
+    private void deleteTrackFromDB(String song_name) {
+        mDatabaseTransactions.deleteSongExtras(song_name).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                        Toast.makeText(mContext, "Entry Deleted From DataBase Extras", Toast.LENGTH_LONG).show();
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+                });
+
+    }
 
     private ExtrasItemClickListener mListener;
 
@@ -42,7 +105,7 @@ public class ExtraListAdapter extends RecyclerView.Adapter<ExtraListAdapter.View
     private int mPlayingSong;
     private String isPlaying;
     private SharedPreferences mSharedPrefs;
-    private AlertDialog alertDialog;
+
 
 
     public ExtraListAdapter(Context context, int resource,ExtrasItemClickListener mListener) {
@@ -59,6 +122,7 @@ public class ExtraListAdapter extends RecyclerView.Adapter<ExtraListAdapter.View
         mSharedPrefs=new SharedPreferences(context);
 
         this.mListener=mListener;
+        mDatabaseTransactions=new DatabaseTransactions(context);
     }
 
     @NonNull
@@ -111,11 +175,10 @@ public class ExtraListAdapter extends RecyclerView.Adapter<ExtraListAdapter.View
                     if(position != 0){
 
 
-                        AlertDialog.Builder temmAlertDialogBuilder=getAlertDialogBuilder(position);
-
-                        // create alert dialog
-                        alertDialog=temmAlertDialogBuilder.create();
-                        alertDialog.show();
+                        materialBottomSheet=MaterialBottomSheet
+                                .getInstance(ExtraListAdapter.this,position,songs_list.get(position));
+                        materialBottomSheet.setLayout(R.layout.material_bottom_sheet_layout);
+                        materialBottomSheet.show(((AppCompatActivity) mContext).getSupportFragmentManager(),"BottomSheet");
 
 
                     }else {
@@ -216,46 +279,7 @@ public class ExtraListAdapter extends RecyclerView.Adapter<ExtraListAdapter.View
         }
     }
 
-    private AlertDialog.Builder getAlertDialogBuilder(final int position){
 
-        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext,
-                R.style.MyAlertDialogTheme);
-        LayoutInflater inflater=(LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view=inflater.inflate(R.layout.alert_dialog_custom_view,null);
-        Button confirm_btn=view.findViewById(R.id.confirm_dialog_btn);
-        Button cancel_btn=view.findViewById(R.id.cancel_dialog_btn);
-        confirm_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Toast.makeText(mContext, "Delete Confirmed", Toast.LENGTH_LONG).show();
-                deleteTrack(position);
-                if(alertDialog!=null){
-                    alertDialog.dismiss();
-                }
-            }
-        });
-
-        cancel_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if(alertDialog!=null){
-                    alertDialog.dismiss();
-                }
-            }
-        });
-
-        alertDialogBuilder.setView(view);
-        // set title
-        // set dialog message
-        alertDialogBuilder
-                .setCancelable(true);
-
-
-
-        return alertDialogBuilder;
-    }
     public void addItems(List<Song> list){
 
         int initSize=songs_list.size();

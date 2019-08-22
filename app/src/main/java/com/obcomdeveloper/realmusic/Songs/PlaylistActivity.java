@@ -46,6 +46,7 @@ import com.obcomdeveloper.realmusic.Utils.Ads;
 import com.obcomdeveloper.realmusic.Utils.DownloadFiles;
 import com.obcomdeveloper.realmusic.Utils.UIUpdater;
 import com.obcomdeveloper.realmusic.room.DatabaseTransactions;
+import com.obcomdeveloper.realmusic.room.PlaylistEntity;
 import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.util.ArrayList;
@@ -55,8 +56,12 @@ import java.util.List;
 import java.util.Locale;
 
 import dmax.dialog.SpotsDialog;
+import io.reactivex.Completable;
+import io.reactivex.CompletableObserver;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeObserver;
+import io.reactivex.Observer;
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -143,6 +148,7 @@ public class PlaylistActivity extends AppCompatActivity implements SongRecyclerV
         setContentView(R.layout.activity_playlist_);
         quotes_Ref = FirebaseDatabase.getInstance().getReference().child(getString(R.string.db_random_quotes)).child("array");
 
+        mDatabaseTransactions=new DatabaseTransactions(this);
         searchView = findViewById(R.id.searchEdit);
         recyclerView = findViewById(R.id.listViewPlaylist);
         patentTextView = findViewById(R.id.patent_playlist);
@@ -173,6 +179,55 @@ public class PlaylistActivity extends AppCompatActivity implements SongRecyclerV
 
         if(networkInfo == null || !networkInfo.isConnected()){
             //loadFromDatabase();
+            //add data to songs_for_click list
+            //add data to existing_songs_model
+            showProgressDialog();
+            mDatabaseTransactions.getAllSongs().subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<List<PlaylistEntity>>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(List<PlaylistEntity> playlistEntities) {
+
+                            for(int i = 0; i< playlistEntities.size(); i++){
+                                 String song_name = playlistEntities.get(i).getSong_name();
+                                 String download_url = playlistEntities.get(i).getDownload_url();
+                                 String genius_url = playlistEntities.get(i).getGenius_url();
+                                 int thumbnail = playlistEntities.get(i).getThumbnail();
+                                 String artist_name = playlistEntities.get(i).getArtist_name();
+                                 String lyrics_url = playlistEntities.get(i).getLyrics_url();
+
+                                 Song song=new Song(String.valueOf(i),song_name,download_url,genius_url
+                                         ,String.valueOf(thumbnail),null,artist_name,lyrics_url);
+
+                                 songs_list_forclick.add(song);
+                                 existing_songs_models_list.add(song);
+                            }
+
+                            //Collections.reverse(songs_list_forclick);
+                            for(int i=0;i<songs_list_forclick.size();i++){
+                                Log.d(TAG, "onNext: SongsListForClick : "+songs_list_forclick.get(i).toString());
+                            }
+                            playlist_adapter.addItems(songs_list_forclick);
+
+                            dialog_loading.dismiss();
+
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
         }else {
             fetchDataandSet();
         }
@@ -527,7 +582,7 @@ public class PlaylistActivity extends AppCompatActivity implements SongRecyclerV
         downloadFiles.downloadingFiles(download_url);
     }
 
-    public void downloadSong(final String fileNameInto, final String downloadDirectory, String download_url) {
+    public void downloadSong(final String fileNameInto, final String downloadDirectory, String download_url,int position) {
 
 
 
@@ -541,10 +596,10 @@ public class PlaylistActivity extends AppCompatActivity implements SongRecyclerV
 
         final long downloadid = downloadFiles.downloadingFiles(download_url);
 
-        initializeReciever(downloadid);
+        initializeReciever(downloadid,fileNameInto,position);
     }
 
-    private void initializeReciever(final long downloadID) {
+    private void initializeReciever(final long downloadID,String song_name,int position) {
         onDownloadComplete = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -557,6 +612,12 @@ public class PlaylistActivity extends AppCompatActivity implements SongRecyclerV
                     Toast.makeText(context, "File Loaded!", Toast.LENGTH_SHORT).show();
                     getFilesListFromFolder();
                     playlist_adapter.notifyDataSetChanged();
+
+                    //enter in track to database when downloaded
+                    PlaylistEntity playlistEntity =new PlaylistEntity
+                            (position+1,song_name,R.drawable.offline_playlist_small_edited,"NF",null,null,null);
+                    enterSongInDatabase(playlistEntity);
+
                     dialog.dismiss();
 
                 }
@@ -776,11 +837,16 @@ public class PlaylistActivity extends AppCompatActivity implements SongRecyclerV
         String song_name = songs_list_forclick.get(position).getSong_name();
         String songFull = song_name + getString(R.string.mp3_extenstion);
         String lyrics_url=songs_list_forclick.get(position).getLyrics_url();
+        String genius_url=songs_list_forclick.get(position).getGenius_url();
 
-        
+
 
         filesNameList=mSharedPrefs.getList(getString(R.string.shared_array_list_key));
 
+        Toast.makeText(mContext, ""+songFull, Toast.LENGTH_LONG).show();
+        for(int i=0;i<filesNameList.size();i++){
+            Log.d(TAG, "onItemClickListener: fileName : "+filesNameList.get(i));
+        }
 
         //if file is there in the fileNameList i-e present in the folder it will play it
         if (filesNameList.contains(songFull)) {
@@ -826,13 +892,41 @@ public class PlaylistActivity extends AppCompatActivity implements SongRecyclerV
 
 
                 //downloadSong file
-                downloadSong(song_name, track_directory,download_url);
+                downloadSong(song_name, track_directory,download_url,position);
+
                 if(lyrics_url != null){
                     download_lyrics_file(song_name,lyrics_directory,lyrics_url);
 
                 }
             }
         }
+    }
+
+    private void enterSongInDatabase(PlaylistEntity song) {
+
+        Completable addSong=mDatabaseTransactions.addSong(song);
+        addSong.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        mDisposibles.add(d);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                        Log.d(TAG, "onComplete: Playlist Added Song : "+song.toString());
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                        Log.d(TAG, "onError: "+e);
+                    }
+                });
+
     }
 }
 

@@ -132,6 +132,47 @@ public class UniversalImageLoader {
 
     }
 
+
+    public static void setImageDrawable(int url, final ImageView image, final ProgressBar progressBar, String append){
+
+        ImageLoader imageLoader=ImageLoader.getInstance();
+        imageLoader.handleSlowNetwork(true);
+        imageLoader.displayImage(append + url, image, new ImageLoadingListener() {
+            @Override
+            public void onLoadingStarted(String imageUri, View view) {
+
+                if(progressBar != null){
+                    progressBar.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+
+                if(progressBar != null){
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+
+                if(progressBar != null){
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onLoadingCancelled(String imageUri, View view) {
+
+                if(progressBar != null){
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+        });
+
+    }
+
     public static void setBlurredImage(String url, final ImageView image, final ProgressBar progressBar,
                                        String append, final SeekBar seekBar,
                                        final ImageView viewLyrics, final ImageView viewGenius){
@@ -207,6 +248,83 @@ public class UniversalImageLoader {
         });
 
     }
+
+    public static void setBlurredImageDraweable(int url, final ImageView image, final ProgressBar progressBar,
+                                       String append, final SeekBar seekBar,
+                                       final ImageView viewLyrics, final ImageView viewGenius){
+
+        final ImageLoader imageLoader=ImageLoader.getInstance();
+        imageLoader.handleSlowNetwork(true);
+        imageLoader.displayImage(append + url, image, new ImageLoadingListener() {
+            @Override
+            public void onLoadingStarted(String imageUri, View view) {
+
+                if(progressBar != null){
+                    progressBar.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+
+                if(progressBar != null){
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onLoadingComplete(String imageUri, final View view, final Bitmap loadedImage) {
+
+                final Bitmap[] bitmap = {null};
+                //final int[] getDominantColor = new int[1];
+                final int[] getDominantColor2 = new int[1];
+                Needle.onBackgroundThread().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        bitmap[0] = BlurImage.fastblur(loadedImage,0.1f,4);
+                        //getDominantColor[0] =ColorPallete.getDominantColor(bitmap[0]);
+                        getDominantColor2[0]=ColorPallete.getDominantColor2(bitmap[0]);
+                        Needle.onMainThread().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                image.setImageBitmap(bitmap[0]);
+                                if(seekBar != null){
+
+                                    Log.d(TAG, "run: seekbar thumb color setting");
+                                    seekBar.getThumb().setColorFilter(getDominantColor2[0], PorterDuff.Mode.SRC_ATOP);
+                                    seekBar.getProgressDrawable().setColorFilter(getDominantColor2[0], PorterDuff.Mode.SRC_ATOP);
+
+                                }
+                                if(viewLyrics != null && viewGenius != null){
+                                    GradientDrawable drawable_lyrics = (GradientDrawable)viewLyrics.getBackground();
+                                    drawable_lyrics.setStroke(3, getDominantColor2[0]);
+
+                                    GradientDrawable drawable_genius = (GradientDrawable)viewGenius.getBackground();
+                                    drawable_genius.setStroke(3, getDominantColor2[0]);
+                                }
+                            }
+                        });
+
+                    }
+                });
+
+
+                if(progressBar != null){
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onLoadingCancelled(String imageUri, View view) {
+
+                if(progressBar != null){
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+        });
+
+    }
+
 
     public static Drawable getTintedDrawable(Resources res,
                                              @DrawableRes int drawableResId, @ColorRes int colorResId) {

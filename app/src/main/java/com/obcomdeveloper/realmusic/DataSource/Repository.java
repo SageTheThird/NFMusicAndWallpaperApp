@@ -1,6 +1,7 @@
 package com.obcomdeveloper.realmusic.DataSource;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -25,7 +26,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 
-public class Repository implements DataSource {
+public class Repository implements DataSource{
+
+
     private static final String TAG = "Repository";
     public static final int ITEMS_PER_PAGE =10;
 
@@ -44,41 +47,62 @@ public class Repository implements DataSource {
 
     }
 
-    public void getChildCount(DatabaseReference reference){
-        reference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                int tempChildCount=(int)dataSnapshot.getChildrenCount();
-                mSharedPrefs.saveInt("paginationChildCount",tempChildCount);
-            }
+    public int getChildCount(DatabaseReference reference){
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
+        final int[] tempChildCount = new int[1];
+        do{
+            reference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    tempChildCount[0] =(int)dataSnapshot.getChildrenCount();
+                    mSharedPrefs.saveInt("paginationChildCount", tempChildCount[0]);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }while (tempChildCount[0] != 0);
+
+
+
+
+      return tempChildCount[0];
     }
 
     public void getQuery(DatabaseReference reference, int page){
-        childCOunt=mSharedPrefs.getInt("paginationChildCount",64);
-        estimatePages= childCOunt / ITEMS_PER_PAGE; //=6
-        mSharedPrefs.saveInt("estimatePages",estimatePages);
-        endingPage = estimatePages + 1;
+        childCOunt=mSharedPrefs.getInt("paginationChildCount",0);
 
-        if (page <= estimatePages){
+        if(childCOunt != 0){
 
-            query = reference
-                    .orderByKey()
-                    .limitToLast( page * ITEMS_PER_PAGE);
+            estimatePages= childCOunt / ITEMS_PER_PAGE; //=6
+            mSharedPrefs.saveInt("estimatePages",estimatePages);
+            endingPage = estimatePages + 1;
+
+            int lastItemsCount=childCOunt % ITEMS_PER_PAGE;
+
+            if (page <= estimatePages ){
+
+                query = reference
+                        .orderByKey()
+                        .limitToLast( page * ITEMS_PER_PAGE);
+
+            }
+            else if(page == endingPage){
+
+                if(lastItemsCount != 0){
+
+                    query = reference
+                            .orderByKey()
+                            //.startAt(lastNode)
+                            .limitToFirst(lastItemsCount);
+                }
+
+            }
         }
-        else if(page == endingPage){
 
-            int lastCount=childCOunt % ITEMS_PER_PAGE;
-            query = reference
-                    .orderByKey()
-                    //.startAt(lastNode)
-                    .limitToFirst(lastCount);
-        }
     }
 
     @Override
@@ -87,6 +111,8 @@ public class Repository implements DataSource {
         DatabaseReference ref2=mRefs.playlistReference;
         getChildCount(ref2);
         getQuery(ref2,page);
+
+
 
         return RxFirebaseDatabase.observeSingleValueEvent(query
                 , DataSnapshotMapper.listOf(Song.class))

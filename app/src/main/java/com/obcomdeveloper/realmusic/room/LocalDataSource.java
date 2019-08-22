@@ -10,45 +10,75 @@ import java.util.List;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 
-public class LocalDataSource implements DataSource {
+public class LocalDataSource implements PlaylistDataSource,ExtrasDataSource {
 
-    private SongsDAO mNotesDao;
+    private PlaylistDAO mPlaylistDao;
+    private ExtrasDAO mExtrasDao;
 
 
     public LocalDataSource(Context context){
         SongsDatabase notesDatabase=SongsDatabase.getInstance(context);
-        this.mNotesDao=notesDatabase.getContactDAO();
+        this.mPlaylistDao =notesDatabase.getPlaylistDAO();
+        this.mExtrasDao=notesDatabase.getExtrasDAO();
     }
 
     public LocalDataSource(Context context, RoomDatabase.Callback callback) {
 
 
         SongsDatabase notesDatabase = SongsDatabase.getInstance(context, callback);
-        this.mNotesDao = notesDatabase.getContactDAO();
+        this.mPlaylistDao = notesDatabase.getPlaylistDAO();
+        this.mExtrasDao=notesDatabase.getExtrasDAO();
     }
 
     @Override
-    public Observable<List<SongDB>> getAllSongs() {
-        return mNotesDao.getAllNotes();
+    public Observable<List<PlaylistEntity>> getAllSongs() {
+        return mPlaylistDao.getAllSongs();
+    }
+
+
+
+    @Override
+    public Completable addSong(PlaylistEntity song) {
+        return mPlaylistDao.addNewSong(song);
     }
 
     @Override
-    public Completable addSong(SongDB song) {
-        return mNotesDao.addNewNote(song);
+    public Completable updateNote(PlaylistEntity song) {
+        return mPlaylistDao.updateSong(song);
     }
 
     @Override
-    public Completable updateNote(SongDB song) {
-        return mNotesDao.updateNote(song);
+    public Completable deleteSong(String song_name) {
+        return mPlaylistDao.deleteSong(song_name);
     }
 
     @Override
-    public Completable deleteSong(SongDB song) {
-        return mNotesDao.deleteNote(song);
+    public Observable<PlaylistEntity> getSong(long id) {
+        return mPlaylistDao.getSong(id);
     }
 
     @Override
-    public Observable<SongDB> getSong(long id) {
-        return mNotesDao.getNote(id);
+    public Observable<List<ExtrasEntity>> getAllSongsExtras() {
+        return mExtrasDao.getAllSongs();
+    }
+
+    @Override
+    public Completable addSongExtras(ExtrasEntity song) {
+        return mExtrasDao.addNewSong(song);
+    }
+
+    @Override
+    public Completable updateSongExtras(ExtrasEntity song) {
+        return mExtrasDao.updateSong(song);
+    }
+
+    @Override
+    public Completable deleteSongExtras(String song_name) {
+        return mExtrasDao.deleteSong(song_name);
+    }
+
+    @Override
+    public Observable<ExtrasEntity> getSongExtras(long id) {
+        return mExtrasDao.getSong(id);
     }
 }

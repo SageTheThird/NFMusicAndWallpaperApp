@@ -41,6 +41,9 @@ import com.obcomdeveloper.realmusic.Songs.PlayerActivity;
 import com.obcomdeveloper.realmusic.Utils.Ads;
 import com.obcomdeveloper.realmusic.Utils.DownloadFiles;
 import com.obcomdeveloper.realmusic.Utils.SharedPreferences;
+import com.obcomdeveloper.realmusic.room.DatabaseTransactions;
+import com.obcomdeveloper.realmusic.room.ExtrasEntity;
+import com.obcomdeveloper.realmusic.room.PlaylistEntity;
 import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.util.ArrayList;
@@ -49,8 +52,11 @@ import java.util.List;
 import java.util.Locale;
 
 import dmax.dialog.SpotsDialog;
+import io.reactivex.Completable;
+import io.reactivex.CompletableObserver;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeObserver;
+import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -103,6 +109,7 @@ public class Extras extends AppCompatActivity implements ExtraListAdapter.Extras
     private ProgressBar loadingProgress;
 
     private LinearLayoutManager layoutManager;
+    private DatabaseTransactions mDatabaseTransactions;
 
 
     @Override
@@ -120,6 +127,7 @@ public class Extras extends AppCompatActivity implements ExtraListAdapter.Extras
         floatingActionButton.setOnClickListener(FloatingButtonClickListener);
         layoutManager=new LinearLayoutManager(this);
         loadingProgress=findViewById(R.id.pagination_progressBar);
+        mDatabaseTransactions=new DatabaseTransactions(this);
 
 
         patentTextView.setHorizontallyScrolling(true);
@@ -142,7 +150,62 @@ public class Extras extends AppCompatActivity implements ExtraListAdapter.Extras
         getFilesListFromFolder();
         layoutImageLoading();
         internetConnectivity();
-        fetchDataandSet();
+        if(networkInfo == null || !networkInfo.isConnected()){
+            //loadFromDatabase();
+            //add data to songs_for_click list
+            //add data to existing_songs_model
+            showProgressDialog();
+            mDatabaseTransactions.getAllSongsExtras().subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<List<ExtrasEntity>>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
+
+                            mDisposibles.add(d);
+                        }
+
+                        @Override
+                        public void onNext(List<ExtrasEntity> list) {
+
+                            for(int i = 0; i< list.size(); i++){
+
+                                String song_name = list.get(i).getSong_name();
+                                String download_url = list.get(i).getDownload_url();
+                                String genius_url = list.get(i).getGenius_url();
+                                int thumbnail = list.get(i).getThumbnail();
+                                String artist_name = list.get(i).getArtist_name();
+                                String lyrics_url = list.get(i).getLyrics_url();
+
+                                Song song=new Song(String.valueOf(i),song_name,download_url,genius_url
+                                        ,String.valueOf(thumbnail),null,artist_name,lyrics_url);
+
+                                songs_list_for_click.add(song);
+                                existing_songs_models_list.add(song);
+
+                            }
+
+                            adapter.addItems(songs_list_for_click);
+
+                            dialog_loading.dismiss();
+
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        }else {
+
+            fetchDataandSet();
+
+        }
+
         setupSearch();
 
 
@@ -330,7 +393,7 @@ public class Extras extends AppCompatActivity implements ExtraListAdapter.Extras
         downloadFiles.downloadingFiles(download_url);
     }
 
-    public void download(final String fileNameInto, final String downloadDirectory,String download_url) {
+    public void download(final String fileNameInto, final String downloadDirectory,String download_url,int position,String artistName) {
 
 
 
@@ -343,10 +406,10 @@ public class Extras extends AppCompatActivity implements ExtraListAdapter.Extras
 
         final long downloadid = downloadFiles.downloadingFiles(download_url);
 
-        initializeReciever(downloadid);
+        initializeReciever(downloadid,fileNameInto,position,artistName);
     }
 
-    private void initializeReciever(final long downloadID) {
+    private void initializeReciever(final long downloadID,String song_name,int position,String artist_name) {
         onDownloadComplete = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -359,6 +422,10 @@ public class Extras extends AppCompatActivity implements ExtraListAdapter.Extras
                     Toast.makeText(context, "File Loaded", Toast.LENGTH_SHORT).show();
                     getFilesListFromFolder();
                     adapter.notifyDataSetChanged();
+
+                    ExtrasEntity songNew =new ExtrasEntity(position+1,song_name,R.drawable.offline_extras_small_edited,artist_name,null,null,null);
+                    enterSongInDatabase(songNew);
+
                     dialog.dismiss();
 
                 }
@@ -554,6 +621,7 @@ public class Extras extends AppCompatActivity implements ExtraListAdapter.Extras
         String song_name = songs_list_for_click.get(position).getSong_name();
         String songFull = song_name + getString(R.string.mp3_extenstion);
         String lyrics_url=songs_list_for_click.get(position).getLyrics_url();
+        String artist_name=songs_list_for_click.get(position).getArtist_name();
 
 
 
@@ -599,7 +667,8 @@ public class Extras extends AppCompatActivity implements ExtraListAdapter.Extras
                 });
 
                 //downloadSong file
-                download(song_name, directory,download_url);
+                download(song_name, directory,download_url,position,artist_name);
+
                 if(lyrics_url != null){
                     download_lyrics_file(song_name,lyrics_directory,lyrics_url);
                 }
@@ -608,7 +677,32 @@ public class Extras extends AppCompatActivity implements ExtraListAdapter.Extras
         }
     }
 
+    private void enterSongInDatabase(ExtrasEntity song) {
+        mDatabaseTransactions.addSongExtras(song)
+                .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        mDisposibles.add(d);
+                    }
 
+                    @Override
+                    public void onComplete() {
+
+                        Log.d(TAG, "onComplete: Extras Added Song : "+song.toString());
+                        Log.d(TAG, "onComplete: Extras Song Added TO Database");
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+                });
+
+
+    }
 
     //////-------------------------------LISTENERS------------------------/////////////
 

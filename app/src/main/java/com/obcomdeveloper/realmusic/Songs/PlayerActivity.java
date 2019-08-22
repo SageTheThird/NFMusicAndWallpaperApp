@@ -10,6 +10,8 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.audiofx.AudioEffect;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -38,6 +40,7 @@ import com.obcomdeveloper.realmusic.Extras.Extras;
 import com.obcomdeveloper.realmusic.Models.Song;
 import com.obcomdeveloper.realmusic.R;
 import com.obcomdeveloper.realmusic.Utils.Ads;
+import com.obcomdeveloper.realmusic.Utils.BitmapUtils;
 import com.obcomdeveloper.realmusic.Utils.CustomViewPager;
 import com.obcomdeveloper.realmusic.Utils.HeadphonesReciever;
 import com.obcomdeveloper.realmusic.Utils.SharedPreferences;
@@ -126,6 +129,8 @@ public class PlayerActivity extends AppCompatActivity {
     private List<Song> existing_songs_ojects_list;
     private boolean trigger_on_page;
     private PagerAdapter adapter;
+    private ConnectivityManager connectivityManager;
+    private NetworkInfo networkInfo;
 
 
 
@@ -137,6 +142,7 @@ public class PlayerActivity extends AppCompatActivity {
         setContentView(R.layout.test_player);
 
 
+        internetConnectivity();
         mSharedPrefs = new com.obcomdeveloper.realmusic.Utils.SharedPreferences(PlayerActivity.this);
         trigger_on_page=true;
         mSharedPrefs.saveBoolean(getString(R.string.trigger_on_page),trigger_on_page);
@@ -226,8 +232,18 @@ public class PlayerActivity extends AppCompatActivity {
 
     private void blurredBackgroundSetup() {
         String thumbnail=existing_songs_ojects_list.get(mCurrentIndex).getThumbnail();
-        UniversalImageLoader.setBlurredImage(thumbnail,
-                blurred_iv,null,"",seekBar,mLyrics_btn,mGenius_btn);
+        if(networkInfo != null && networkInfo.isConnected()){
+            //For Online Images Are Loaded from string url
+            UniversalImageLoader.setBlurredImage(thumbnail,
+                    blurred_iv,null,"",seekBar,mLyrics_btn,mGenius_btn);
+        }else {
+            //For Offline images are loaded from resource Drawable
+            UniversalImageLoader.setBlurredImageDraweable(Integer.parseInt(thumbnail),blurred_iv
+            ,null,"drawable://",seekBar,mLyrics_btn,mGenius_btn);
+
+        }
+
+
 
     }
 
@@ -298,13 +314,28 @@ public class PlayerActivity extends AppCompatActivity {
                     .show();
 
     }
+    private void internetConnectivity(){
+        //Internet Connectivity
+        connectivityManager = (ConnectivityManager)
+                PlayerActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        networkInfo = connectivityManager.getActiveNetworkInfo();
+
+    }
+
 
     private void getThumbnailofPlayingIndex(){
 
 
+
         String thumbnail=existing_songs_ojects_list.get(mCurrentIndex).getThumbnail();
-        UniversalImageLoader.setBlurredImage(thumbnail,
-                blurred_iv,null,"",seekBar,mLyrics_btn,mGenius_btn);
+        if(networkInfo != null && networkInfo.isConnected()){
+            UniversalImageLoader.setBlurredImage(thumbnail,
+                    blurred_iv,null,"",seekBar,mLyrics_btn,mGenius_btn);
+        }else {
+            UniversalImageLoader.setBlurredImageDraweable(Integer.parseInt(thumbnail),blurred_iv
+                    ,null,"drawable://",seekBar,mLyrics_btn,mGenius_btn);
+        }
+
 
 
     }
@@ -591,16 +622,21 @@ public class PlayerActivity extends AppCompatActivity {
 
 
     public void openGeniusFragment(String genius_url) {
-        GeniusFragment fragment=new GeniusFragment();
-        Bundle args=new Bundle();
-        args.putString(getString(R.string.genius_url),genius_url);
-        fragment.setArguments(args);
+        if(networkInfo != null && networkInfo.isConnected()){
+            GeniusFragment fragment=new GeniusFragment();
+            Bundle args=new Bundle();
+            args.putString(getString(R.string.genius_url),genius_url);
+            fragment.setArguments(args);
 
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_right);
-        transaction.replace(R.id.frameLayout,fragment);
-        transaction.addToBackStack(getString(R.string.GENIUS_FRAGMENT));
-        transaction.commit();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_right);
+            transaction.replace(R.id.frameLayout,fragment);
+            transaction.addToBackStack(getString(R.string.GENIUS_FRAGMENT));
+            transaction.commit();
+        }else {
+            Toast.makeText(mContext, "Connect To The Internet First", Toast.LENGTH_LONG).show();
+        }
+
 
     }
 
@@ -617,6 +653,7 @@ public class PlayerActivity extends AppCompatActivity {
         transaction.replace(R.id.frameLayout,fragment);
         transaction.addToBackStack(getString(R.string.lyrics_fragment));
         transaction.commit();
+
     }
 
     public void playSong(final int index, final int activityIdentifier) {

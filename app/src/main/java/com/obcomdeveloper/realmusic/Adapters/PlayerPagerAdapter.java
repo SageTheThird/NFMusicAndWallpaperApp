@@ -3,6 +3,9 @@ package com.obcomdeveloper.realmusic.Adapters;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
+
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +27,8 @@ public class PlayerPagerAdapter extends PagerAdapter {
     private Context context;
     private List<Song> song_list;
     private SharedPreferences mSharedPrefs;
+    private ConnectivityManager connectivityManager;
+    private NetworkInfo networkInfo;;;
 
 
 
@@ -64,72 +69,15 @@ public class PlayerPagerAdapter extends PagerAdapter {
 
 
         String thumbnail=song_list.get(mSharedPrefs.getInt(context.getString(R.string.shared_current_index),0)).getThumbnail();
-        UniversalImageLoader.setImage(thumbnail,imageView,null,"");
-//        Needle.onBackgroundThread().execute(new Runnable() {
-////            @Override
-////            public void run() {
-////                String song_name=mSongsList.get(PlayerActivity
-////                        .getIntPref(context.getString(R.string.shared_current_index),context))
-////                        .replace(".mp3","");
-////
-////                for(int i1=0;i1<song_list.size();i1++){
-////                    if(song_list.get(i1).getSong_name().equals(song_name)){
-////                        final String thumbnail=song_list.get(i1).getThumbnail();
-////                        Log.d(TAG, "instantiateItem: thumbnail : "+thumbnail);
-////                        Needle.onMainThread().execute(new Runnable() {
-////                            @Override
-////                            public void run() {
-////                                UniversalImageLoader.setImage(thumbnail,
-////                                        imageView,null,"");
-////                            }
-////                        });
-////
-////
-////
-////                    }
-////                }
-////            }
-////        });
 
-
-
-
-        //String song_name=mSongsList.get(position).replace(".mp3","");
-
-
-        //UniversalImageLoader.setImage(song_list.get(position).getThumbnail(),imageView,null,"");
-
-//        item_view.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent=new Intent(context, ImageClickActivity.class);
-//                intent.putExtra("clickedurl",mImagesUrls.get(position));
-//                intent.putExtra("smallclickedurl",small_walls_list.get(position).getDownload_url());
-//                context.startActivity(intent);
-//            }
-//        });
-        /*Picasso
-                .with(context)
-                .load(mImagesUrls.get(position))
-                .fetch(new Callback() {
-
-                    @Override
-                    public void onSuccess() {
-                        Picasso
-                                .with(context)
-                                .load(mImagesUrls.get(position))
-                                .networkPolicy(NetworkPolicy.OFFLINE)
-                                .placeholder(R.drawable.ic_change_history_black_24dp)
-                                .into(imageView);
-
-
-                    }
-
-                    @Override
-                    public void onError() {
-
-                    }
-                });*/
+        if(internetConnectivity() != null && internetConnectivity().isConnected()){
+            //For online images are loaded from url
+            UniversalImageLoader.setImage(thumbnail,imageView,null,"");
+        }else {
+            //For Offline it loads drawable
+            UniversalImageLoader.setImageDrawable(Integer.parseInt(thumbnail),imageView
+                    ,null,"drawable://");
+        }
 
         container.addView(item_view);
 //        linearLayout.getLayoutParams().width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 180, container.getContext().getResources().getDisplayMetrics());
@@ -150,6 +98,17 @@ public class PlayerPagerAdapter extends PagerAdapter {
         super.setPrimaryItem(container,position, object);
 
     }
+
+    private NetworkInfo internetConnectivity(){
+        //Internet Connectivity
+
+        connectivityManager = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        return networkInfo;
+    }
+
 
 
 }

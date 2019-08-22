@@ -14,6 +14,7 @@ import io.reactivex.Completable;
 import io.reactivex.CompletableObserver;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -22,38 +23,40 @@ public class DatabaseTransactions {
 
     private Context context;
     private LocalDataSource mLocalDataSource;
-    private NotesViewModel mNotesViewModel;
+    private SongsOfflineViewModel mSongsOfflineViewModel;
+    private CompositeDisposable mDisposibles=new CompositeDisposable();
 
     public DatabaseTransactions(Context context) {
         this.context = context;
 
         mLocalDataSource=new LocalDataSource(context,CreateAndOpenCallBack);
-        mNotesViewModel =new NotesViewModel(mLocalDataSource);
+        mSongsOfflineViewModel =new SongsOfflineViewModel(mLocalDataSource);
     }
 
-    public Completable addSong(final SongDB song){
+    public Completable addSong(final PlaylistEntity song){
 
-        Log.d(TAG, "addNewNote: adding new note to database");
+        Log.d(TAG, "addNewSong: adding new note to database");
 
-        return mNotesViewModel.addSong(song)
-                .subscribeOn(Schedulers.io());
+        return mSongsOfflineViewModel.addSong(song)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<List<SongDB>> getAllSongs(){
-        return mNotesViewModel
+    public Observable<List<PlaylistEntity>> getAllSongs(){
+        return mSongsOfflineViewModel
                 .getAllSongs()
                 .subscribeOn(Schedulers.io());
     }
 
-    public Completable deleteSong(final SongDB song){
+    public Completable deleteSong(final String song_name){
 
-        return mNotesViewModel.deleteSong(song)
+        return mSongsOfflineViewModel.deleteSong(song_name)
                 .subscribeOn(Schedulers.io());
 
     }
 
-    public Completable updateSong(SongDB song){
-        return mNotesViewModel.
+    public Completable updateSong(PlaylistEntity song){
+        return mSongsOfflineViewModel.
                 updateSong(song)
                 .subscribeOn(Schedulers.io());
     }
@@ -66,31 +69,7 @@ public class DatabaseTransactions {
             Log.d("CallBack", "onCreate: database callBack onCreate");
 
             //calls only once when database is created
-            String song_name= String.valueOf(R.string.playlist_firstrun_lyrics_song_name);
-            Completable newNote=addSong(new
-                    SongDB(1, song_name,R.drawable.offline_playlist_small,"NF"));
 
-
-            newNote.subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new CompletableObserver() {
-                        @Override
-                        public void onSubscribe(Disposable d) {
-
-                        }
-
-                        @Override
-                        public void onComplete() {
-
-                            Log.d(TAG, "onComplete: New Note Added");
-
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-
-                        }
-                    });
         }
 
         @Override
@@ -103,4 +82,37 @@ public class DatabaseTransactions {
         }
 
     };
+
+
+
+
+
+
+    public Completable addSongExtras(final ExtrasEntity song){
+
+        Log.d(TAG, "addNewSong: adding new note to database");
+
+        return mSongsOfflineViewModel.addSongExtras(song)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<List<ExtrasEntity>> getAllSongsExtras(){
+        return mSongsOfflineViewModel
+                .getAllSongsExtras()
+                .subscribeOn(Schedulers.io());
+    }
+
+    public Completable deleteSongExtras(final String song_name){
+
+        return mSongsOfflineViewModel.deleteSongExtras(song_name)
+                .subscribeOn(Schedulers.io());
+
+    }
+
+    public Completable updateSongExtras(ExtrasEntity song){
+        return mSongsOfflineViewModel.
+                updateSongExtras(song)
+                .subscribeOn(Schedulers.io());
+    }
 }

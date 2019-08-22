@@ -55,6 +55,9 @@ import com.obcomdeveloper.realmusic.Utils.DownloadFiles;
 import com.obcomdeveloper.realmusic.Utils.UniversalImageLoader;
 import com.obcomdeveloper.realmusic.Wallpapers.WallpaperMain;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.obcomdeveloper.realmusic.room.DatabaseTransactions;
+import com.obcomdeveloper.realmusic.room.ExtrasEntity;
+import com.obcomdeveloper.realmusic.room.PlaylistEntity;
 import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.util.ArrayList;
@@ -64,9 +67,12 @@ import dmax.dialog.SpotsDialog;
 import durdinapps.rxfirebase2.DataSnapshotMapper;
 import durdinapps.rxfirebase2.RxFirebaseDatabase;
 import hotchemi.android.rate.AppRate;
+import io.reactivex.Completable;
+import io.reactivex.CompletableObserver;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -100,6 +106,9 @@ public class MainActivity extends AppCompatActivity {
 
     private List<Song> list;
 
+    private DatabaseTransactions mDatabaseTransactions;
+    private CompositeDisposable mDisposibles=new CompositeDisposable();
+
 
 
     @Override
@@ -109,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         toolbar_tv=findViewById(R.id.main_toolbar_tv);
 
+        mDatabaseTransactions=new DatabaseTransactions(this);
 
         directorySetup();
         internetConnectivity();
@@ -130,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
             if(prefs.getBoolean("firstRun", true)) {
                 downloadPlaylistFirstSongOnce();// <-- your function
                 downloadExtrasFirstSongOnce();
+                initialEntriesInDatabase();
                 prefs.edit().putBoolean("firstRun", false).commit();
             }
         }
@@ -148,6 +159,57 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    }
+
+    private void initialEntriesInDatabase() {
+
+        String song_name= "When I Grow Up";
+        Completable newNote=mDatabaseTransactions.addSong(new
+                PlaylistEntity(0, song_name,R.drawable.offline_playlist_small_edited,"NF",null,null,null));
+
+        String song_name2= "Rick and Morty (Dubstep)";
+        Completable newSongExtras=mDatabaseTransactions.addSongExtras
+                (new ExtrasEntity(0,song_name2,R.drawable.offline_extras_small_edited,"Wubba Lubba Dub Dub",null,null,null));
+
+        newSongExtras.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        mDisposibles.add(d);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                        Log.d(TAG, "onComplete: Extras Note Added");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+                });
+        newNote.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        mDisposibles.add(d);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                        Log.d(TAG, "onComplete: New Note Added");
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+                });
     }
 
     private void downloadPlaylistFirstSongOnce(){

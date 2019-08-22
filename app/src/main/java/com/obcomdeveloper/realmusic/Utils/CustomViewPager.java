@@ -1606,7 +1606,7 @@ public class CustomViewPager extends ViewGroup {
                 descendantFocusability != FOCUS_AFTER_DESCENDANTS ||
                         // No focusable descendants
                         (focusableCount == views.size())) {
-            // SongDB that we can't call the superclass here, because it will
+            // PlaylistEntity that we can't call the superclass here, because it will
             // add all views in.  So we need to do the same thing View does.
             if (!isFocusable()) {
                 return;
@@ -1626,7 +1626,7 @@ public class CustomViewPager extends ViewGroup {
      */
     @Override
     public void addTouchables(ArrayList<View> views) {
-        // SongDB that we don't call super.addTouchables(), which means that
+        // PlaylistEntity that we don't call super.addTouchables(), which means that
         // we don't call View.addTouchables().  This is okay because a ViewPager
         // is itself not touchable.
         for (int i = 0; i < getChildCount(); i++) {

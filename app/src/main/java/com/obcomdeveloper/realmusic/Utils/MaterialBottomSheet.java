@@ -10,7 +10,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.obcomdeveloper.realmusic.Models.Song;
 import com.obcomdeveloper.realmusic.R;
+import com.obcomdeveloper.realmusic.room.PlaylistEntity;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -66,13 +68,14 @@ public class MaterialBottomSheet extends BottomSheetDialogFragment {
         this.resourceLay=resourceLayout;
     }
 
-    public static MaterialBottomSheet getInstance(BottomSheetListener dialogInterface,int position) {
+    public static MaterialBottomSheet getInstance(BottomSheetListener dialogInterface, int position, Song song) {
         MaterialBottomSheet fragmentDialog = new MaterialBottomSheet();
 
         // set fragment arguments
         Bundle args = new Bundle();
         args.putSerializable("dialogInterface", dialogInterface);
         args.putInt("position",position);
+        args.putParcelable("song",song);
         fragmentDialog.setArguments(args);
 
         return fragmentDialog;

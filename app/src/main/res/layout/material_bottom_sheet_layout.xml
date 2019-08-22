@@ -16,7 +16,7 @@
         android:textSize="15sp"
         android:textColor="@color/black"
         android:gravity="center"
-        android:text="Whole Note Will Be Cleared Including Images"
+        android:text="This Track Will Not Be Availible Offline"
         android:textStyle="bold"
         />
     <Button

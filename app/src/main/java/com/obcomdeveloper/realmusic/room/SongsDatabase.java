@@ -7,12 +7,13 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
 
-@Database(entities = {SongDB.class},version = 1)
+@Database(entities = {PlaylistEntity.class, ExtrasEntity.class},version = 1)
 public abstract class SongsDatabase extends RoomDatabase {
 
     public static final String DATABASE_NAME="SongsDB";
 
-    public abstract SongsDAO getContactDAO();
+    public abstract PlaylistDAO getPlaylistDAO();
+    public abstract ExtrasDAO getExtrasDAO();
 
     private static volatile SongsDatabase INSTANCE;
 
